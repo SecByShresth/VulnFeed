@@ -29,15 +29,14 @@ jobs:
           echo "Fetching CVEs from $START_DATE to $END_DATE"
 
           URL="https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=2000&pubStartDate=${START_DATE}&pubEndDate=${END_DATE}"
-
           echo "Request URL: $URL"
 
-          RESPONSE=$(curl -s -w "%{http_code}" -H "apiKey: $NVD_API_KEY" "$URL" -o data/cves.json)
+          RESPONSE=$(curl -s -w "%{http_code}" -H "X-Api-Key: $NVD_API_KEY" "$URL" -o data/cves.json)
           echo "HTTP Response Code: $RESPONSE"
 
           if [ "$RESPONSE" -ne 200 ]; then
             echo "❌ Error fetching CVE data (HTTP $RESPONSE)"
-            cat data/cves.json
+            cat data/cves.json || true
             exit 1
           fi
 
