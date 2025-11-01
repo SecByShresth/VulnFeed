@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0  # fetch full history for rebase
+          fetch-depth: 0  # required for rebase or pull
 
       - name: Fetch CVE data from NVD
         env:
@@ -27,40 +27,43 @@ jobs:
           START_DATE=$(date -u -d '30 days ago' '+%Y-%m-%dT%H:%M:%S.000')
           echo "Fetching CVEs since $START_DATE"
 
-          HTTP_CODE=$(curl -w "%{http_code}" -H "apiKey: $NVD_API_KEY" \
+          HTTP_CODE=$(curl -s -w "%{http_code}" -H "apiKey: $NVD_API_KEY" \
             "https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=2000&pubStartDate=${START_DATE}" \
             -o data/cves.json)
 
           echo "HTTP Response Code: $HTTP_CODE"
 
           if [ "$HTTP_CODE" -ne 200 ]; then
-            echo "Error: API request failed with HTTP code $HTTP_CODE"
+            echo "❌ Error: API request failed with HTTP code $HTTP_CODE"
             cat data/cves.json
             exit 1
           fi
 
           if [ ! -s data/cves.json ]; then
-            echo "Error: Downloaded file is empty"
+            echo "❌ Error: Downloaded file is empty"
             exit 1
           fi
 
-          echo "Successfully fetched CVE data"
+          echo "✅ Successfully fetched CVE data"
           echo "File size: $(wc -c < data/cves.json) bytes"
 
       - name: Commit and push changes
         run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
 
-          git fetch origin main
+          # Make sure we're on main and up to date
           git checkout main
-          git pull --rebase origin main
+          git pull origin main --rebase || true
 
+          # Ensure folder exists and add data
+          mkdir -p data
           git add data/cves.json
-          if git diff --staged --quiet; then
-            echo "No new CVEs to commit"
+
+          if git diff --cached --quiet; then
+            echo "✅ No new CVEs to commit"
           else
             git commit -m "Update CVE data - $(date -u)"
-            git push origin main
-            echo "Successfully pushed CVE data"
+            git push origin main || (git pull --rebase origin main && git push origin main)
+            echo "✅ Successfully pushed CVE data"
           fi
