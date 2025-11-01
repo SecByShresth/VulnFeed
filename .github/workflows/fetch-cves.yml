@@ -13,11 +13,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout main branch with write access
         uses: actions/checkout@v4
         with:
+          ref: main
+          persist-credentials: true
+          fetch-depth: 0  # ensure full history for rebase
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0  # required for rebase or pull
 
       - name: Fetch CVE data from NVD
         env:
@@ -47,23 +49,18 @@ jobs:
           echo "✅ Successfully fetched CVE data"
           echo "File size: $(wc -c < data/cves.json) bytes"
 
-      - name: Commit and push changes
+      - name: Commit and push updated CVE data
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
 
-          # Make sure we're on main and up to date
-          git checkout main
-          git pull origin main --rebase || true
-
-          # Ensure folder exists and add data
-          mkdir -p data
           git add data/cves.json
 
           if git diff --cached --quiet; then
             echo "✅ No new CVEs to commit"
           else
             git commit -m "Update CVE data - $(date -u)"
-            git push origin main || (git pull --rebase origin main && git push origin main)
+            git pull origin main --rebase
+            git push origin main
             echo "✅ Successfully pushed CVE data"
           fi
