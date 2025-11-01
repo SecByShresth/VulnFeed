@@ -1,0 +1,40 @@
+name: Fetch CVEs Daily
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 2 AM UTC
+  workflow_dispatch:
+
+jobs:
+  fetch-cves:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Fetch CVE data from NVD
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          mkdir -p data
+          
+          # Calculate date 30 days ago
+          START_DATE=$(date -u -d '30 days ago' '+%Y-%m-%dT%H:%M:%S.000')
+          
+          # Fetch CVEs from NVD API
+          curl -H "apiKey: $NVD_API_KEY" \
+               "https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=2000&pubStartDate=${START_DATE}" \
+               -o temp.json
+          
+          # Add timestamp to the JSON
+          echo "{\"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\", \"vulnerabilities\": $(cat temp.json | jq '.vulnerabilities')}" > data/cves.json
+          rm temp.json
+          
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/cves.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update CVE data - $(date)"
+          git push
