@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write  # ← Add this line!
+  contents: write
 
 jobs:
   fetch-cves:
@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}  # ← Add this too!
+          token: ${{ secrets.GITHUB_TOKEN }}
         
       - name: Fetch CVE data from NVD
         env:
@@ -27,10 +27,31 @@ jobs:
           # Calculate date 30 days ago
           START_DATE=$(date -u -d '30 days ago' '+%Y-%m-%dT%H:%M:%S.000')
           
-          # Fetch CVEs from NVD API
-          curl -H "apiKey: $NVD_API_KEY" \
+          echo "Fetching CVEs from NVD API..."
+          echo "Start Date: $START_DATE"
+          
+          # Fetch CVEs from NVD API with error handling
+          HTTP_CODE=$(curl -w "%{http_code}" -H "apiKey: $NVD_API_KEY" \
                "https://services.nvd.nist.gov/rest/json/cves/2.0?resultsPerPage=2000&pubStartDate=${START_DATE}" \
-               -o data/cves.json
+               -o data/cves.json)
+          
+          echo "HTTP Response Code: $HTTP_CODE"
+          
+          # Check if request was successful
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "Error: API request failed with HTTP code $HTTP_CODE"
+            cat data/cves.json  # Print error message from API
+            exit 1
+          fi
+          
+          # Check if file has content
+          if [ ! -s data/cves.json ]; then
+            echo "Error: Downloaded file is empty"
+            exit 1
+          fi
+          
+          echo "Successfully fetched CVE data"
+          echo "File size: $(wc -c < data/cves.json) bytes"
           
       - name: Commit and push changes
         run: |
@@ -39,32 +60,3 @@ jobs:
           git add data/cves.json
           git diff --quiet && git diff --staged --quiet || git commit -m "Update CVE data - $(date)"
           git push
-```
-
-**Key changes:**
-- Added `permissions: contents: write` at the top level
-- Added `token: ${{ secrets.GITHUB_TOKEN }}` to the checkout step
-
----
-
-## 🔄 After Making Changes
-
-1. **If you used Option 1**: Just re-run the workflow
-   - Go to **Actions** tab
-   - Click **"Fetch CVEs Daily"**
-   - Click **"Re-run jobs"** → **"Re-run failed jobs"**
-
-2. **If you used Option 2**: Commit the updated workflow file, then run it again
-
----
-
-## ✅ Success Looks Like This
-
-When it works, you'll see:
-```
-[main abc1234] Update CVE data - Sat Nov 1 21:34:55 UTC 2025
- 1 file changed, 1 insertion(+)
- create mode 100644 data/cves.json
-Enumerating objects: 5, done.
-To https://github.com/SecByShresth/VulnFeed
-   abc1234..def5678  main -> main
