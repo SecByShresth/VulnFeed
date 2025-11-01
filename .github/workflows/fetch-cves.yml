@@ -11,14 +11,14 @@ permissions:
 jobs:
   fetch-cves:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0  # Fetch all history
-        
+
       - name: Fetch CVE data from NVD
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
@@ -51,18 +51,17 @@ jobs:
           
           echo "Successfully fetched CVE data"
           echo "File size: $(wc -c < data/cves.json) bytes"
-          
+
       - name: Commit and push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          
-          # Fetch and rebase on latest changes
-          git fetch origin main
-          git rebase origin/main
-          
+
+          # Make sure the local branch is up-to-date
+          git pull origin main --rebase
+
           git add data/cves.json
-          
+
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
