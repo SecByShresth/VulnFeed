@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulnerability Feed Aggregator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --border: #475569;
+            --critical: #dc2626;
+            --high: #f97316;
+            --medium: #eab308;
+            --low: #22c55e;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, #1a2332 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 20px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .last-updated {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .filters-panel {
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, select {
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 200px;
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .results-count {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        .sort-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .sort-btn {
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .sort-btn:hover {
+            border-color: var(--accent);
+            background: var(--bg-card);
+        }
+
+        .sort-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+        }
+
+        .cve-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 15px var(--shadow);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .cve-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px var(--shadow);
+            border-color: var(--accent);
+        }
+
+        .cve-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .cve-id {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .cve-id:hover {
+            color: var(--accent-hover);
+            text-decoration: underline;
+        }
+
+        .severity-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .severity-critical { background: var(--critical); color: white; }
+        .severity-high { background: var(--high); color: white; }
+        .severity-medium { background: var(--medium); color: #000; }
+        .severity-low { background: var(--low); color: white; }
+        .severity-none { background: var(--border); color: var(--text-primary); }
+
+        .cve-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .cve-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+        }
+
+        .meta-label {
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        .spinner {
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: rgba(220, 38, 38, 0.1);
+            border: 2px solid var(--critical);
+            color: var(--critical);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ Vulnerability Feed Aggregator</h1>
+            <p class="subtitle">Real-time CVE tracking powered by NVD API</p>
+            <p class="last-updated" id="lastUpdated">Loading data...</p>
+        </header>
+
+        <div class="filters-panel">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="vendor">Vendor/Product</label>
+                    <input type="text" id="vendor" placeholder="e.g., Microsoft, Cisco, Apache">
+                </div>
+
+                <div class="filter-group">
+                    <label for="severity">Severity</label>
+                    <select id="severity">
+                        <option value="all">All Severities</option>
+                        <option value="critical">Critical</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="timeRange">Time Range</label>
+                    <select id="timeRange">
+                        <option value="24">Last 24 Hours</option>
+                        <option value="168">Last 7 Days</option>
+                        <option value="720" selected>Last 30 Days</option>
+                        <option value="all">All Time</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="statsBar" class="stats-bar" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-label">Total CVEs</div>
+                <div class="stat-value" id="totalCves">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Critical</div>
+                <div class="stat-value" style="color: var(--critical);" id="criticalCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">High</div>
+                <div class="stat-value" style="color: var(--high);" id="highCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Medium</div>
+                <div class="stat-value" style="color: var(--medium);" id="mediumCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Low</div>
+                <div class="stat-value" style="color: var(--low);" id="lowCount">0</div>
+            </div>
+        </div>
+
+        <div class="results-header" id="resultsHeader" style="display: none;">
+            <div class="results-count" id="resultsCount">0 results</div>
+            <div class="sort-controls">
+                <span style="color: var(--text-secondary); margin-right: 10px;">Sort by:</span>
+                <button class="sort-btn active" data-sort="date">Date</button>
+                <button class="sort-btn" data-sort="severity">Severity</button>
+            </div>
+        </div>
+
+        <div id="resultsContainer"></div>
+    </div>
+
+    <script>
+        let allCves = [];
+        let rawData = [];
+        let currentSort = 'date';
+
+        const elements = {
+            vendorInput: document.getElementById('vendor'),
+            severitySelect: document.getElementById('severity'),
+            timeRangeSelect: document.getElementById('timeRange'),
+            resultsContainer: document.getElementById('resultsContainer'),
+            statsBar: document.getElementById('statsBar'),
+            resultsHeader: document.getElementById('resultsHeader'),
+            resultsCount: document.getElementById('resultsCount'),
+            lastUpdated: document.getElementById('lastUpdated')
+        };
+
+        // Event Listeners
+        elements.vendorInput.addEventListener('input', applyFilters);
+        elements.severitySelect.addEventListener('change', applyFilters);
+        elements.timeRangeSelect.addEventListener('change', applyFilters);
+
+        document.querySelectorAll('.sort-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentSort = this.dataset.sort;
+                renderResults(allCves);
+            });
+        });
+
+        // Load data on page load
+        window.addEventListener('load', loadCVEData);
+
+        async function loadCVEData() {
+            showLoading();
+
+            try {
+                const response = await fetch('data/cves.json');
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to load CVE data: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (!data.vulnerabilities || data.vulnerabilities.length === 0) {
+                    showError('No vulnerability data available. Please check back later.');
+                    return;
+                }
+
+                // Store raw data
+                rawData = data.vulnerabilities.map(item => processCVE(item.cve));
+                
+                // Update last updated timestamp
+                if (data.timestamp) {
+                    elements.lastUpdated.textContent = `Last updated: ${formatDate(new Date(data.timestamp))}`;
+                } else {
+                    elements.lastUpdated.textContent = `Data loaded successfully`;
+                }
+
+                // Apply initial filters
+                applyFilters();
+
+            } catch (error) {
+                showError(`Failed to load CVEs: ${error.message}. Make sure the GitHub Action has run at least once to generate data/cves.json`);
+            }
+        }
+
+        function applyFilters() {
+            const vendor = elements.vendorInput.value.trim().toLowerCase();
+            const severityFilter = elements.severitySelect.value;
+            const timeRange = elements.timeRangeSelect.value;
+
+            allCves = rawData.filter(cve => {
+                // Filter by severity
+                if (severityFilter !== 'all' && cve.severity.toLowerCase() !== severityFilter) {
+                    return false;
+                }
+                
+                // Filter by vendor
+                if (vendor) {
+                    const vendorMatch = cve.description.toLowerCase().includes(vendor) || 
+                                      cve.vendors.some(v => v.toLowerCase().includes(vendor));
+                    if (!vendorMatch) return false;
+                }
+                
+                // Filter by time range
+                if (timeRange !== 'all') {
+                    const hours = parseInt(timeRange);
+                    const cutoffDate = new Date();
+                    cutoffDate.setHours(cutoffDate.getHours() - hours);
+                    if (cve.publishedDate < cutoffDate) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
+
+            if (allCves.length === 0) {
+                showEmptyState();
+            } else {
+                updateStats(allCves);
+                renderResults(allCves);
+            }
+        }
+
+        function processCVE(cve) {
+            const id = cve.id;
+            const description = cve.descriptions?.find(d => d.lang === 'en')?.value || 'No description available';
+            const publishedDate = new Date(cve.published);
+            
+            // Extract CVSS score and severity
+            let score = 0;
+            let severity = 'NONE';
+            
+            if (cve.metrics?.cvssMetricV31?.[0]) {
+                score = cve.metrics.cvssMetricV31[0].cvssData.baseScore;
+                severity = cve.metrics.cvssMetricV31[0].cvssData.baseSeverity;
+            } else if (cve.metrics?.cvssMetricV2?.[0]) {
+                score = cve.metrics.cvssMetricV2[0].cvssData.baseScore;
+                severity = cve.metrics.cvssMetricV2[0].baseSeverity || getSeverityFromScore(score);
+            }
+
+            // Extract vendor/product info
+            const vendors = [];
+            if (cve.configurations) {
+                cve.configurations.forEach(config => {
+                    config.nodes?.forEach(node => {
+                        node.cpeMatch?.forEach(match => {
+                            const cpeParts = match.criteria.split(':');
+                            if (cpeParts[3]) vendors.push(cpeParts[3]);
+                        });
+                    });
+                });
+            }
+
+            return {
+                id,
+                description,
+                publishedDate,
+                score,
+                severity,
+                vendors: [...new Set(vendors)].slice(0, 3),
+                url: `https://nvd.nist.gov/vuln/detail/${id}`
+            };
+        }
+
+        function getSeverityFromScore(score) {
+            if (score >= 9.0) return 'CRITICAL';
+            if (score >= 7.0) return 'HIGH';
+            if (score >= 4.0) return 'MEDIUM';
+            if (score > 0) return 'LOW';
+            return 'NONE';
+        }
+
+        function renderResults(cves) {
+            // Sort CVEs
+            const sorted = [...cves].sort((a, b) => {
+                if (currentSort === 'date') {
+                    return b.publishedDate - a.publishedDate;
+                } else {
+                    return b.score - a.score;
+                }
+            });
+
+            elements.resultsHeader.style.display = 'flex';
+            elements.resultsCount.textContent = `${sorted.length} result${sorted.length !== 1 ? 's' : ''}`;
+
+            const html = sorted.map(cve => `
+                <div class="cve-card">
+                    <div class="cve-header">
+                        <a href="${cve.url}" target="_blank" class="cve-id">${cve.id}</a>
+                        <span class="severity-badge severity-${cve.severity.toLowerCase()}">${cve.severity}</span>
+                    </div>
+                    <div class="cve-description">
+                        ${truncateText(cve.description, 150)}
+                    </div>
+                    <div class="cve-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">Score:</span>
+                            <span>${cve.score.toFixed(1)}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Published:</span>
+                            <span>${formatDate(cve.publishedDate)}</span>
+                        </div>
+                        ${cve.vendors.length > 0 ? `
+                            <div class="meta-item">
+                                <span class="meta-label">Vendors:</span>
+                                <span>${cve.vendors.join(', ')}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            elements.resultsContainer.innerHTML = `<div class="results-grid">${html}</div>`;
+        }
+
+        function updateStats(cves) {
+            elements.statsBar.style.display = 'flex';
+            
+            const stats = {
+                total: cves.length,
+                critical: cves.filter(c => c.severity === 'CRITICAL').length,
+                high: cves.filter(c => c.severity === 'HIGH').length,
+                medium: cves.filter(c => c.severity === 'MEDIUM').length,
+                low: cves.filter(c => c.severity === 'LOW').length
+            };
+
+            document.getElementById('totalCves').textContent = stats.total;
+            document.getElementById('criticalCount').textContent = stats.critical;
+            document.getElementById('highCount').textContent = stats.high;
+            document.getElementById('mediumCount').textContent = stats.medium;
+            document.getElementById('lowCount').textContent = stats.low;
+        }
+
+        function showLoading() {
+            elements.statsBar.style.display = 'none';
+            elements.resultsHeader.style.display = 'none';
+            elements.resultsContainer.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading vulnerability data...</p>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            elements.statsBar.style.display = 'none';
+            elements.resultsHeader.style.display = 'none';
+            elements.lastUpdated.textContent = 'Failed to load data';
+            elements.resultsContainer.innerHTML = `
+                <div class="error">
+                    <h3>⚠️ Error</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function showEmptyState() {
+            elements.statsBar.style.display = 'none';
+            elements.resultsHeader.style.display = 'none';
+            elements.resultsContainer.innerHTML = `
+                <div class="empty-state">
+                    <h3>🔍 No Results Found</h3>
+                    <p>Try adjusting your filters or expanding the time range.</p>
+                </div>
+            `;
+        }
+
+        function truncateText(text, maxLength) {
+            if (text.length <= maxLength) return text;
+            return text.substr(0, maxLength) + '...';
+        }
+
+        function formatDate(date) {
+            const now = new Date();
+            const diff = now - date;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            
+            if (days === 0) return 'Today';
+            if (days === 1) return 'Yesterday';
+            if (days < 7) return `${days} days ago`;
+            
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+    </script>
+</body>
+</html>
