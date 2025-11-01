@@ -61,6 +61,18 @@
         .subtitle {
             color: var(--text-secondary);
             font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .source-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 10px;
         }
 
         .last-updated {
@@ -123,7 +135,7 @@
 
         .stat-card {
             flex: 1;
-            min-width: 200px;
+            min-width: 180px;
             background: var(--bg-secondary);
             padding: 20px;
             border-radius: 12px;
@@ -226,7 +238,7 @@
             text-decoration: underline;
         }
 
-        .severity-badge {
+        .badge {
             padding: 6px 12px;
             border-radius: 6px;
             font-size: 0.75rem;
@@ -235,11 +247,8 @@
             letter-spacing: 0.5px;
         }
 
-        .severity-critical { background: var(--critical); color: white; }
-        .severity-high { background: var(--high); color: white; }
-        .severity-medium { background: var(--medium); color: #000; }
-        .severity-low { background: var(--low); color: white; }
-        .severity-none { background: var(--border); color: var(--text-primary); }
+        .badge-exploited { background: #8b5cf6; color: white; }
+        .badge-ransomware { background: #ec4899; color: white; }
 
         .cve-description {
             color: var(--text-secondary);
@@ -266,6 +275,19 @@
 
         .meta-label {
             font-weight: 600;
+        }
+
+        .action-required {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 3px solid var(--critical);
+            padding: 12px;
+            margin-top: 12px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .action-required strong {
+            color: var(--critical);
         }
 
         .loading {
@@ -330,8 +352,9 @@
 <body>
     <div class="container">
         <header>
-            <h1>🛡️ Vulnerability Feed Aggregator</h1>
-            <p class="subtitle">Real-time CVE tracking powered by NVD API</p>
+            <h1>🛡️ CISA Known Exploited Vulnerabilities</h1>
+            <p class="subtitle">Actively exploited vulnerabilities tracked by CISA</p>
+            <span class="source-badge">🚨 EXPLOITED IN THE WILD</span>
             <p class="last-updated" id="lastUpdated">Loading data...</p>
         </header>
 
@@ -343,57 +366,35 @@
                 </div>
 
                 <div class="filter-group">
-                    <label for="severity">Severity</label>
-                    <select id="severity">
-                        <option value="all">All Severities</option>
-                        <option value="critical">Critical</option>
-                        <option value="high">High</option>
-                        <option value="medium">Medium</option>
-                        <option value="low">Low</option>
+                    <label for="ransomware">Ransomware Filter</label>
+                    <select id="ransomware">
+                        <option value="all">All Vulnerabilities</option>
+                        <option value="known">Known Ransomware Use</option>
+                        <option value="unknown">No Ransomware (Yet)</option>
                     </select>
                 </div>
 
                 <div class="filter-group">
                     <label for="timeRange">Time Range</label>
                     <select id="timeRange">
-                        <option value="24">Last 24 Hours</option>
-                        <option value="168">Last 7 Days</option>
-                        <option value="720" selected>Last 30 Days</option>
+                        <option value="7">Last 7 Days</option>
+                        <option value="30" selected>Last 30 Days</option>
+                        <option value="90">Last 90 Days</option>
                         <option value="all">All Time</option>
                     </select>
                 </div>
             </div>
         </div>
 
-        <div id="statsBar" class="stats-bar" style="display: none;">
-            <div class="stat-card">
-                <div class="stat-label">Total CVEs</div>
-                <div class="stat-value" id="totalCves">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Critical</div>
-                <div class="stat-value" style="color: var(--critical);" id="criticalCount">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">High</div>
-                <div class="stat-value" style="color: var(--high);" id="highCount">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Medium</div>
-                <div class="stat-value" style="color: var(--medium);" id="mediumCount">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Low</div>
-                <div class="stat-value" style="color: var(--low);" id="lowCount">0</div>
-            </div>
-        </div>
+        <div id="statsBar" class="stats-bar" style="display: none;"></div>
 
         <div class="results-header" id="resultsHeader" style="display: none;">
             <div class="results-count" id="resultsCount">0 results</div>
             <div class="sort-controls">
                 <span style="color: var(--text-secondary); margin-right: 10px;">Sort by:</span>
-                <button class="sort-btn active" data-sort="date">Date</button>
-                <button class="sort-btn" data-sort="severity">Severity</button>
+                <button class="sort-btn active" data-sort="date">Date Added</button>
+                <button class="sort-btn" data-sort="vendor">Vendor</button>
+                <button class="sort-btn" data-sort="duedate">Due Date</button>
             </div>
         </div>
 
@@ -407,7 +408,7 @@
 
         const elements = {
             vendorInput: document.getElementById('vendor'),
-            severitySelect: document.getElementById('severity'),
+            ransomwareSelect: document.getElementById('ransomware'),
             timeRangeSelect: document.getElementById('timeRange'),
             resultsContainer: document.getElementById('resultsContainer'),
             statsBar: document.getElementById('statsBar'),
@@ -418,7 +419,7 @@
 
         // Event Listeners
         elements.vendorInput.addEventListener('input', applyFilters);
-        elements.severitySelect.addEventListener('change', applyFilters);
+        elements.ransomwareSelect.addEventListener('change', applyFilters);
         elements.timeRangeSelect.addEventListener('change', applyFilters);
 
         document.querySelectorAll('.sort-btn').forEach(btn => {
@@ -431,66 +432,73 @@
         });
 
         // Load data on page load
-        window.addEventListener('load', loadCVEData);
+        window.addEventListener('load', loadCISAData);
 
-        async function loadCVEData() {
+        async function loadCISAData() {
             showLoading();
-
+            
             try {
-                const response = await fetch('data/cves.json');
+                const response = await fetch('data/cisa-kev.json');
                 
                 if (!response.ok) {
-                    throw new Error(`Failed to load CVE data: ${response.status}`);
+                    throw new Error(`Failed to load CISA data: ${response.status}. Make sure GitHub Actions has run at least once.`);
                 }
 
                 const data = await response.json();
                 
                 if (!data.vulnerabilities || data.vulnerabilities.length === 0) {
-                    showError('No vulnerability data available. Please check back later.');
+                    showError('No CISA vulnerability data available.');
                     return;
                 }
 
-                // Store raw data
-                rawData = data.vulnerabilities.map(item => processCVE(item.cve));
-                
-                // Update last updated timestamp
-                if (data.timestamp) {
-                    elements.lastUpdated.textContent = `Last updated: ${formatDate(new Date(data.timestamp))}`;
-                } else {
-                    elements.lastUpdated.textContent = `Data loaded successfully`;
-                }
+                rawData = data.vulnerabilities.map(v => ({
+                    id: v.cveID,
+                    description: v.shortDescription || v.vulnerabilityName,
+                    publishedDate: new Date(v.dateAdded),
+                    vendors: v.vendorProject,
+                    product: v.product,
+                    url: `https://nvd.nist.gov/vuln/detail/${v.cveID}`,
+                    exploited: true,
+                    ransomware: v.knownRansomwareCampaignUse === 'Known',
+                    dueDate: new Date(v.dueDate),
+                    action: v.requiredAction,
+                    notes: v.notes
+                }));
 
-                // Apply initial filters
+                elements.lastUpdated.textContent = `Last updated: ${data.catalogVersion || 'Unknown'} • ${data.count || rawData.length} total vulnerabilities`;
                 applyFilters();
-
             } catch (error) {
-                showError(`Failed to load CVEs: ${error.message}. Make sure the GitHub Action has run at least once to generate data/cves.json`);
+                showError(`${error.message}<br><br>The GitHub Actions workflow needs to run first to fetch CISA data. Please check the Actions tab.`);
             }
         }
 
         function applyFilters() {
             const vendor = elements.vendorInput.value.trim().toLowerCase();
-            const severityFilter = elements.severitySelect.value;
+            const ransomwareFilter = elements.ransomwareSelect.value;
             const timeRange = elements.timeRangeSelect.value;
 
             allCves = rawData.filter(cve => {
-                // Filter by severity
-                if (severityFilter !== 'all' && cve.severity.toLowerCase() !== severityFilter) {
+                // Filter by ransomware
+                if (ransomwareFilter === 'known' && !cve.ransomware) {
+                    return false;
+                }
+                if (ransomwareFilter === 'unknown' && cve.ransomware) {
                     return false;
                 }
                 
-                // Filter by vendor
+                // Filter by vendor/product
                 if (vendor) {
                     const vendorMatch = cve.description.toLowerCase().includes(vendor) || 
-                                      cve.vendors.some(v => v.toLowerCase().includes(vendor));
+                                      cve.vendors?.toLowerCase().includes(vendor) ||
+                                      cve.product?.toLowerCase().includes(vendor);
                     if (!vendorMatch) return false;
                 }
                 
                 // Filter by time range
                 if (timeRange !== 'all') {
-                    const hours = parseInt(timeRange);
+                    const days = parseInt(timeRange);
                     const cutoffDate = new Date();
-                    cutoffDate.setHours(cutoffDate.getHours() - hours);
+                    cutoffDate.setDate(cutoffDate.getDate() - days);
                     if (cve.publishedDate < cutoffDate) {
                         return false;
                     }
@@ -507,62 +515,14 @@
             }
         }
 
-        function processCVE(cve) {
-            const id = cve.id;
-            const description = cve.descriptions?.find(d => d.lang === 'en')?.value || 'No description available';
-            const publishedDate = new Date(cve.published);
-            
-            // Extract CVSS score and severity
-            let score = 0;
-            let severity = 'NONE';
-            
-            if (cve.metrics?.cvssMetricV31?.[0]) {
-                score = cve.metrics.cvssMetricV31[0].cvssData.baseScore;
-                severity = cve.metrics.cvssMetricV31[0].cvssData.baseSeverity;
-            } else if (cve.metrics?.cvssMetricV2?.[0]) {
-                score = cve.metrics.cvssMetricV2[0].cvssData.baseScore;
-                severity = cve.metrics.cvssMetricV2[0].baseSeverity || getSeverityFromScore(score);
-            }
-
-            // Extract vendor/product info
-            const vendors = [];
-            if (cve.configurations) {
-                cve.configurations.forEach(config => {
-                    config.nodes?.forEach(node => {
-                        node.cpeMatch?.forEach(match => {
-                            const cpeParts = match.criteria.split(':');
-                            if (cpeParts[3]) vendors.push(cpeParts[3]);
-                        });
-                    });
-                });
-            }
-
-            return {
-                id,
-                description,
-                publishedDate,
-                score,
-                severity,
-                vendors: [...new Set(vendors)].slice(0, 3),
-                url: `https://nvd.nist.gov/vuln/detail/${id}`
-            };
-        }
-
-        function getSeverityFromScore(score) {
-            if (score >= 9.0) return 'CRITICAL';
-            if (score >= 7.0) return 'HIGH';
-            if (score >= 4.0) return 'MEDIUM';
-            if (score > 0) return 'LOW';
-            return 'NONE';
-        }
-
         function renderResults(cves) {
-            // Sort CVEs
             const sorted = [...cves].sort((a, b) => {
                 if (currentSort === 'date') {
                     return b.publishedDate - a.publishedDate;
-                } else {
-                    return b.score - a.score;
+                } else if (currentSort === 'vendor') {
+                    return (a.vendors || '').localeCompare(b.vendors || '');
+                } else if (currentSort === 'duedate') {
+                    return a.dueDate - b.dueDate;
                 }
             });
 
@@ -573,26 +533,38 @@
                 <div class="cve-card">
                     <div class="cve-header">
                         <a href="${cve.url}" target="_blank" class="cve-id">${cve.id}</a>
-                        <span class="severity-badge severity-${cve.severity.toLowerCase()}">${cve.severity}</span>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <span class="badge badge-exploited">⚠️ Exploited</span>
+                            ${cve.ransomware ? '<span class="badge badge-ransomware">🔒 Ransomware</span>' : ''}
+                        </div>
                     </div>
                     <div class="cve-description">
-                        ${truncateText(cve.description, 150)}
+                        ${cve.description}
                     </div>
+                    ${cve.action ? `
+                        <div class="action-required">
+                            <strong>⚡ Required Action:</strong> ${cve.action}
+                        </div>
+                    ` : ''}
                     <div class="cve-meta">
                         <div class="meta-item">
-                            <span class="meta-label">Score:</span>
-                            <span>${cve.score.toFixed(1)}</span>
-                        </div>
-                        <div class="meta-item">
-                            <span class="meta-label">Published:</span>
+                            <span class="meta-label">Date Added:</span>
                             <span>${formatDate(cve.publishedDate)}</span>
                         </div>
-                        ${cve.vendors.length > 0 ? `
-                            <div class="meta-item">
-                                <span class="meta-label">Vendors:</span>
-                                <span>${cve.vendors.join(', ')}</span>
-                            </div>
-                        ` : ''}
+                        <div class="meta-item">
+                            <span class="meta-label">Due Date:</span>
+                            <span style="color: ${isDueSoon(cve.dueDate) ? 'var(--critical)' : 'inherit'};">
+                                ${formatDate(cve.dueDate)}${isDueSoon(cve.dueDate) ? ' ⚠️' : ''}
+                            </span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Vendor:</span>
+                            <span>${cve.vendors}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Product:</span>
+                            <span>${cve.product}</span>
+                        </div>
                     </div>
                 </div>
             `).join('');
@@ -603,19 +575,38 @@
         function updateStats(cves) {
             elements.statsBar.style.display = 'flex';
             
+            const now = new Date();
+            const dueSoon = cves.filter(c => {
+                const daysUntilDue = Math.ceil((c.dueDate - now) / (1000 * 60 * 60 * 24));
+                return daysUntilDue >= 0 && daysUntilDue <= 7;
+            }).length;
+
             const stats = {
                 total: cves.length,
-                critical: cves.filter(c => c.severity === 'CRITICAL').length,
-                high: cves.filter(c => c.severity === 'HIGH').length,
-                medium: cves.filter(c => c.severity === 'MEDIUM').length,
-                low: cves.filter(c => c.severity === 'LOW').length
+                ransomware: cves.filter(c => c.ransomware).length,
+                dueSoon: dueSoon
             };
 
-            document.getElementById('totalCves').textContent = stats.total;
-            document.getElementById('criticalCount').textContent = stats.critical;
-            document.getElementById('highCount').textContent = stats.high;
-            document.getElementById('mediumCount').textContent = stats.medium;
-            document.getElementById('lowCount').textContent = stats.low;
+            elements.statsBar.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-label">Total Exploited</div>
+                    <div class="stat-value">${stats.total}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Ransomware Use</div>
+                    <div class="stat-value" style="color: #ec4899;">${stats.ransomware}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Due Within 7 Days</div>
+                    <div class="stat-value" style="color: var(--critical);">${stats.dueSoon}</div>
+                </div>
+            `;
+        }
+
+        function isDueSoon(dueDate) {
+            const now = new Date();
+            const daysUntilDue = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+            return daysUntilDue >= 0 && daysUntilDue <= 7;
         }
 
         function showLoading() {
@@ -624,7 +615,7 @@
             elements.resultsContainer.innerHTML = `
                 <div class="loading">
                     <div class="spinner"></div>
-                    <p>Loading vulnerability data...</p>
+                    <p>Loading CISA KEV data...</p>
                 </div>
             `;
         }
@@ -652,11 +643,6 @@
             `;
         }
 
-        function truncateText(text, maxLength) {
-            if (text.length <= maxLength) return text;
-            return text.substr(0, maxLength) + '...';
-        }
-
         function formatDate(date) {
             const now = new Date();
             const diff = now - date;
@@ -664,6 +650,8 @@
             
             if (days === 0) return 'Today';
             if (days === 1) return 'Yesterday';
+            if (days === -1) return 'Tomorrow';
+            if (days < 0) return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
             if (days < 7) return `${days} days ago`;
             
             return date.toLocaleDateString('en-US', { 
