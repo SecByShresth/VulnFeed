@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vulnerability Feed Aggregator</title>
+    <title>Vulnerability Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -12,27 +13,34 @@
         }
 
         :root {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-card: #334155;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
             --accent: #3b82f6;
             --accent-hover: #2563eb;
-            --border: #475569;
+            --accent-light: rgba(59, 130, 246, 0.08);
+            --border: #e2e8f0;
             --critical: #dc2626;
-            --high: #f97316;
-            --medium: #eab308;
-            --low: #22c55e;
-            --shadow: rgba(0, 0, 0, 0.3);
+            --high: #ea580c;
+            --medium: #d97706;
+            --low: #16a34a;
+            --shadow: rgba(0, 0, 0, 0.05);
+            --gradient-primary: linear-gradient(135deg, #3b82f6, #60a5fa);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --transition: all 0.2s ease;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, var(--bg-primary) 0%, #1a2332 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
             padding: 20px;
+            line-height: 1.5;
         }
 
         .container {
@@ -42,52 +50,84 @@
 
         header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             padding: 30px 20px;
             background: var(--bg-secondary);
-            border-radius: 16px;
-            box-shadow: 0 10px 30px var(--shadow);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 12px var(--shadow);
+            border: 1px solid var(--border);
         }
 
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 2.4rem;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .subtitle {
             color: var(--text-secondary);
             font-size: 1.1rem;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            font-weight: 400;
         }
 
         .source-badge {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             padding: 8px 16px;
-            background: linear-gradient(135deg, #8b5cf6, #ec4899);
-            color: white;
+            background: var(--accent-light);
+            color: var(--accent);
             border-radius: 20px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
-            margin-top: 10px;
+            margin-top: 8px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
         }
 
         .last-updated {
-            margin-top: 10px;
-            font-size: 0.9rem;
+            margin-top: 12px;
+            font-size: 0.85rem;
             color: var(--text-secondary);
-            font-style: italic;
         }
 
         .filters-panel {
             background: var(--bg-secondary);
-            padding: 30px;
-            border-radius: 16px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px var(--shadow);
+            padding: 24px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .filters-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .reset-filters {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .reset-filters:hover {
+            background: var(--accent-light);
         }
 
         .filters-grid {
@@ -103,33 +143,39 @@
 
         label {
             margin-bottom: 8px;
-            font-weight: 600;
+            font-weight: 500;
             color: var(--text-secondary);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-icon {
+            color: var(--accent);
+            width: 16px;
         }
 
         input, select {
-            padding: 12px 16px;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            background: var(--bg-card);
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-primary);
             color: var(--text-primary);
-            font-size: 1rem;
-            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            transition: var(--transition);
         }
 
         input:focus, select:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            box-shadow: 0 0 0 3px var(--accent-light);
         }
 
         .stats-bar {
             display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
+            gap: 16px;
+            margin-bottom: 24px;
             flex-wrap: wrap;
         }
 
@@ -138,20 +184,30 @@
             min-width: 180px;
             background: var(--bg-secondary);
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px var(--shadow);
+            border-radius: var(--radius-md);
+            box-shadow: 0 2px 8px var(--shadow);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow);
         }
 
         .stat-label {
             color: var(--text-secondary);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .stat-value {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 700;
         }
 
@@ -161,39 +217,49 @@
             align-items: center;
             margin-bottom: 20px;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 12px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            box-shadow: 0 2px 8px var(--shadow);
+            border: 1px solid var(--border);
         }
 
         .results-count {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: var(--text-secondary);
+            font-weight: 500;
         }
 
         .sort-controls {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: center;
         }
 
         .sort-btn {
-            padding: 8px 16px;
-            background: var(--bg-secondary);
+            padding: 8px 14px;
+            background: var(--bg-primary);
             color: var(--text-primary);
-            border: 2px solid var(--border);
-            border-radius: 6px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
+            transition: var(--transition);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .sort-btn:hover {
             border-color: var(--accent);
-            background: var(--bg-card);
+            background: var(--bg-secondary);
         }
 
         .sort-btn.active {
             background: var(--accent);
             border-color: var(--accent);
+            color: white;
         }
 
         .results-grid {
@@ -204,33 +270,36 @@
 
         .cve-card {
             background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 15px var(--shadow);
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
+            border-radius: var(--radius-md);
+            padding: 20px;
+            box-shadow: 0 2px 8px var(--shadow);
+            transition: var(--transition);
+            border: 1px solid var(--border);
+            position: relative;
         }
 
         .cve-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 25px var(--shadow);
-            border-color: var(--accent);
+            box-shadow: 0 6px 16px var(--shadow);
         }
 
         .cve-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 15px;
+            margin-bottom: 14px;
             gap: 10px;
         }
 
         .cve-id {
             font-size: 1.1rem;
-            font-weight: 700;
+            font-weight: 600;
             color: var(--accent);
             text-decoration: none;
-            transition: color 0.3s ease;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .cve-id:hover {
@@ -238,32 +307,54 @@
             text-decoration: underline;
         }
 
-        .badge {
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .badge-container {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
         }
 
-        .badge-exploited { background: #8b5cf6; color: white; }
-        .badge-ransomware { background: #ec4899; color: white; }
+        .badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .badge-exploited {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        .badge-ransomware {
+            background: rgba(236, 72, 153, 0.1);
+            color: #ec4899;
+            border: 1px solid rgba(236, 72, 153, 0.2);
+        }
+        .badge-due-soon {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--critical);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
 
         .cve-description {
             color: var(--text-secondary);
-            line-height: 1.6;
-            margin-bottom: 15px;
-            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 14px;
+            font-size: 0.9rem;
         }
 
         .cve-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            padding-top: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            padding-top: 14px;
             border-top: 1px solid var(--border);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
 
         .meta-item {
@@ -273,17 +364,31 @@
             color: var(--text-secondary);
         }
 
+        .meta-icon {
+            color: var(--accent);
+            width: 14px;
+            text-align: center;
+        }
+
         .meta-label {
-            font-weight: 600;
+            font-weight: 500;
         }
 
         .action-required {
-            background: rgba(239, 68, 68, 0.1);
+            background: rgba(239, 68, 68, 0.05);
             border-left: 3px solid var(--critical);
             padding: 12px;
-            margin-top: 12px;
+            margin-top: 14px;
             border-radius: 4px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .action-icon {
+            color: var(--critical);
+            margin-top: 1px;
         }
 
         .action-required strong {
@@ -294,12 +399,12 @@
             text-align: center;
             padding: 60px 20px;
             color: var(--text-secondary);
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
 
         .spinner {
-            border: 4px solid var(--border);
-            border-top: 4px solid var(--accent);
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--accent);
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -313,11 +418,11 @@
         }
 
         .error {
-            background: rgba(220, 38, 38, 0.1);
-            border: 2px solid var(--critical);
+            background: rgba(220, 38, 38, 0.05);
+            border: 1px solid var(--critical);
             color: var(--critical);
             padding: 20px;
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             text-align: center;
             margin: 20px 0;
         }
@@ -328,10 +433,31 @@
             color: var(--text-secondary);
         }
 
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
         .empty-state h3 {
             font-size: 1.5rem;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: var(--text-primary);
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 24px 20px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
         }
 
         @media (max-width: 768px) {
@@ -346,27 +472,86 @@
             .filters-grid {
                 grid-template-columns: 1fr;
             }
+
+            .filters-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+            }
+
+            .stat-card {
+                min-width: 100%;
+            }
+
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .sort-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .sort-btn {
+                flex: 1;
+                justify-content: center;
+            }
         }
+
+        /* Animation for cards when they load */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cve-card {
+            animation: fadeInUp 0.3s ease forwards;
+        }
+
+        /* Stagger animation for multiple cards */
+        .cve-card:nth-child(1) { animation-delay: 0.05s; }
+        .cve-card:nth-child(2) { animation-delay: 0.1s; }
+        .cve-card:nth-child(3) { animation-delay: 0.15s; }
+        .cve-card:nth-child(4) { animation-delay: 0.2s; }
+        .cve-card:nth-child(5) { animation-delay: 0.25s; }
+        .cve-card:nth-child(6) { animation-delay: 0.3s; }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🛡️ CISA Known Exploited Vulnerabilities</h1>
-            <p class="subtitle">Actively exploited vulnerabilities tracked by CISA</p>
-            <span class="source-badge">🚨 EXPLOITED IN THE WILD</span>
+            <h1><i class="fas fa-shield-alt"></i> CISA Known Exploited Vulnerabilities</h1>
+            <p class="subtitle">Actively exploited vulnerabilities tracked by the Cybersecurity and Infrastructure Security Agency</p>
+            <span class="source-badge"><i class="fas fa-exclamation-triangle"></i> EXPLOITED IN THE WILD</span>
             <p class="last-updated" id="lastUpdated">Loading data...</p>
         </header>
 
         <div class="filters-panel">
+            <div class="filters-header">
+                <h2 class="filters-title"><i class="fas fa-filter"></i> Filters</h2>
+                <button class="reset-filters" id="resetFilters">
+                    <i class="fas fa-redo"></i> Reset Filters
+                </button>
+            </div>
             <div class="filters-grid">
                 <div class="filter-group">
-                    <label for="vendor">Vendor/Product</label>
+                    <label for="vendor"><i class="fas fa-building filter-icon"></i> Vendor/Product</label>
                     <input type="text" id="vendor" placeholder="e.g., Microsoft, Cisco, Apache">
                 </div>
 
                 <div class="filter-group">
-                    <label for="ransomware">Ransomware Filter</label>
+                    <label for="ransomware"><i class="fas fa-lock filter-icon"></i> Ransomware Filter</label>
                     <select id="ransomware">
                         <option value="all">All Vulnerabilities</option>
                         <option value="known">Known Ransomware Use</option>
@@ -375,7 +560,7 @@
                 </div>
 
                 <div class="filter-group">
-                    <label for="timeRange">Time Range</label>
+                    <label for="timeRange"><i class="fas fa-calendar-alt filter-icon"></i> Time Range</label>
                     <select id="timeRange">
                         <option value="7">Last 7 Days</option>
                         <option value="30" selected>Last 30 Days</option>
@@ -391,14 +576,25 @@
         <div class="results-header" id="resultsHeader" style="display: none;">
             <div class="results-count" id="resultsCount">0 results</div>
             <div class="sort-controls">
-                <span style="color: var(--text-secondary); margin-right: 10px;">Sort by:</span>
-                <button class="sort-btn active" data-sort="date">Date Added</button>
-                <button class="sort-btn" data-sort="vendor">Vendor</button>
-                <button class="sort-btn" data-sort="duedate">Due Date</button>
+                <span style="color: var(--text-secondary); margin-right: 8px;">Sort by:</span>
+                <button class="sort-btn active" data-sort="date">
+                    <i class="fas fa-calendar-plus"></i> Date Added
+                </button>
+                <button class="sort-btn" data-sort="vendor">
+                    <i class="fas fa-building"></i> Vendor
+                </button>
+                <button class="sort-btn" data-sort="duedate">
+                    <i class="fas fa-clock"></i> Due Date
+                </button>
             </div>
         </div>
 
         <div id="resultsContainer"></div>
+
+        <footer>
+            <p>Data provided by CISA Known Exploited Vulnerabilities Catalog</p>
+            <p>This dashboard is for informational purposes only. Always verify with official sources.</p>
+        </footer>
     </div>
 
     <script>
@@ -414,13 +610,15 @@
             statsBar: document.getElementById('statsBar'),
             resultsHeader: document.getElementById('resultsHeader'),
             resultsCount: document.getElementById('resultsCount'),
-            lastUpdated: document.getElementById('lastUpdated')
+            lastUpdated: document.getElementById('lastUpdated'),
+            resetFilters: document.getElementById('resetFilters')
         };
 
         // Event Listeners
         elements.vendorInput.addEventListener('input', applyFilters);
         elements.ransomwareSelect.addEventListener('change', applyFilters);
         elements.timeRangeSelect.addEventListener('change', applyFilters);
+        elements.resetFilters.addEventListener('click', resetFilters);
 
         document.querySelectorAll('.sort-btn').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -436,16 +634,16 @@
 
         async function loadCISAData() {
             showLoading();
-            
+
             try {
                 const response = await fetch('data/cisa-kev.json');
-                
+
                 if (!response.ok) {
                     throw new Error(`Failed to load CISA data: ${response.status}. Make sure GitHub Actions has run at least once.`);
                 }
 
                 const data = await response.json();
-                
+
                 if (!data.vulnerabilities || data.vulnerabilities.length === 0) {
                     showError('No CISA vulnerability data available.');
                     return;
@@ -472,6 +670,13 @@
             }
         }
 
+        function resetFilters() {
+            elements.vendorInput.value = '';
+            elements.ransomwareSelect.value = 'all';
+            elements.timeRangeSelect.value = '30';
+            applyFilters();
+        }
+
         function applyFilters() {
             const vendor = elements.vendorInput.value.trim().toLowerCase();
             const ransomwareFilter = elements.ransomwareSelect.value;
@@ -485,15 +690,15 @@
                 if (ransomwareFilter === 'unknown' && cve.ransomware) {
                     return false;
                 }
-                
+
                 // Filter by vendor/product
                 if (vendor) {
-                    const vendorMatch = cve.description.toLowerCase().includes(vendor) || 
+                    const vendorMatch = cve.description.toLowerCase().includes(vendor) ||
                                       cve.vendors?.toLowerCase().includes(vendor) ||
                                       cve.product?.toLowerCase().includes(vendor);
                     if (!vendorMatch) return false;
                 }
-                
+
                 // Filter by time range
                 if (timeRange !== 'all') {
                     const days = parseInt(timeRange);
@@ -503,7 +708,7 @@
                         return false;
                     }
                 }
-                
+
                 return true;
             });
 
@@ -532,10 +737,13 @@
             const html = sorted.map(cve => `
                 <div class="cve-card">
                     <div class="cve-header">
-                        <a href="${cve.url}" target="_blank" class="cve-id">${cve.id}</a>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <span class="badge badge-exploited">⚠️ Exploited</span>
-                            ${cve.ransomware ? '<span class="badge badge-ransomware">🔒 Ransomware</span>' : ''}
+                        <a href="${cve.url}" target="_blank" class="cve-id">
+                            <i class="fas fa-bug"></i> ${cve.id}
+                        </a>
+                        <div class="badge-container">
+                            <span class="badge badge-exploited"><i class="fas fa-bolt"></i> Exploited</span>
+                            ${cve.ransomware ? '<span class="badge badge-ransomware"><i class="fas fa-lock"></i> Ransomware</span>' : ''}
+                            ${isDueSoon(cve.dueDate) ? '<span class="badge badge-due-soon"><i class="fas fa-exclamation-circle"></i> Due Soon</span>' : ''}
                         </div>
                     </div>
                     <div class="cve-description">
@@ -543,25 +751,30 @@
                     </div>
                     ${cve.action ? `
                         <div class="action-required">
-                            <strong>⚡ Required Action:</strong> ${cve.action}
+                            <i class="fas fa-exclamation-triangle action-icon"></i>
+                            <div><strong>Required Action:</strong> ${cve.action}</div>
                         </div>
                     ` : ''}
                     <div class="cve-meta">
                         <div class="meta-item">
-                            <span class="meta-label">Date Added:</span>
+                            <i class="fas fa-calendar-plus meta-icon"></i>
+                            <span class="meta-label">Added:</span>
                             <span>${formatDate(cve.publishedDate)}</span>
                         </div>
                         <div class="meta-item">
-                            <span class="meta-label">Due Date:</span>
+                            <i class="fas fa-clock meta-icon"></i>
+                            <span class="meta-label">Due:</span>
                             <span style="color: ${isDueSoon(cve.dueDate) ? 'var(--critical)' : 'inherit'};">
-                                ${formatDate(cve.dueDate)}${isDueSoon(cve.dueDate) ? ' ⚠️' : ''}
+                                ${formatDate(cve.dueDate)}
                             </span>
                         </div>
                         <div class="meta-item">
+                            <i class="fas fa-building meta-icon"></i>
                             <span class="meta-label">Vendor:</span>
                             <span>${cve.vendors}</span>
                         </div>
                         <div class="meta-item">
+                            <i class="fas fa-cube meta-icon"></i>
                             <span class="meta-label">Product:</span>
                             <span>${cve.product}</span>
                         </div>
@@ -574,7 +787,7 @@
 
         function updateStats(cves) {
             elements.statsBar.style.display = 'flex';
-            
+
             const now = new Date();
             const dueSoon = cves.filter(c => {
                 const daysUntilDue = Math.ceil((c.dueDate - now) / (1000 * 60 * 60 * 24));
@@ -589,15 +802,15 @@
 
             elements.statsBar.innerHTML = `
                 <div class="stat-card">
-                    <div class="stat-label">Total Exploited</div>
+                    <div class="stat-label"><i class="fas fa-bug"></i> Total Exploited</div>
                     <div class="stat-value">${stats.total}</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Ransomware Use</div>
+                    <div class="stat-label"><i class="fas fa-lock"></i> Ransomware Use</div>
                     <div class="stat-value" style="color: #ec4899;">${stats.ransomware}</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Due Within 7 Days</div>
+                    <div class="stat-label"><i class="fas fa-exclamation-circle"></i> Due Within 7 Days</div>
                     <div class="stat-value" style="color: var(--critical);">${stats.dueSoon}</div>
                 </div>
             `;
@@ -626,7 +839,7 @@
             elements.lastUpdated.textContent = 'Failed to load data';
             elements.resultsContainer.innerHTML = `
                 <div class="error">
-                    <h3>⚠️ Error</h3>
+                    <h3><i class="fas fa-exclamation-triangle"></i> Error</h3>
                     <p>${message}</p>
                 </div>
             `;
@@ -637,7 +850,10 @@
             elements.resultsHeader.style.display = 'none';
             elements.resultsContainer.innerHTML = `
                 <div class="empty-state">
-                    <h3>🔍 No Results Found</h3>
+                    <div class="empty-state-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>No Results Found</h3>
                     <p>Try adjusting your filters or expanding the time range.</p>
                 </div>
             `;
@@ -647,17 +863,17 @@
             const now = new Date();
             const diff = now - date;
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            
+
             if (days === 0) return 'Today';
             if (days === 1) return 'Yesterday';
             if (days === -1) return 'Tomorrow';
             if (days < 0) return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
             if (days < 7) return `${days} days ago`;
-            
-            return date.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric' 
+
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
             });
         }
     </script>
