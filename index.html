@@ -938,9 +938,15 @@
                         redhatData = redhatJson.map(v => {
                             // Handle different possible field names in Red Hat response
                             const cveId = v.name || v.CVE || v.cve || 'Unknown CVE';
-                            const description = v.bugzilla?.description || 
-                                              v.details?.[0] || 
-                                              'No description available';
+                            
+                            // EXTRACT DESCRIPTION FROM DETAILS - UPDATED
+                            let description = 'No description available';
+                            if (v.details && Array.isArray(v.details) && v.details.length > 0) {
+                                // Join all details with spaces, as sometimes there are multiple paragraphs
+                                description = v.details.join(' ').trim();
+                            } else if (v.bugzilla?.description) {
+                                description = v.bugzilla.description;
+                            }
                             
                             // Parse date - try different possible date fields
                             let publishedDate = new Date();
@@ -997,6 +1003,11 @@
                         }).filter(cve => cve.id !== 'Unknown CVE'); // Filter out invalid entries
                         
                         debugMessages.push(`Processed ${redhatData.length} Red Hat CVEs`);
+                        
+                        // Show sample of what we extracted
+                        if (redhatData.length > 0) {
+                            debugMessages.push(`Sample CVE description: "${redhatData[0].description.substring(0, 100)}..."`);
+                        }
                     } else {
                         debugMessages.push('Red Hat data is not an array');
                         debugMessages.push(`Red Hat data structure: ${JSON.stringify(redhatJson).substring(0, 200)}...`);
