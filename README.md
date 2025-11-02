@@ -193,7 +193,7 @@ No installation, no API keys, no configuration required!
 
 ## 🔄 Update Frequency
 
-- **Automatic Updates**: Every 6 hours via GitHub Actions
+- **Automatic Updates**: Every 1 hours via GitHub Actions
 - **Manual Updates**: Trigger anytime from the Actions tab
 - **Data Freshness**: Typically within 6 hours of CISA's latest update
 
@@ -260,7 +260,7 @@ Contributions are welcome! Here's how you can help:
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **Apache 2.0 License** - see the [LICENSE](LICENSE) file for details.
 
 ### CISA Data Usage
 The CISA Known Exploited Vulnerabilities Catalog is public domain data provided by the U.S. Government. No copyright restrictions apply to the data itself.
