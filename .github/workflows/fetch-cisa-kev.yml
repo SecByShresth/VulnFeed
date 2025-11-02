@@ -2,7 +2,7 @@ name: Fetch CISA KEV Daily
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Every 6 hours (CISA updates frequently)
+    - cron: '0 * * * *'  # Every 6 hours (CISA updates frequently)
   workflow_dispatch:      # Allows manual triggering
 
 permissions:
