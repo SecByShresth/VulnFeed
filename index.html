@@ -428,6 +428,11 @@
             color: var(--redhat);
             border: 1px solid rgba(238, 0, 0, 0.2);
         }
+        .badge-cvss {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
 
         .cve-description {
             color: var(--text-secondary);
@@ -481,6 +486,49 @@
 
         .action-required strong {
             color: var(--critical);
+        }
+
+        .references-section {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .references-title {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .references-list {
+            font-size: 0.75rem;
+            max-height: 80px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .reference-item {
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+
+        .reference-link {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .reference-link:hover {
+            text-decoration: underline;
+        }
+
+        .more-references {
+            color: var(--text-secondary);
+            font-style: italic;
+            font-size: 0.7rem;
+            margin-top: 4px;
         }
 
         .loading {
@@ -751,530 +799,3 @@
         let redhatData = [];
         let currentSort = 'date';
         let currentSource = 'cisa';
-
-        const elements = {
-            vendorInput: document.getElementById('vendor'),
-            ransomwareSelect: document.getElementById('ransomware'),
-            timeRangeSelect: document.getElementById('timeRange'),
-            rhSeveritySelect: document.getElementById('rhSeverity'),
-            rhProductInput: document.getElementById('rhProduct'),
-            rhTimeRangeSelect: document.getElementById('rhTimeRange'),
-            resultsContainer: document.getElementById('resultsContainer'),
-            statsBar: document.getElementById('statsBar'),
-            resultsHeader: document.getElementById('resultsHeader'),
-            resultsCount: document.getElementById('resultsCount'),
-            lastUpdated: document.getElementById('lastUpdated'),
-            resetFilters: document.getElementById('resetFilters'),
-            cisaFilters: document.getElementById('cisaFilters'),
-            redhatFilters: document.getElementById('redhatFilters')
-        };
-
-        // Event Listeners
-        document.querySelectorAll('input[name="dataSource"]').forEach(radio => {
-            radio.addEventListener('change', handleSourceChange);
-        });
-
-        elements.vendorInput.addEventListener('input', applyFilters);
-        elements.ransomwareSelect.addEventListener('change', applyFilters);
-        elements.timeRangeSelect.addEventListener('change', applyFilters);
-        elements.rhSeveritySelect.addEventListener('change', applyFilters);
-        elements.rhProductInput.addEventListener('input', applyFilters);
-        elements.rhTimeRangeSelect.addEventListener('change', applyFilters);
-        elements.resetFilters.addEventListener('click', resetFilters);
-
-        document.querySelectorAll('.sort-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                currentSort = this.dataset.sort;
-                renderResults(allCves);
-            });
-        });
-
-        // Load data on page load
-        window.addEventListener('load', loadAllData);
-
-        function handleSourceChange(e) {
-            currentSource = e.target.value;
-            
-            // Toggle filter visibility
-            if (currentSource === 'cisa') {
-                elements.cisaFilters.style.display = 'grid';
-                elements.redhatFilters.style.display = 'none';
-            } else if (currentSource === 'redhat') {
-                elements.cisaFilters.style.display = 'none';
-                elements.redhatFilters.style.display = 'grid';
-            } else {
-                elements.cisaFilters.style.display = 'grid';
-                elements.redhatFilters.style.display = 'grid';
-            }
-            
-            applyFilters();
-        }
-
-        async function loadAllData() {
-            showLoading();
-
-            try {
-                // Load CISA data
-                const cisaResponse = await fetch('data/cisa-kev.json');
-                if (cisaResponse.ok) {
-                    const cisaJson = await cisaResponse.json();
-                    cisaData = cisaJson.vulnerabilities.map(v => ({
-                        id: v.cveID,
-                        description: v.shortDescription || v.vulnerabilityName,
-                        publishedDate: new Date(v.dateAdded),
-                        vendors: v.vendorProject,
-                        product: v.product,
-                        url: `https://nvd.nist.gov/vuln/detail/${v.cveID}`,
-                        exploited: true,
-                        ransomware: v.knownRansomwareCampaignUse === 'Known',
-                        dueDate: new Date(v.dueDate),
-                        action: v.requiredAction,
-                        notes: v.notes,
-                        source: 'cisa'
-                    }));
-                }
-
-                // Load Red Hat data
-                const redhatResponse = await fetch('data/redhat-cves.json');
-                if (redhatResponse.ok) {
-                    const redhatJson = await redhatResponse.json();
-                    redhatData = redhatJson.map(v => {
-                        // Extract description from bugzilla or details
-                        let description = 'No description available';
-                        if (v.bugzilla?.description) {
-                            description = v.bugzilla.description;
-                        } else if (v.details && v.details.length > 0) {
-                            // Get first 200 chars from details
-                            description = v.details[0].substring(0, 200) + '...';
-                        }
-
-                        // Determine severity from CVSS score if available
-                        let severity = v.severity || 'Unknown';
-                        if (!v.severity && v.cvss3?.cvss3_base_score) {
-                            const score = parseFloat(v.cvss3.cvss3_base_score);
-                            if (score >= 9.0) severity = 'Critical';
-                            else if (score >= 7.0) severity = 'Important';
-                            else if (score >= 4.0) severity = 'Moderate';
-                            else severity = 'Low';
-                        }
-
-                        // Extract product names
-                        let product = 'Various';
-                        if (v.affected_release && v.affected_release.length > 0) {
-                            product = v.affected_release.map(r => r.product_name).join(', ');
-                        } else if (v.package_state && v.package_state.length > 0) {
-                            product = v.package_state.map(p => p.product_name).filter(Boolean).join(', ') || 'Various';
-                        }
-
-                        return {
-                            id: v.name || v.CVE,
-                            description: description,
-                            publishedDate: new Date(v.public_date),
-                            severity: severity,
-                            vendors: 'Red Hat',
-                            product: product,
-                            url: v.resource_url || `https://access.redhat.com/security/cve/${v.name || v.CVE}`,
-                            cvss3Score: v.cvss3?.cvss3_base_score,
-                            cvss3Vector: v.cvss3?.cvss3_scoring_vector,
-                            cwe: v.cwe,
-                            bugzillaUrl: v.bugzilla?.url,
-                            bugzillaId: v.bugzilla?.id,
-                            references: v.references,
-                            details: v.details,
-                            source: 'redhat'
-                        };
-                    });
-                }
-
-                if (cisaData.length === 0 && redhatData.length === 0) {
-                    showError('No vulnerability data available. Make sure GitHub Actions has run at least once.');
-                    return;
-                }
-
-                updateLastUpdated();
-                applyFilters();
-            } catch (error) {
-                showError(`${error.message}<br><br>The GitHub Actions workflow needs to run first to fetch data. Please check the Actions tab.`);
-            }
-        }
-
-        function updateLastUpdated() {
-            const messages = [];
-            if (cisaData.length > 0) {
-                messages.push(`CISA: ${cisaData.length} vulnerabilities`);
-            }
-            if (redhatData.length > 0) {
-                messages.push(`Red Hat: ${redhatData.length} CVEs`);
-            }
-            elements.lastUpdated.textContent = `Last updated: ${new Date().toLocaleDateString()} • ${messages.join(' | ')}`;
-        }
-
-        function resetFilters() {
-            elements.vendorInput.value = '';
-            elements.ransomwareSelect.value = 'all';
-            elements.timeRangeSelect.value = '30';
-            elements.rhSeveritySelect.value = 'all';
-            elements.rhProductInput.value = '';
-            elements.rhTimeRangeSelect.value = '30';
-            document.querySelector('input[name="dataSource"][value="cisa"]').checked = true;
-            currentSource = 'cisa';
-            elements.cisaFilters.style.display = 'grid';
-            elements.redhatFilters.style.display = 'none';
-            applyFilters();
-        }
-
-        function applyFilters() {
-            let filtered = [];
-
-            // Apply source filter
-            if (currentSource === 'cisa') {
-                filtered = filterCISA(cisaData);
-            } else if (currentSource === 'redhat') {
-                filtered = filterRedHat(redhatData);
-            } else {
-                filtered = [...filterCISA(cisaData), ...filterRedHat(redhatData)];
-            }
-
-            allCves = filtered;
-
-            if (allCves.length === 0) {
-                showEmptyState();
-            } else {
-                updateStats(allCves);
-                renderResults(allCves);
-            }
-        }
-
-        function filterCISA(data) {
-            const vendor = elements.vendorInput.value.trim().toLowerCase();
-            const ransomwareFilter = elements.ransomwareSelect.value;
-            const timeRange = elements.timeRangeSelect.value;
-
-            return data.filter(cve => {
-                // Filter by ransomware
-                if (ransomwareFilter === 'known' && !cve.ransomware) {
-                    return false;
-                }
-                if (ransomwareFilter === 'unknown' && cve.ransomware) {
-                    return false;
-                }
-
-                // Filter by vendor/product
-                if (vendor) {
-                    const vendorMatch = cve.description.toLowerCase().includes(vendor) ||
-                                      cve.vendors?.toLowerCase().includes(vendor) ||
-                                      cve.product?.toLowerCase().includes(vendor);
-                    if (!vendorMatch) return false;
-                }
-
-                // Filter by time range
-                if (timeRange !== 'all') {
-                    const days = parseInt(timeRange);
-                    const cutoffDate = new Date();
-                    cutoffDate.setDate(cutoffDate.getDate() - days);
-                    if (cve.publishedDate < cutoffDate) {
-                        return false;
-                    }
-                }
-
-                return true;
-            });
-        }
-
-        function filterRedHat(data) {
-            const severity = elements.rhSeveritySelect.value;
-            const product = elements.rhProductInput.value.trim().toLowerCase();
-            const timeRange = elements.rhTimeRangeSelect.value;
-
-            return data.filter(cve => {
-                // Filter by severity
-                if (severity !== 'all' && cve.severity !== severity) {
-                    return false;
-                }
-
-                // Filter by product
-                if (product) {
-                    const productMatch = cve.description.toLowerCase().includes(product) ||
-                                        cve.product?.toLowerCase().includes(product);
-                    if (!productMatch) return false;
-                }
-
-                // Filter by time range
-                if (timeRange !== 'all') {
-                    const days = parseInt(timeRange);
-                    const cutoffDate = new Date();
-                    cutoffDate.setDate(cutoffDate.getDate() - days);
-                    if (cve.publishedDate < cutoffDate) {
-                        return false;
-                    }
-                }
-
-                return true;
-            });
-        }
-
-        function renderResults(cves) {
-            const sorted = [...cves].sort((a, b) => {
-                if (currentSort === 'date') {
-                    return b.publishedDate - a.publishedDate;
-                } else if (currentSort === 'vendor') {
-                    return (a.vendors || '').localeCompare(b.vendors || '');
-                } else if (currentSort === 'severity') {
-                    const severityOrder = { 'Critical': 0, 'Important': 1, 'Moderate': 2, 'Low': 3 };
-                    const aSev = severityOrder[a.severity] ?? 4;
-                    const bSev = severityOrder[b.severity] ?? 4;
-                    return aSev - bSev;
-                }
-            });
-
-            elements.resultsHeader.style.display = 'flex';
-            elements.resultsCount.textContent = `${sorted.length} result${sorted.length !== 1 ? 's' : ''}`;
-
-            const html = sorted.map(cve => {
-                if (cve.source === 'cisa') {
-                    return renderCISACard(cve);
-                } else {
-                    return renderRedHatCard(cve);
-                }
-            }).join('');
-
-            elements.resultsContainer.innerHTML = `<div class="results-grid">${html}</div>`;
-        }
-
-        function renderCISACard(cve) {
-            return `
-                <div class="cve-card cisa-source">
-                    <div class="cve-header">
-                        <a href="${cve.url}" target="_blank" class="cve-id">
-                            <i class="fas fa-bug"></i> ${cve.id}
-                        </a>
-                        <div class="badge-container">
-                            <span class="badge badge-exploited"><i class="fas fa-bolt"></i> Exploited</span>
-                            ${cve.ransomware ? '<span class="badge badge-ransomware"><i class="fas fa-lock"></i> Ransomware</span>' : ''}
-                            ${isDueSoon(cve.dueDate) ? '<span class="badge badge-due-soon"><i class="fas fa-exclamation-circle"></i> Due Soon</span>' : ''}
-                        </div>
-                    </div>
-                    <div class="cve-description">
-                        ${cve.description}
-                    </div>
-                    ${cve.action ? `
-                        <div class="action-required">
-                            <i class="fas fa-exclamation-triangle action-icon"></i>
-                            <div><strong>Required Action:</strong> ${cve.action}</div>
-                        </div>
-                    ` : ''}
-                    <div class="cve-meta">
-                        <div class="meta-item">
-                            <i class="fas fa-calendar-plus meta-icon"></i>
-                            <span class="meta-label">Added:</span>
-                            <span>${formatDate(cve.publishedDate)}</span>
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-clock meta-icon"></i>
-                            <span class="meta-label">Due:</span>
-                            <span style="color: ${isDueSoon(cve.dueDate) ? 'var(--critical)' : 'inherit'};">
-                                ${formatDate(cve.dueDate)}
-                            </span>
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-building meta-icon"></i>
-                            <span class="meta-label">Vendor:</span>
-                            <span>${cve.vendors}</span>
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-cube meta-icon"></i>
-                            <span class="meta-label">Product:</span>
-                            <span>${cve.product}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderRedHatCard(cve) {
-            const severityBadge = {
-                'Critical': 'badge-critical',
-                'Important': 'badge-important',
-                'Moderate': 'badge-moderate',
-                'Low': 'badge-low'
-            }[cve.severity] || '';
-
-            // Truncate long descriptions
-            const displayDescription = cve.description.length > 250 
-                ? cve.description.substring(0, 250) + '...' 
-                : cve.description;
-
-            return `
-                <div class="cve-card redhat-source">
-                    <div class="cve-header">
-                        <a href="${cve.url}" target="_blank" class="cve-id">
-                            <i class="fas fa-bug"></i> ${cve.id}
-                        </a>
-                        <div class="badge-container">
-                            <span class="badge badge-source"><i class="fab fa-redhat"></i> Red Hat</span>
-                            ${cve.severity && cve.severity !== 'Unknown' ? `<span class="badge ${severityBadge}"><i class="fas fa-exclamation-triangle"></i> ${cve.severity}</span>` : ''}
-                        </div>
-                    </div>
-                    <div class="cve-description">
-                        ${displayDescription}
-                    </div>
-                    ${cve.bugzillaUrl ? `
-                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 0.85rem;">
-                            <a href="${cve.bugzillaUrl}" target="_blank" style="color: var(--accent); text-decoration: none; display: flex; align-items: center; gap: 6px;">
-                                <i class="fas fa-external-link-alt"></i> Bugzilla #${cve.bugzillaId}
-                            </a>
-                        </div>
-                    ` : ''}
-                    <div class="cve-meta">
-                        <div class="meta-item">
-                            <i class="fas fa-calendar-plus meta-icon"></i>
-                            <span class="meta-label">Published:</span>
-                            <span>${formatDate(cve.publishedDate)}</span>
-                        </div>
-                        ${cve.cvss3Score ? `
-                            <div class="meta-item">
-                                <i class="fas fa-chart-line meta-icon"></i>
-                                <span class="meta-label">CVSS 3:</span>
-                                <span style="font-weight: 600;">${cve.cvss3Score}</span>
-                            </div>
-                        ` : ''}
-                        <div class="meta-item">
-                            <i class="fas fa-cube meta-icon"></i>
-                            <span class="meta-label">Product:</span>
-                            <span title="${cve.product}">${cve.product.length > 30 ? cve.product.substring(0, 30) + '...' : cve.product}</span>
-                        </div>
-                        ${cve.cwe ? `
-                            <div class="meta-item">
-                                <i class="fas fa-code meta-icon"></i>
-                                <span class="meta-label">CWE:</span>
-                                <span>${cve.cwe}</span>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-        }
-
-        function updateStats(cves) {
-            elements.statsBar.style.display = 'flex';
-
-            const cisaCves = cves.filter(c => c.source === 'cisa');
-            const redhatCves = cves.filter(c => c.source === 'redhat');
-
-            const now = new Date();
-            const dueSoon = cisaCves.filter(c => {
-                if (!c.dueDate) return false;
-                const daysUntilDue = Math.ceil((c.dueDate - now) / (1000 * 60 * 60 * 24));
-                return daysUntilDue >= 0 && daysUntilDue <= 7;
-            }).length;
-
-            const criticalRedHat = redhatCves.filter(c => c.severity === 'Critical').length;
-            const ransomware = cisaCves.filter(c => c.ransomware).length;
-
-            let statsHtml = `
-                <div class="stat-card">
-                    <div class="stat-label"><i class="fas fa-bug"></i> Total Results</div>
-                    <div class="stat-value">${cves.length}</div>
-                </div>
-            `;
-
-            if (currentSource === 'cisa' || currentSource === 'both') {
-                statsHtml += `
-                    <div class="stat-card">
-                        <div class="stat-label"><i class="fas fa-exclamation-triangle"></i> CISA KEV</div>
-                        <div class="stat-value" style="color: var(--accent);">${cisaCves.length}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label"><i class="fas fa-lock"></i> Ransomware Use</div>
-                        <div class="stat-value" style="color: #ec4899;">${ransomware}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label"><i class="fas fa-clock"></i> Due Within 7 Days</div>
-                        <div class="stat-value" style="color: var(--critical);">${dueSoon}</div>
-                    </div>
-                `;
-            }
-
-            if (currentSource === 'redhat' || currentSource === 'both') {
-                statsHtml += `
-                    <div class="stat-card">
-                        <div class="stat-label"><i class="fab fa-redhat"></i> Red Hat CVEs</div>
-                        <div class="stat-value" style="color: var(--redhat);">${redhatCves.length}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label"><i class="fas fa-fire"></i> Critical Severity</div>
-                        <div class="stat-value" style="color: var(--critical);">${criticalRedHat}</div>
-                    </div>
-                `;
-            }
-
-            elements.statsBar.innerHTML = statsHtml;
-        }
-
-        function isDueSoon(dueDate) {
-            if (!dueDate) return false;
-            const now = new Date();
-            const daysUntilDue = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
-            return daysUntilDue >= 0 && daysUntilDue <= 7;
-        }
-
-        function showLoading() {
-            elements.statsBar.style.display = 'none';
-            elements.resultsHeader.style.display = 'none';
-            elements.resultsContainer.innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Loading vulnerability data from multiple sources...</p>
-                </div>
-            `;
-        }
-
-        function showError(message) {
-            elements.statsBar.style.display = 'none';
-            elements.resultsHeader.style.display = 'none';
-            elements.lastUpdated.textContent = 'Failed to load data';
-            elements.resultsContainer.innerHTML = `
-                <div class="error">
-                    <h3><i class="fas fa-exclamation-triangle"></i> Error</h3>
-                    <p>${message}</p>
-                </div>
-            `;
-        }
-
-        function showEmptyState() {
-            elements.statsBar.style.display = 'none';
-            elements.resultsHeader.style.display = 'none';
-            elements.resultsContainer.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <h3>No Results Found</h3>
-                    <p>Try adjusting your filters or expanding the time range.</p>
-                </div>
-            `;
-        }
-
-        function formatDate(date) {
-            if (!date) return 'N/A';
-            const now = new Date();
-            const diff = now - date;
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-            if (days === 0) return 'Today';
-            if (days === 1) return 'Yesterday';
-            if (days === -1) return 'Tomorrow';
-            if (days < 0) return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            if (days < 7) return `${days} days ago`;
-
-            return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
-        }
-    </script>
-</body>
-</html>
