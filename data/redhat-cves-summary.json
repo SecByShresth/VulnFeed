@@ -1,6 +1,6 @@
 {
   "total_cves_in_list": 1000,
-  "detailed_cves_fetched": 100,
+  "detailed_cves_fetched": 1000,
   "failed_cves": [],
   "cve_names": [
     "CVE-2025-40106",
