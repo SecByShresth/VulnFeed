@@ -1,0 +1,107 @@
+name: Fetch Red Hat CVEs Daily
+
+on:
+  schedule:
+    - cron: '30 */6 * * *'  # Every 6 hours at 30 minutes past (offset from CISA)
+  workflow_dispatch:         # Allows manual triggering
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-redhat-cves:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+        
+      - name: Fetch Red Hat CVE Data
+        run: |
+          mkdir -p data
+          
+          echo "🔍 Fetching Red Hat CVE data..."
+          
+          # Calculate date 90 days ago for fetching recent CVEs
+          AFTER_DATE=$(date -d '90 days ago' '+%Y-%m-%d' 2>/dev/null || date -v-90d '+%Y-%m-%d')
+          echo "📅 Fetching CVEs after: $AFTER_DATE"
+          
+          # Fetch Red Hat CVE data (no API key needed!)
+          # Using 90-day window to keep data fresh and file size manageable
+          HTTP_CODE=$(curl -w "%{http_code}" \
+               "https://access.redhat.com/hydra/rest/securitydata/cve.json?after=${AFTER_DATE}" \
+               -H "Accept: application/json" \
+               -o data/redhat-cves.json \
+               --retry 3 \
+               --retry-delay 5 \
+               --max-time 120)
+          
+          echo "📡 HTTP Response Code: $HTTP_CODE"
+          
+          # Check if request was successful
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "❌ Error: Failed to fetch Red Hat data with HTTP code $HTTP_CODE"
+            cat data/redhat-cves.json
+            exit 1
+          fi
+          
+          # Check if file has content
+          if [ ! -s data/redhat-cves.json ]; then
+            echo "❌ Error: Downloaded file is empty"
+            exit 1
+          fi
+          
+          # Validate JSON format
+          if ! jq empty data/redhat-cves.json 2>/dev/null; then
+            echo "❌ Error: Invalid JSON format"
+            cat data/redhat-cves.json
+            exit 1
+          fi
+          
+          # Get some stats from the file
+          CVE_COUNT=$(jq '. | length' data/redhat-cves.json)
+          FILE_SIZE=$(wc -c < data/redhat-cves.json)
+          CRITICAL_COUNT=$(jq '[.[] | select(.severity == "Critical")] | length' data/redhat-cves.json)
+          IMPORTANT_COUNT=$(jq '[.[] | select(.severity == "Important")] | length' data/redhat-cves.json)
+          
+          echo "✅ Successfully fetched Red Hat CVE data"
+          echo "📦 File size: $FILE_SIZE bytes"
+          echo "🔢 Total CVEs: $CVE_COUNT"
+          echo "🔴 Critical: $CRITICAL_COUNT"
+          echo "🟠 Important: $IMPORTANT_COUNT"
+          
+          # Create a summary file with metadata
+          cat > data/redhat-cves-metadata.json << EOF
+          {
+            "last_updated": "$(date -u '+%Y-%m-%d %H:%M:%S UTC')",
+            "total_cves": $CVE_COUNT,
+            "critical_count": $CRITICAL_COUNT,
+            "important_count": $IMPORTANT_COUNT,
+            "date_range_start": "$AFTER_DATE",
+            "date_range_end": "$(date '+%Y-%m-%d')"
+          }
+          EOF
+          
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          # Sync with remote to avoid conflicts
+          git fetch origin main
+          git rebase origin/main
+          
+          git add data/redhat-cves.json data/redhat-cves-metadata.json
+          
+          # Only commit if there are changes
+          if git diff --staged --quiet; then
+            echo "ℹ️ No changes to Red Hat CVE data"
+          else
+            CVE_COUNT=$(jq '. | length' data/redhat-cves.json)
+            git commit -m "🔄 Update Red Hat CVE data - $CVE_COUNT CVEs - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            git push origin main
+            echo "✅ Successfully pushed Red Hat CVE data to repository"
+          fi
