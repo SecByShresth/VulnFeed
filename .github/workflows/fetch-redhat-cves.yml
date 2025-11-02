@@ -34,13 +34,12 @@ jobs:
           
           echo "🔍 Fetching Red Hat CVE data..."
           
-          # Calculate date 90 days ago for fetching recent CVEs
-          AFTER_DATE=$(date -d '90 days ago' '+%Y-%m-%d' 2>/dev/null || date -v-90d '+%Y-%m-%d')
-          echo "📅 Fetching CVEs after: $AFTER_DATE"
+          # Remove the date filter to get ALL CVEs
+          echo "📅 Fetching ALL CVEs (no date filter)"
           
           # Fetch Red Hat CVE list (no API key needed!)
           HTTP_CODE=$(curl -w "%{http_code}" \
-               "https://access.redhat.com/hydra/rest/securitydata/cve.json?after=${AFTER_DATE}" \
+               "https://access.redhat.com/hydra/rest/securitydata/cve.json" \
                -H "Accept: application/json" \
                -o data/redhat-cves-list.json \
                --retry 3 \
@@ -73,7 +72,7 @@ jobs:
           CVE_COUNT=$(jq '. | length' data/redhat-cves-list.json)
           echo "📋 Found $CVE_COUNT CVEs in list"
           
-          # Use Python script to fetch detailed CVE data
+          # Use Python script to fetch detailed CVE data - REMOVED THE 100 LIMIT
           python << EOF
           import json
           import requests
@@ -89,12 +88,12 @@ jobs:
           detailed_cves = []
           failed_cves = []
           
-          # Fetch details for each CVE (limit to 100 for performance)
-          max_cves = min(100, len(cve_list))
+          # Fetch details for each CVE - NO LIMIT, process all CVEs
+          total_cves = len(cve_list)
           
-          for i, cve in enumerate(cve_list[:max_cves]):
+          for i, cve in enumerate(cve_list):
               cve_name = cve.get('CVE', cve.get('name', 'Unknown'))
-              print(f"Fetching {i+1}/{max_cves}: {cve_name}")
+              print(f"Fetching {i+1}/{total_cves}: {cve_name}")
               
               try:
                   # Fetch individual CVE details
@@ -159,15 +158,14 @@ jobs:
           cat > data/redhat-cves-metadata.json << EOF
           {
             "last_updated": "$(date -u '+%Y-%m-%d %H:%M:%S UTC')",
-            "total_cves_in_period": $CVE_COUNT,
+            "total_cves_in_list": $CVE_COUNT,
             "detailed_cves_fetched": $DETAILED_COUNT,
             "critical_count": $CRITICAL_COUNT,
             "important_count": $IMPORTANT_COUNT,
             "moderate_count": $MODERATE_COUNT,
             "low_count": $LOW_COUNT,
-            "date_range_start": "$AFTER_DATE",
-            "date_range_end": "$(date '+%Y-%m-%d')",
-            "notes": "Only first 100 CVEs are fetched with full details due to API rate limiting"
+            "date_range": "All Time",
+            "notes": "Fetched all available Red Hat CVEs"
           }
           EOF
           
@@ -188,7 +186,7 @@ jobs:
               echo "ℹ️ No changes to Red Hat CVE data after adding specific files"
             else
               DETAILED_COUNT=$(jq '. | length' data/redhat-cves.json)
-              git commit -m "🔄 Update Red Hat CVE data - $DETAILED_COUNT detailed CVEs - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+              git commit -m "🔄 Update Red Hat CVE data - $DETAILED_COUNT detailed CVEs (All Time) - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
               
               # Pull latest changes and push
               git pull --rebase origin main
