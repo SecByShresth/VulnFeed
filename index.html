@@ -840,19 +840,52 @@
                 const redhatResponse = await fetch('data/redhat-cves.json');
                 if (redhatResponse.ok) {
                     const redhatJson = await redhatResponse.json();
-                    redhatData = redhatJson.map(v => ({
-                        id: v.CVE,
-                        description: v.bugzilla_description || v.bugzilla?.description || 'No description available',
-                        publishedDate: new Date(v.public_date),
-                        severity: v.severity,
-                        vendors: 'Red Hat',
-                        product: v.affected_release ? v.affected_release.map(r => r.product_name).join(', ') : 'Various',
-                        url: v.resource_url || `https://access.redhat.com/security/cve/${v.CVE}`,
-                        cvss3Score: v.cvss3?.cvss3_base_score,
-                        cvss3Vector: v.cvss3?.cvss3_scoring_vector,
-                        cwe: v.cwe,
-                        source: 'redhat'
-                    }));
+                    redhatData = redhatJson.map(v => {
+                        // Extract description from bugzilla or details
+                        let description = 'No description available';
+                        if (v.bugzilla?.description) {
+                            description = v.bugzilla.description;
+                        } else if (v.details && v.details.length > 0) {
+                            // Get first 200 chars from details
+                            description = v.details[0].substring(0, 200) + '...';
+                        }
+
+                        // Determine severity from CVSS score if available
+                        let severity = v.severity || 'Unknown';
+                        if (!v.severity && v.cvss3?.cvss3_base_score) {
+                            const score = parseFloat(v.cvss3.cvss3_base_score);
+                            if (score >= 9.0) severity = 'Critical';
+                            else if (score >= 7.0) severity = 'Important';
+                            else if (score >= 4.0) severity = 'Moderate';
+                            else severity = 'Low';
+                        }
+
+                        // Extract product names
+                        let product = 'Various';
+                        if (v.affected_release && v.affected_release.length > 0) {
+                            product = v.affected_release.map(r => r.product_name).join(', ');
+                        } else if (v.package_state && v.package_state.length > 0) {
+                            product = v.package_state.map(p => p.product_name).filter(Boolean).join(', ') || 'Various';
+                        }
+
+                        return {
+                            id: v.name || v.CVE,
+                            description: description,
+                            publishedDate: new Date(v.public_date),
+                            severity: severity,
+                            vendors: 'Red Hat',
+                            product: product,
+                            url: v.resource_url || `https://access.redhat.com/security/cve/${v.name || v.CVE}`,
+                            cvss3Score: v.cvss3?.cvss3_base_score,
+                            cvss3Vector: v.cvss3?.cvss3_scoring_vector,
+                            cwe: v.cwe,
+                            bugzillaUrl: v.bugzilla?.url,
+                            bugzillaId: v.bugzilla?.id,
+                            references: v.references,
+                            details: v.details,
+                            source: 'redhat'
+                        };
+                    });
                 }
 
                 if (cisaData.length === 0 && redhatData.length === 0) {
@@ -1068,6 +1101,11 @@
                 'Low': 'badge-low'
             }[cve.severity] || '';
 
+            // Truncate long descriptions
+            const displayDescription = cve.description.length > 250 
+                ? cve.description.substring(0, 250) + '...' 
+                : cve.description;
+
             return `
                 <div class="cve-card redhat-source">
                     <div class="cve-header">
@@ -1076,12 +1114,19 @@
                         </a>
                         <div class="badge-container">
                             <span class="badge badge-source"><i class="fab fa-redhat"></i> Red Hat</span>
-                            ${cve.severity ? `<span class="badge ${severityBadge}"><i class="fas fa-exclamation-triangle"></i> ${cve.severity}</span>` : ''}
+                            ${cve.severity && cve.severity !== 'Unknown' ? `<span class="badge ${severityBadge}"><i class="fas fa-exclamation-triangle"></i> ${cve.severity}</span>` : ''}
                         </div>
                     </div>
                     <div class="cve-description">
-                        ${cve.description}
+                        ${displayDescription}
                     </div>
+                    ${cve.bugzillaUrl ? `
+                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 0.85rem;">
+                            <a href="${cve.bugzillaUrl}" target="_blank" style="color: var(--accent); text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                                <i class="fas fa-external-link-alt"></i> Bugzilla #${cve.bugzillaId}
+                            </a>
+                        </div>
+                    ` : ''}
                     <div class="cve-meta">
                         <div class="meta-item">
                             <i class="fas fa-calendar-plus meta-icon"></i>
@@ -1098,7 +1143,7 @@
                         <div class="meta-item">
                             <i class="fas fa-cube meta-icon"></i>
                             <span class="meta-label">Product:</span>
-                            <span>${cve.product || 'Various'}</span>
+                            <span title="${cve.product}">${cve.product.length > 30 ? cve.product.substring(0, 30) + '...' : cve.product}</span>
                         </div>
                         ${cve.cwe ? `
                             <div class="meta-item">
