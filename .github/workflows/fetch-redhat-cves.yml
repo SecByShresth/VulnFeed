@@ -19,7 +19,16 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
         
-      - name: Fetch Red Hat CVE Data
+      - name: Setup Python for JSON processing
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install requests
+          
+      - name: Fetch and Process Red Hat CVE Data
         run: |
           mkdir -p data
           
@@ -29,59 +38,136 @@ jobs:
           AFTER_DATE=$(date -d '90 days ago' '+%Y-%m-%d' 2>/dev/null || date -v-90d '+%Y-%m-%d')
           echo "📅 Fetching CVEs after: $AFTER_DATE"
           
-          # Fetch Red Hat CVE data (no API key needed!)
-          # Using 90-day window to keep data fresh and file size manageable
+          # Fetch Red Hat CVE list (no API key needed!)
           HTTP_CODE=$(curl -w "%{http_code}" \
                "https://access.redhat.com/hydra/rest/securitydata/cve.json?after=${AFTER_DATE}" \
                -H "Accept: application/json" \
-               -o data/redhat-cves.json \
+               -o data/redhat-cves-list.json \
                --retry 3 \
                --retry-delay 5 \
                --max-time 120)
           
-          echo "📡 HTTP Response Code: $HTTP_CODE"
+          echo "📡 HTTP Response Code for CVE list: $HTTP_CODE"
           
           # Check if request was successful
           if [ "$HTTP_CODE" -ne 200 ]; then
-            echo "❌ Error: Failed to fetch Red Hat data with HTTP code $HTTP_CODE"
-            cat data/redhat-cves.json
+            echo "❌ Error: Failed to fetch Red Hat CVE list with HTTP code $HTTP_CODE"
+            cat data/redhat-cves-list.json
             exit 1
           fi
           
           # Check if file has content
-          if [ ! -s data/redhat-cves.json ]; then
-            echo "❌ Error: Downloaded file is empty"
+          if [ ! -s data/redhat-cves-list.json ]; then
+            echo "❌ Error: Downloaded CVE list file is empty"
             exit 1
           fi
           
           # Validate JSON format
-          if ! jq empty data/redhat-cves.json 2>/dev/null; then
-            echo "❌ Error: Invalid JSON format"
-            cat data/redhat-cves.json
+          if ! jq empty data/redhat-cves-list.json 2>/dev/null; then
+            echo "❌ Error: Invalid JSON format in CVE list"
+            cat data/redhat-cves-list.json
             exit 1
           fi
           
-          # Get some stats from the file
-          CVE_COUNT=$(jq '. | length' data/redhat-cves.json)
-          FILE_SIZE=$(wc -c < data/redhat-cves.json)
-          CRITICAL_COUNT=$(jq '[.[] | select(.severity == "Critical")] | length' data/redhat-cves.json)
-          IMPORTANT_COUNT=$(jq '[.[] | select(.severity == "Important")] | length' data/redhat-cves.json)
+          # Get CVE count and names from the list
+          CVE_COUNT=$(jq '. | length' data/redhat-cves-list.json)
+          echo "📋 Found $CVE_COUNT CVEs in list"
           
-          echo "✅ Successfully fetched Red Hat CVE data"
-          echo "📦 File size: $FILE_SIZE bytes"
-          echo "🔢 Total CVEs: $CVE_COUNT"
-          echo "🔴 Critical: $CRITICAL_COUNT"
-          echo "🟠 Important: $IMPORTANT_COUNT"
+          # Use Python script to fetch detailed CVE data
+          python << EOF
+          import json
+          import requests
+          import time
+          import os
+          
+          # Read the CVE list
+          with open('data/redhat-cves-list.json', 'r') as f:
+              cve_list = json.load(f)
+          
+          print(f"Processing {len(cve_list)} CVEs...")
+          
+          detailed_cves = []
+          failed_cves = []
+          
+          # Fetch details for each CVE (limit to 100 for performance)
+          max_cves = min(100, len(cve_list))
+          
+          for i, cve in enumerate(cve_list[:max_cves]):
+              cve_name = cve.get('CVE', cve.get('name', 'Unknown'))
+              print(f"Fetching {i+1}/{max_cves}: {cve_name}")
+              
+              try:
+                  # Fetch individual CVE details
+                  url = f"https://access.redhat.com/hydra/rest/securitydata/cve/{cve_name}.json"
+                  response = requests.get(url, timeout=30)
+                  
+                  if response.status_code == 200:
+                      detailed_cve = response.json()
+                      detailed_cves.append(detailed_cve)
+                      print(f"  ✅ Success: {cve_name}")
+                  else:
+                      print(f"  ❌ Failed: {cve_name} - HTTP {response.status_code}")
+                      failed_cves.append(cve_name)
+                      
+              except Exception as e:
+                  print(f"  ❌ Error fetching {cve_name}: {str(e)}")
+                  failed_cves.append(cve_name)
+              
+              # Be nice to the API - small delay between requests
+              time.sleep(0.5)
+          
+          # Save detailed CVEs
+          with open('data/redhat-cves.json', 'w') as f:
+              json.dump(detailed_cves, f, indent=2)
+          
+          print(f"\\n✅ Successfully fetched {len(detailed_cves)} detailed CVE records")
+          if failed_cves:
+              print(f"❌ Failed to fetch {len(failed_cves)} CVEs: {failed_cves}")
+          
+          # Also save summary with all CVE names
+          summary = {
+              "total_cves_in_list": len(cve_list),
+              "detailed_cves_fetched": len(detailed_cves),
+              "failed_cves": failed_cves,
+              "cve_names": [cve.get('CVE', cve.get('name', 'Unknown')) for cve in cve_list]
+          }
+          
+          with open('data/redhat-cves-summary.json', 'w') as f:
+              json.dump(summary, f, indent=2)
+          EOF
+          
+          # Get stats from the detailed file
+          if [ -f data/redhat-cves.json ] && [ -s data/redhat-cves.json ]; then
+            DETAILED_COUNT=$(jq '. | length' data/redhat-cves.json)
+            CRITICAL_COUNT=$(jq '[.[] | select(.threat_severity == "Critical")] | length' data/redhat-cves.json)
+            IMPORTANT_COUNT=$(jq '[.[] | select(.threat_severity == "Important")] | length' data/redhat-cves.json)
+            MODERATE_COUNT=$(jq '[.[] | select(.threat_severity == "Moderate")] | length' data/redhat-cves.json)
+            LOW_COUNT=$(jq '[.[] | select(.threat_severity == "Low")] | length' data/redhat-cves.json)
+            
+            echo "✅ Successfully processed Red Hat CVE data"
+            echo "📦 Detailed CVEs fetched: $DETAILED_COUNT"
+            echo "🔴 Critical: $CRITICAL_COUNT"
+            echo "🟠 Important: $IMPORTANT_COUNT"
+            echo "🟡 Moderate: $MODERATE_COUNT"
+            echo "🟢 Low: $LOW_COUNT"
+          else
+            echo "❌ Error: Failed to generate detailed CVE data"
+            exit 1
+          fi
           
           # Create a summary file with metadata
           cat > data/redhat-cves-metadata.json << EOF
           {
             "last_updated": "$(date -u '+%Y-%m-%d %H:%M:%S UTC')",
-            "total_cves": $CVE_COUNT,
+            "total_cves_in_period": $CVE_COUNT,
+            "detailed_cves_fetched": $DETAILED_COUNT,
             "critical_count": $CRITICAL_COUNT,
             "important_count": $IMPORTANT_COUNT,
+            "moderate_count": $MODERATE_COUNT,
+            "low_count": $LOW_COUNT,
             "date_range_start": "$AFTER_DATE",
-            "date_range_end": "$(date '+%Y-%m-%d')"
+            "date_range_end": "$(date '+%Y-%m-%d')",
+            "notes": "Only first 100 CVEs are fetched with full details due to API rate limiting"
           }
           EOF
           
@@ -94,14 +180,14 @@ jobs:
           git fetch origin main
           git rebase origin/main
           
-          git add data/redhat-cves.json data/redhat-cves-metadata.json
+          git add data/redhat-cves.json data/redhat-cves-metadata.json data/redhat-cves-list.json data/redhat-cves-summary.json
           
           # Only commit if there are changes
           if git diff --staged --quiet; then
             echo "ℹ️ No changes to Red Hat CVE data"
           else
-            CVE_COUNT=$(jq '. | length' data/redhat-cves.json)
-            git commit -m "🔄 Update Red Hat CVE data - $CVE_COUNT CVEs - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            DETAILED_COUNT=$(jq '. | length' data/redhat-cves.json)
+            git commit -m "🔄 Update Red Hat CVE data - $DETAILED_COUNT detailed CVEs - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
             git push origin main
             echo "✅ Successfully pushed Red Hat CVE data to repository"
           fi
