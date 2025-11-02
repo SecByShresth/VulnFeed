@@ -2,8 +2,8 @@ name: Fetch Red Hat CVEs Daily
 
 on:
   schedule:
-    - cron: '30 */6 * * *'  # Every 6 hours at 30 minutes past (offset from CISA)
-  workflow_dispatch:         # Allows manual triggering
+    - cron: '30 */6 * * *'  # Every 6 hours at 30 min offset from CISA job
+  workflow_dispatch:         # Allows manual trigger
 
 permissions:
   contents: write
@@ -26,7 +26,7 @@ jobs:
           
       - name: Install dependencies
         run: |
-          python -m pip install requests
+          python -m pip install requests jq
           
       - name: Fetch and Process Red Hat CVE Data
         run: |
@@ -38,7 +38,7 @@ jobs:
           AFTER_DATE=$(date -d '90 days ago' '+%Y-%m-%d' 2>/dev/null || date -v-90d '+%Y-%m-%d')
           echo "📅 Fetching CVEs after: $AFTER_DATE"
           
-          # Fetch Red Hat CVE list (no API key needed!)
+          # Fetch Red Hat CVE list (no API key needed)
           HTTP_CODE=$(curl -w "%{http_code}" \
                "https://access.redhat.com/hydra/rest/securitydata/cve.json?after=${AFTER_DATE}" \
                -H "Accept: application/json" \
@@ -49,94 +49,67 @@ jobs:
           
           echo "📡 HTTP Response Code for CVE list: $HTTP_CODE"
           
-          # Check if request was successful
           if [ "$HTTP_CODE" -ne 200 ]; then
             echo "❌ Error: Failed to fetch Red Hat CVE list with HTTP code $HTTP_CODE"
             cat data/redhat-cves-list.json
             exit 1
           fi
           
-          # Check if file has content
           if [ ! -s data/redhat-cves-list.json ]; then
             echo "❌ Error: Downloaded CVE list file is empty"
             exit 1
           fi
           
-          # Validate JSON format
           if ! jq empty data/redhat-cves-list.json 2>/dev/null; then
             echo "❌ Error: Invalid JSON format in CVE list"
             cat data/redhat-cves-list.json
             exit 1
           fi
           
-          # Get CVE count and names from the list
           CVE_COUNT=$(jq '. | length' data/redhat-cves-list.json)
           echo "📋 Found $CVE_COUNT CVEs in list"
           
-          # Use Python script to fetch detailed CVE data
-          python << EOF
-          import json
-          import requests
-          import time
-          import os
+          python << 'EOF'
+import json, requests, time
+
+with open('data/redhat-cves-list.json', 'r') as f:
+    cve_list = json.load(f)
+
+print(f"Processing {len(cve_list)} CVEs...")
+detailed_cves, failed_cves = [], []
+max_cves = min(100, len(cve_list))
+
+for i, cve in enumerate(cve_list[:max_cves]):
+    cve_name = cve.get('CVE', cve.get('name', 'Unknown'))
+    print(f"Fetching {i+1}/{max_cves}: {cve_name}")
+    try:
+        url = f"https://access.redhat.com/hydra/rest/securitydata/cve/{cve_name}.json"
+        r = requests.get(url, timeout=30)
+        if r.status_code == 200:
+            detailed_cves.append(r.json())
+            print(f"  ✅ Success: {cve_name}")
+        else:
+            print(f"  ❌ Failed: {cve_name} - HTTP {r.status_code}")
+            failed_cves.append(cve_name)
+    except Exception as e:
+        print(f"  ❌ Error fetching {cve_name}: {str(e)}")
+        failed_cves.append(cve_name)
+    time.sleep(0.5)
+
+with open('data/redhat-cves.json', 'w') as f:
+    json.dump(detailed_cves, f, indent=2)
+
+summary = {
+    "total_cves_in_list": len(cve_list),
+    "detailed_cves_fetched": len(detailed_cves),
+    "failed_cves": failed_cves,
+    "cve_names": [c.get('CVE', c.get('name', 'Unknown')) for c in cve_list]
+}
+
+with open('data/redhat-cves-summary.json', 'w') as f:
+    json.dump(summary, f, indent=2)
+EOF
           
-          # Read the CVE list
-          with open('data/redhat-cves-list.json', 'r') as f:
-              cve_list = json.load(f)
-          
-          print(f"Processing {len(cve_list)} CVEs...")
-          
-          detailed_cves = []
-          failed_cves = []
-          
-          # Fetch details for each CVE (limit to 100 for performance)
-          max_cves = min(100, len(cve_list))
-          
-          for i, cve in enumerate(cve_list[:max_cves]):
-              cve_name = cve.get('CVE', cve.get('name', 'Unknown'))
-              print(f"Fetching {i+1}/{max_cves}: {cve_name}")
-              
-              try:
-                  # Fetch individual CVE details
-                  url = f"https://access.redhat.com/hydra/rest/securitydata/cve/{cve_name}.json"
-                  response = requests.get(url, timeout=30)
-                  
-                  if response.status_code == 200:
-                      detailed_cve = response.json()
-                      detailed_cves.append(detailed_cve)
-                      print(f"  ✅ Success: {cve_name}")
-                  else:
-                      print(f"  ❌ Failed: {cve_name} - HTTP {response.status_code}")
-                      failed_cves.append(cve_name)
-                      
-              except Exception as e:
-                  print(f"  ❌ Error fetching {cve_name}: {str(e)}")
-                  failed_cves.append(cve_name)
-              
-              # Be nice to the API - small delay between requests
-              time.sleep(0.5)
-          
-          # Save detailed CVEs
-          with open('data/redhat-cves.json', 'w') as f:
-              json.dump(detailed_cves, f, indent=2)
-          
-          print(f"\\n✅ Successfully fetched {len(detailed_cves)} detailed CVE records")
-          if failed_cves:
-              print(f"❌ Failed to fetch {len(failed_cves)} CVEs: {failed_cves}")
-          
-          # Also save summary with all CVE names
-          summary = {
-              "total_cves_in_list": len(cve_list),
-              "detailed_cves_fetched": len(detailed_cves),
-              "failed_cves": failed_cves,
-              "cve_names": [cve.get('CVE', cve.get('name', 'Unknown')) for cve in cve_list]
-          }
-          
-          with open('data/redhat-cves-summary.json', 'w') as f:
-              json.dump(summary, f, indent=2)
-          EOF
-          
-          # Get stats from the detailed file
           if [ -f data/redhat-cves.json ] && [ -s data/redhat-cves.json ]; then
             DETAILED_COUNT=$(jq '. | length' data/redhat-cves.json)
             CRITICAL_COUNT=$(jq '[.[] | select(.threat_severity == "Critical")] | length' data/redhat-cves.json)
@@ -155,7 +128,6 @@ jobs:
             exit 1
           fi
           
-          # Create a summary file with metadata
           cat > data/redhat-cves-metadata.json << EOF
           {
             "last_updated": "$(date -u '+%Y-%m-%d %H:%M:%S UTC')",
@@ -170,19 +142,20 @@ jobs:
             "notes": "Only first 100 CVEs are fetched with full details due to API rate limiting"
           }
           EOF
-          
+
       - name: Commit and push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          
-          # Sync with remote to avoid conflicts
+
+          # ✅ Safe rebase flow
           git fetch origin main
-          git rebase origin/main
-          
+          git stash --include-untracked || true
+          git rebase origin/main || git rebase --abort
+          git stash pop || true
+
           git add data/redhat-cves.json data/redhat-cves-metadata.json data/redhat-cves-list.json data/redhat-cves-summary.json
-          
-          # Only commit if there are changes
+
           if git diff --staged --quiet; then
             echo "ℹ️ No changes to Red Hat CVE data"
           else
