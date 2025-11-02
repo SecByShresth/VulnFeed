@@ -174,23 +174,19 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           
-          # Check if there are any changes to commit
-          if git diff --quiet && git diff --staged --quiet; then
+          # Get the latest changes to avoid conflicts
+          git fetch origin
+          git reset --hard origin/main
+          
+          # Add only the specific files we want to track
+          git add data/redhat-cves.json data/redhat-cves-metadata.json data/redhat-cves-list.json data/redhat-cves-summary.json
+          
+          # Check if there are changes after adding
+          if git diff --staged --quiet; then
             echo "ℹ️ No changes to Red Hat CVE data"
           else
-            # Add only the specific files we want to track
-            git add data/redhat-cves.json data/redhat-cves-metadata.json data/redhat-cves-list.json data/redhat-cves-summary.json
-            
-            # Check if there are changes after adding
-            if git diff --staged --quiet; then
-              echo "ℹ️ No changes to Red Hat CVE data after adding specific files"
-            else
-              DETAILED_COUNT=$(jq '. | length' data/redhat-cves.json)
-              git commit -m "🔄 Update Red Hat CVE data - $DETAILED_COUNT detailed CVEs (All Time) - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-              
-              # Pull latest changes and push
-              git pull --rebase origin main
-              git push origin main
-              echo "✅ Successfully pushed Red Hat CVE data to repository"
-            fi
+            DETAILED_COUNT=$(jq '. | length' data/redhat-cves.json)
+            git commit -m "🔄 Update Red Hat CVE data - $DETAILED_COUNT detailed CVEs (All Time) - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            git push origin main
+            echo "✅ Successfully pushed Red Hat CVE data to repository"
           fi
