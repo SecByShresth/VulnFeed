@@ -2,7 +2,7 @@ name: Fetch Red Hat CVEs Daily
 
 on:
   schedule:
-    - cron: '30 */0 * * *'  # Every 6 hours at 30 minutes past (offset from CISA)
+    - cron: '30 */6 * * *'  # Every 6 hours at 30 minutes past (offset from CISA)
   workflow_dispatch:         # Allows manual triggering
 
 permissions:
