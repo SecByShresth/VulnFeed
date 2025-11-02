@@ -1,8 +1,12 @@
 {
-  "last_updated": "2025-11-02 04:59:11 UTC",
-  "total_cves": 1000,
+  "last_updated": "2025-11-02 05:38:50 UTC",
+  "total_cves_in_period": 1000,
+  "detailed_cves_fetched": 100,
   "critical_count": 0,
-  "important_count": 0,
+  "important_count": 17,
+  "moderate_count": 69,
+  "low_count": 12,
   "date_range_start": "2025-08-04",
-  "date_range_end": "2025-11-02"
+  "date_range_end": "2025-11-02",
+  "notes": "Only first 100 CVEs are fetched with full details due to API rate limiting"
 }
