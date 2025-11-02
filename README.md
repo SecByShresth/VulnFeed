@@ -81,32 +81,6 @@ Unlike traditional CVE databases that list every vulnerability, VulnFeed focuses
 
 ## 🚀 How It Works
 
-### 🧱 Architecture
-
-┌──────────────────────────────────────────────┐
-│ GitHub Actions Workflow │
-│ (Runs every 6 hours - No API key required) │
-└───────────────┬──────────────────────────────┘
-│
-┌─────────┴─────────┐
-▼ ▼
-┌──────────────┐ ┌───────────────┐
-│ CISA KEV │ │ Red Hat Sec. │
-│ JSON Feed │ │ Advisories API│
-└──────┬───────┘ └──────┬────────┘
-│ │
-▼ ▼
-┌───────────────┐ ┌──────────────────┐
-│ data/cisa.json│ │ data/redhat.json│
-└───────────────┘ └──────────────────┘
-│ │
-└───────────┬─────────┘
-▼
-┌──────────────────────┐
-│ GitHub Pages (HTML) │
-│ Client-Side JS App │
-└──────────────────────┘
-
 ### 📈 Data Flow
 
 - **Automated Fetching:** Every 6 hours via GitHub Actions  
