@@ -60,7 +60,7 @@ jobs:
           
           # Sync with remote to avoid conflicts
           git fetch origin main
-          git rebase origin/main
+          git rebase origin/main --autostash
           
           git add data/cisa-kev.json
           
