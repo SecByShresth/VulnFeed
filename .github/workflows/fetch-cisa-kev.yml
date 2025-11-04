@@ -2,7 +2,7 @@ name: Fetch CISA KEV Daily
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Every 6 hours (CISA updates frequently)
+    - cron: '0 * * * *'  # Every hour
   workflow_dispatch:      # Allows manual triggering
 
 permissions:
@@ -11,64 +11,61 @@ permissions:
 jobs:
   fetch-cisa-kev:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
-        
+
       - name: Fetch CISA Known Exploited Vulnerabilities
         run: |
           mkdir -p data
-          
+
           echo "🔍 Fetching CISA KEV catalog..."
-          
+
           # Fetch CISA KEV JSON (no API key needed!)
           HTTP_CODE=$(curl -w "%{http_code}" \
                "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json" \
                -o data/cisa-kev.json)
-          
+
           echo "📡 HTTP Response Code: $HTTP_CODE"
-          
-          # Check if request was successful
+
           if [ "$HTTP_CODE" -ne 200 ]; then
             echo "❌ Error: Failed to fetch CISA data with HTTP code $HTTP_CODE"
             cat data/cisa-kev.json
             exit 1
           fi
-          
-          # Check if file has content
+
           if [ ! -s data/cisa-kev.json ]; then
             echo "❌ Error: Downloaded file is empty"
             exit 1
           fi
-          
-          # Get some stats from the file
-          VULN_COUNT=$(cat data/cisa-kev.json | grep -o '"cveID"' | wc -l)
+
+          VULN_COUNT=$(grep -o '"cveID"' data/cisa-kev.json | wc -l)
           FILE_SIZE=$(wc -c < data/cisa-kev.json)
-          
+
           echo "✅ Successfully fetched CISA KEV data"
           echo "📦 File size: $FILE_SIZE bytes"
           echo "🔢 Total vulnerabilities: $VULN_COUNT"
-          
+
       - name: Commit and push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          
-          # Sync with remote to avoid conflicts
-          git fetch origin main
-          git rebase origin/main --autostash
-          
+
           git add data/cisa-kev.json
-          
-          # Only commit if there are changes
-          if git diff --staged --quiet; then
+
+          if git diff --cached --quiet; then
             echo "ℹ️ No changes to CISA KEV data"
-          else
-            git commit -m "🔄 Update CISA KEV data - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-            git push origin main
-            echo "✅ Successfully pushed CISA KEV data to repository"
+            exit 0
           fi
+
+          git commit -m "🔄 Update CISA KEV data - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+
+          # Sync and push
+          git pull --rebase origin main
+          git push origin main
+
+          echo "✅ Successfully pushed updated CISA KEV data to repository"
