@@ -3,7 +3,7 @@ name: Fetch CISA KEV Daily
 on:
   schedule:
     - cron: '0 * * * *'  # Every hour
-  workflow_dispatch:      # Allows manual triggering
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -24,17 +24,13 @@ jobs:
           mkdir -p data
 
           echo "🔍 Fetching CISA KEV catalog..."
-
-          # Fetch CISA KEV JSON (no API key needed!)
           HTTP_CODE=$(curl -w "%{http_code}" \
                "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json" \
                -o data/cisa-kev.json)
 
           echo "📡 HTTP Response Code: $HTTP_CODE"
-
           if [ "$HTTP_CODE" -ne 200 ]; then
             echo "❌ Error: Failed to fetch CISA data with HTTP code $HTTP_CODE"
-            cat data/cisa-kev.json
             exit 1
           fi
 
@@ -64,8 +60,10 @@ jobs:
 
           git commit -m "🔄 Update CISA KEV data - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 
-          # Sync and push
-          git pull --rebase origin main
-          git push origin main
+          # Safe sync with remote
+          git stash
+          git pull --rebase origin main || git rebase --abort
+          git stash pop || true
 
+          git push origin main
           echo "✅ Successfully pushed updated CISA KEV data to repository"
