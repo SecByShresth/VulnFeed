@@ -1,105 +1,288 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>VulnFeed — Neumorphic Dashboard</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-  :root { --sidebar-w:260px; --radius:12px; --gap:16px; --transition:220ms cubic-bezier(.2,.9,.2,1); --accent:#9b7cff; --muted:#7b8696; --card-pad:16px; --max-list-height:64vh; }
-  :root[data-theme="light"]{ --bg:#eef1f6; --panel:#e7ebf0; --text:#0f1724; --muted:#667085; --shadow-top: rgba(255,255,255,0.9); --shadow-bottom: rgba(168,175,191,0.35); --accent-weak: rgba(155,124,255,0.08);}
-  :root[data-theme="dark"]{ --bg:#0f1418; --panel:#11151a; --text:#e9eef6; --muted:#98a4b2; --shadow-top: rgba(255,255,255,0.03); --shadow-bottom: rgba(0,0,0,0.7); --accent-weak: rgba(155,124,255,0.06);}
-  html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
-  .app{display:flex;gap:24px;padding:26px;box-sizing:border-box;min-height:100vh}
-  .header {position:fixed;top:0;left:0;right:0;background:var(--bg);padding:20px 26px;z-index:100;border-bottom:1px solid var(--shadow-bottom);}
-  .header h1 {font-size:2rem;font-weight:900;margin:0;background:linear-gradient(135deg,var(--accent),#7b61ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-  .header .tagline {font-size:0.9rem;color:var(--muted);margin-top:6px;font-weight:600;}
-  .sidebar{width:var(--sidebar-w);display:flex;flex-direction:column;gap:14px;margin-top:100px;}
-  .brand{display:flex;gap:12px;align-items:center;padding:12px;border-radius:12px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.02));box-shadow:6px 6px 16px var(--shadow-bottom),-6px -6px 16px var(--shadow-top)}
-  .logo{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--accent-weak);color:var(--accent)}
-  nav.nav{display:flex;flex-direction:column;gap:10px;padding:6px;max-height:70vh;overflow-y:auto;}
-  nav a{display:flex;gap:12px;align-items:center;padding:10px;border-radius:10px;color:var(--text);text-decoration:none;font-weight:700;transition:transform var(--transition),background var(--transition)}
-  nav a .ico{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--panel);box-shadow:4px 4px 12px var(--shadow-bottom),-4px -4px 12px var(--shadow-top);color:var(--muted)}
-  nav a:hover{transform:translateX(6px)}
-  nav a.active{background:linear-gradient(180deg,var(--accent-weak),transparent);color:var(--accent)}
-  .sidebar-footer{display:flex;gap:8px;align-items:center;justify-content:center;padding:8px}
-  .btn{border:none;cursor:pointer;padding:10px;border-radius:10px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.02));box-shadow:6px 6px 16px var(--shadow-bottom),-6px -6px 16px var(--shadow-top);color:var(--text);font-weight:700}
-  .main{flex:1;display:flex;flex-direction:column;gap:16px;min-height:calc(100vh - 52px);margin-top:100px;}
-  .grid{display:flex;flex-direction:column;gap:12px;max-height:70vh;overflow:auto;}
-  .cve{padding:14px;border-radius:12px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.02));box-shadow:inset 3px 3px 6px var(--shadow-bottom),inset -3px -3px 6px var(--shadow-top);}
-  .id{font-weight:800;color:var(--accent);}
-  .sev-critical{color:#ff4d4d}.sev-high{color:#ff884d}.sev-medium{color:#facc15}.sev-low{color:#4ade80}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VulnFeed — Vulnerability Intelligence Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+  <style>
+    :root {
+      --bg: #f5f6fa;
+      --fg: #1e1e1e;
+      --card-bg: #ffffff;
+      --shadow-light: rgba(255,255,255,0.6);
+      --shadow-dark: rgba(0,0,0,0.1);
+    }
+    [data-theme="dark"] {
+      --bg: #1b1e23;
+      --fg: #e6e6e6;
+      --card-bg: #23272f;
+      --shadow-light: rgba(255,255,255,0.05);
+      --shadow-dark: rgba(0,0,0,0.6);
+    }
+
+    body {
+      font-family: "Inter", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: all 0.3s ease;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: var(--card-bg);
+      box-shadow: 4px 4px 8px var(--shadow-dark),
+                  -4px -4px 8px var(--shadow-light);
+      border-radius: 0 0 1rem 1rem;
+    }
+
+    h1 {
+      font-weight: 600;
+      font-size: 1.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .theme-toggle {
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin: 1rem;
+    }
+
+    .tab {
+      background: var(--card-bg);
+      padding: 0.6rem 1.2rem;
+      border-radius: 1rem;
+      box-shadow: 3px 3px 6px var(--shadow-dark),
+                  -3px -3px 6px var(--shadow-light);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab.active {
+      background: var(--fg);
+      color: var(--bg);
+      font-weight: 600;
+    }
+
+    .content {
+      flex: 1;
+      padding: 1rem 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 1rem;
+      padding: 1rem;
+      box-shadow: 4px 4px 10px var(--shadow-dark),
+                  -4px -4px 10px var(--shadow-light);
+      transition: all 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+    }
+
+    .card h3 {
+      margin: 0 0 0.4rem 0;
+      font-size: 1rem;
+    }
+
+    .card p {
+      margin: 0.2rem 0;
+      font-size: 0.9rem;
+      opacity: 0.85;
+    }
+
+    .card small {
+      opacity: 0.6;
+    }
+
+    .feed-card {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .feed-stats {
+      margin-top: 0.4rem;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .search-bar {
+      text-align: center;
+      margin: 1rem;
+    }
+
+    .search-bar input {
+      width: 60%;
+      padding: 0.6rem 1rem;
+      border-radius: 2rem;
+      border: none;
+      background: var(--card-bg);
+      box-shadow: inset 2px 2px 6px var(--shadow-dark),
+                  inset -2px -2px 6px var(--shadow-light);
+      color: var(--fg);
+      font-size: 1rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+  </style>
 </head>
-<body>
-<div class="header">
-  <h1>VulnFeed</h1>
-  <div class="tagline">Centralized Vulnerability Intelligence Dashboard</div>
-</div>
+<body data-theme="light">
+  <header>
+    <h1>🛡️ VulnFeed</h1>
+    <div class="theme-toggle" id="themeToggle">🌙</div>
+  </header>
 
-<div class="app">
-  <aside class="sidebar">
-    <div class="brand"><div class="logo">🛡️</div><div><h1>VulnFeed</h1><div class="muted" style="font-size:12px">Security Intelligence</div></div></div>
-    <nav class="nav" id="nav">
-      <a href="#" data-section="dashboard" class="active"><span class="ico"><i class="fas fa-chart-pie"></i></span>Dashboard</a>
-      <a href="#" data-section="mysql"><span class="ico"><i class="fas fa-database"></i></span>MySQL</a>
-      <a href="#" data-section="postgresql"><span class="ico"><i class="fas fa-server"></i></span>PostgreSQL</a>
-      <a href="#" data-section="redis"><span class="ico"><i class="fas fa-bolt"></i></span>Redis</a>
-      <a href="#" data-section="almalinux"><span class="ico"><i class="fab fa-linux"></i></span>AlmaLinux</a>
-      <a href="#" data-section="rockylinux"><span class="ico"><i class="fab fa-linux"></i></span>Rocky Linux</a>
-      <a href="#" data-section="suse"><span class="ico"><i class="fab fa-suse"></i></span>SUSE</a>
-      <a href="#" data-section="debian"><span class="ico"><i class="fab fa-linux"></i></span>Debian</a>
-      <a href="#" data-section="ubuntu"><span class="ico"><i class="fab fa-ubuntu"></i></span>Ubuntu</a>
-    </nav>
-    <div class="sidebar-footer"><button class="btn" id="themeBtn"><i class="fas fa-moon"></i></button></div>
-  </aside>
+  <nav id="tabs"></nav>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search vulnerabilities...">
+  </div>
+  <main class="content" id="content"></main>
 
-  <main class="main">
-    <section id="contentArea" class="grid"></section>
-  </main>
-</div>
+  <footer>© 2025 VulnFeed — Open Vulnerability Intelligence Dashboard</footer>
 
-<script>
-const FEEDS={
-  dashboard:{files:['data/mysql.json','data/postgresql.json','data/redis.json']},
-  mysql:{files:['data/mysql.json']},
-  postgresql:{files:['data/postgresql.json']},
-  redis:{files:['data/redis.json']},
-  almalinux:{files:['data/almalinux.json']},
-  rockylinux:{files:['data/rocky.json']},
-  suse:{files:['data/suse.json']},
-  debian:{files:['data/debian.json']},
-  ubuntu:{files:['data/ubuntu.json']}
-};
-const state={theme:localStorage.getItem('vf_theme')||'light',activeSection:'dashboard',feedsData:{}};
-document.documentElement.setAttribute('data-theme',state.theme);
-document.getElementById('themeBtn').onclick=()=>{state.theme=state.theme==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',state.theme);localStorage.setItem('vf_theme',state.theme);};
-document.querySelectorAll('nav.nav a').forEach(a=>a.onclick=e=>{e.preventDefault();document.querySelectorAll('nav.nav a').forEach(n=>n.classList.remove('active'));a.classList.add('active');state.activeSection=a.dataset.section;loadSection(a.dataset.section);});
+  <script>
+    const feeds = [
+      "mysql", "postgresql", "redis", "redhat-cves",
+      "cisa-kev", "almalinux", "debian", "rocky",
+      "suse", "ubuntu"
+    ];
+    const tabs = document.getElementById("tabs");
+    const content = document.getElementById("content");
+    const searchInput = document.getElementById("searchInput");
+    const themeToggle = document.getElementById("themeToggle");
 
-async function fetchJson(file){try{const r=await fetch(file+`?t=${Date.now()}`);if(!r.ok)throw new Error(r.statusText);return r.json();}catch(e){console.warn('❌',file,e);return[];}}
-function normalizeSeverity(s){if(!s)return'';s=s.toLowerCase();if(s.includes('crit'))return'critical';if(s.includes('high'))return'high';if(s.includes('med'))return'medium';if(s.includes('low'))return'low';return'';}
-function normalize(item){const id=item.id||item.CVE||item.cve_id||'';return{id,title:item.summary||item.title||id,description:item.details||item.description||'',severity:normalizeSeverity(item.severity||item.database_specific?.severity||''),published:item.published||item.date||item.modified||''};}
+    let currentTab = "dashboard";
+    let cachedData = {};
 
-async function loadSection(section){
-  const area=document.getElementById('contentArea');
-  area.innerHTML='<div class="card">Loading…</div>';
-  const cfg=FEEDS[section];if(!cfg)return;
-  let all=[];
-  for(const file of cfg.files){const data=await fetchJson(file);if(Array.isArray(data))all.push(...data.map(normalize));}
-  if(!all.length){area.innerHTML='<div class="card">No data found</div>';return;}
-  const html=all.map(x=>`
-    <div class="cve">
-      <div class="id">${x.id}</div>
-      <div class="title">${x.title}</div>
-      <div class="sev-${x.severity}">${x.severity.toUpperCase()}</div>
-      <div class="muted">${x.published}</div>
-      <div>${x.description||''}</div>
-    </div>
-  `).join('');
-  area.innerHTML=html;
-}
-loadSection('dashboard');
-</script>
+    // Theme toggle
+    themeToggle.onclick = () => {
+      const body = document.body;
+      const isLight = body.getAttribute("data-theme") === "light";
+      body.setAttribute("data-theme", isLight ? "dark" : "light");
+      themeToggle.textContent = isLight ? "☀️" : "🌙";
+    };
+
+    // Build tabs
+    function buildTabs() {
+      tabs.innerHTML = `<div class="tab active" data-feed="dashboard">Dashboard</div>`;
+      feeds.forEach(feed => {
+        tabs.innerHTML += `<div class="tab" data-feed="${feed}">${feed.toUpperCase()}</div>`;
+      });
+      tabs.addEventListener("click", e => {
+        if (e.target.classList.contains("tab")) {
+          document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+          e.target.classList.add("active");
+          currentTab = e.target.dataset.feed;
+          renderContent();
+        }
+      });
+    }
+
+    async function fetchFeed(feed) {
+      if (cachedData[feed]) return cachedData[feed];
+      try {
+        const res = await fetch(`data/${feed}.json`);
+        if (!res.ok) throw new Error("Fetch error");
+        const json = await res.json();
+        cachedData[feed] = json;
+        return json;
+      } catch (err) {
+        console.warn(`Failed to load ${feed}:`, err);
+        return [];
+      }
+    }
+
+    async function renderDashboard() {
+      content.innerHTML = "";
+      for (const feed of feeds) {
+        const data = await fetchFeed(feed);
+        const lastUpdated = new Date().toLocaleDateString();
+        const total = Array.isArray(data) ? data.length : Object.keys(data || {}).length;
+        const card = document.createElement("div");
+        card.className = "card feed-card";
+        card.innerHTML = `
+          <h3>${feed.toUpperCase()}</h3>
+          <div class="feed-stats">Total: ${total || 0}</div>
+          <small>Last updated: ${lastUpdated}</small>
+        `;
+        card.onclick = () => {
+          document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+          document.querySelector(`[data-feed="${feed}"]`).classList.add("active");
+          currentTab = feed;
+          renderContent();
+        };
+        content.appendChild(card);
+      }
+    }
+
+    async function renderFeed(feed) {
+      const data = await fetchFeed(feed);
+      const query = searchInput.value.toLowerCase();
+      content.innerHTML = "";
+      if (!data || (Array.isArray(data) && data.length === 0)) {
+        content.innerHTML = `<div>No data available for ${feed.toUpperCase()}.</div>`;
+        return;
+      }
+      const items = Array.isArray(data) ? data : Object.values(data);
+      items
+        .filter(item => !query || JSON.stringify(item).toLowerCase().includes(query))
+        .slice(0, 100) // limit
+        .forEach(vuln => {
+          const cve = vuln.id || vuln.cve_id || vuln.CVE || "Unknown CVE";
+          const desc = vuln.description || vuln.summary || "No description available.";
+          const severity = vuln.severity || vuln.cvss?.baseSeverity || "N/A";
+          const date = vuln.date || vuln.published || vuln.updated || "Unknown";
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <h3>${cve}</h3>
+            <p><strong>Severity:</strong> ${severity}</p>
+            <p>${desc}</p>
+            <small>${date}</small>
+          `;
+          content.appendChild(card);
+        });
+    }
+
+    async function renderContent() {
+      if (currentTab === "dashboard") {
+        renderDashboard();
+      } else {
+        renderFeed(currentTab);
+      }
+    }
+
+    searchInput.addEventListener("input", () => {
+      if (currentTab !== "dashboard") renderFeed(currentTab);
+    });
+
+    buildTabs();
+    renderContent();
+  </script>
 </body>
 </html>
