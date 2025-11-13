@@ -1,4 +1,4 @@
-name: VulnFeed - OSV.dev Centralized Feed
+name: Database
 
 on:
   schedule:
