@@ -1,0 +1,206 @@
+[
+  {
+    "id": "GHSA-9rp6-23gf-4c3h",
+    "title": "syncthing vulnerable to Cross-site Scripting (XSS) in Web GUI",
+    "description": "## Impact\n\n1. A compromised instance with shared folders could sync malicious files which contain arbitrary HTML and JavaScript in the name.\nIf the owner of another device looks over the shared folder settings and moves the mouse over the latest sync, a script could be executed to change settings for shared folders or add devices automatically.\n\n2. Adding a new device with a malicious name could embed HTML or JavaScript inside parts of the page.\n\n## Risk\n\nAs long as trusted devices are used, the risk is low.\nAdditionally, the web GUI is not used that often in daily use which reduces the likelihood of exploitation.\n\n## Details\n\n### 1. Field \"Latest Change\"\n\n* Open the web GUI at [http://127.0.0.1:8384/](http://127.0.0.1:8384/).\n* Create/Delete a file named ```<img src=a onerror=alert(123)>``` and sync it to the other instance.\n* Move your mouse over the latest change to trigger the tooltip.\n\n<img width=\"834\" alt=\"latest-change\" src=\"https://user-images.githubusercontent.com/9484134/205084362-20a8ec13-a88d-469f-bdf1-e5291c20f4c1.png\">\n\n##### Web browser source\n```html\n<span tooltip=\"\" data-original-title=\"\\&quot;><img src=a onerror=alert(123)> @ 2022-11-30 16:58:43\"\n    aria-describedby=\"tooltip409527\">\n    <!-- ngIf: !folderStats[folder.id].lastFile.deleted --><span translate=\"\"\n        translate-value-file=\"&quot;><img src=a onerror=alert(123)>\" ng-if=\"!folderStats[folder.id].lastFile.deleted\"\n        class=\"ng-scope\">Updated \"&gt;&lt;img src=a onerror=alert(123)&gt;</span>\n    <!-- end ngIf: !folderStats[folder.id].lastFile.deleted -->\n    <!-- ngIf: folderStats[folder.id].lastFile.deleted -->\n</span>\n<div class=\"tooltip fade top in\" role=\"tooltip\" id=\"tooltip409527\"\n    style=\"top: 446.033px; left: 318.3px; display: block;\">\n    <div class=\"tooltip-arrow\" style=\"left: 50%;\"></div>\n    <div class=\"tooltip-inner\">\\\"&gt;<img src=\"a\" onerror=\"alert(123)\"> @ 2022-11-30 16:58:43</div>\n</div>\n```\n\n##### Corresponding code in the project \n\nFile ````gui/default/index.html````:\n```html\n<tr ng-if=\"folder.type != 'sendonly' && folder.type != 'receiveencrypted' && folderStats[folder.id].lastFile && folderStats[folder.id].lastFile.filename\">\n    <th><span class=\"fas fa-fw fa-exchange-alt\"></span>&nbsp;<span translate>Latest Change</span></th>\n    <td class=\"text-right\">\n        <span tooltip data-original-title=\"{{folderStats[folder.id].lastFile.filename}} @ {{folderStats[folder.id].lastFile.at | date:'yyyy-MM-dd HH:mm:ss'}}\">\n        <span translate translate-value-file=\"{{folderStats[folder.id].lastFile.filename | basename}}\" ng-if=\"!folderStats[folder.id].lastFile.deleted\">Updated {%file%}</span>\n        <span translate translate-value-file=\"{{folderStats[folder.id].lastFile.filename | basename}}\" ng-if=\"folderStats[folder.id].lastFile.deleted\">Deleted {%file%}</span>\n        </span>\n    </td>\n</tr>\n```\n\nFile ````gui/default/syncthing/core/tooltipDirective.js````:  \n```javascript\nangular.module('syncthing.core')\n    .directive('tooltip', function () {\n        return {\n            restrict: 'A',\n            link: function (scope, element, attributes) {\n                $(element).tooltip({\n                    html: 'true'\n                });\n            }\n        };\n    });\n```\n\nThe attribute ```html``` should not be set to ```true``` or input sanitized.\n\n### 2. Field \"Shared With\"\n\n* Open the web GUI at [http://127.0.0.1:8384/](http://127.0.0.1:8384/).\n* Create a device with the following name ```fedora 1\"'><h1>Headline</h1><img src=x><script>alert(1)</script>```.\n* Add the device to another instance and share a folder.\n* Move your mouse over the malicious device name to trigger the tooltip.\n \n<img width=\"608\" alt=\"shared-with-1\" src=\"https://user-images.githubusercontent.com/9484134/205084172-8cab2d0e-3257-46d5-be81-41fbd7228e0c.png\">\n\n\n##### Web browser source  \n\n```html\n<span tooltip=\"\" data-original-title=\"fedora 1&quot;'><h1>Headline</h1><img src=x><script>alert(1)</script>  \"\n    ng-bind-html=\"sharesFolder(folder)\" class=\"ng-binding\" aria-describedby=\"tooltip348410\">fedora 1\"'&gt;<h1>Headline\n    </h1><img src=\"x\"></span>\n<div class=\"tooltip fade top\" role=\"tooltip\" id=\"tooltip348410\" style=\"top: 0px; left: 0px; display: block;\">\n    <div class=\"tooltip-arrow\" style=\"left: 50%;\"></div>\n    <div class=\"tooltip-inner\">fedora 1\"'&gt;<h1>Headline</h1><img src=\"x\">\n        <script>alert(1)</script>\n    </div>\n</div>\n```\n\n##### Corresponding code in the project \n\nFile ````gui/default/index.html````:\n\n```html\n<tr>\n    <th><span class=\"fas fa-fw fa-share-alt\"></span>&nbsp;<span translate>Shared With</span></th>\n    <td class=\"text-right\">\n        <span tooltip data-original-title=\"{{sharesFolder(folder)}} {{folderHasUnacceptedDevices(folder) ? '<br/>(<sup>1</sup>' + ('The remote device has not accepted sharing this folder.' | translate) + ')' : ''}} {{folderHasPausedDevices(folder) ? '<br/>(<sup>2</sup>' + ('The remote device has paused this folder.' | translate) + ')' : ''}}\" ng-bind-html=\"sharesFolder(folder)\"></span>\n    </td>\n</tr>\n```\n\nFile ````gui/default/syncthing/core/tooltipDirective.js````:  \n\n```javascript\nangular.module('syncthing.core')\n    .directive('tooltip', function () {\n        return {\n            restrict: 'A',\n            link: function (scope, element, attributes) {\n                $(element).tooltip({\n                    html: 'true'\n                });\n            }\n        };\n    });\n```\n\nThe attribute ```html``` should not be set to ```true``` or input sanitized.\n\n##### HTML Injection in \"Edit Folder\"\n\n<img width=\"672\" alt=\"shared-with-2\" src=\"https://user-images.githubusercontent.com/9484134/205084067-b33f8536-e350-4de1-86f6-3d4a12a683c3.png\">\n",
+    "url": "https://osv.dev/GHSA-9rp6-23gf-4c3h",
+    "source": "fedora",
+    "aliases": [
+      "BIT-syncthing-2022-46165",
+      "CVE-2022-46165"
+    ],
+    "affected_packages": [
+      "github.com/syncthing/syncthing"
+    ],
+    "ecosystem": "go"
+  },
+  {
+    "id": "GHSA-cvx8-ppmc-78hm",
+    "title": "Duplicate Advisory: KubeVirt arbitrary host file read from the VM",
+    "description": "## Duplicate Advisory\nThis advisory is a duplicate of [GHSA-qv98-3369-g364](https://github.com/advisories/GHSA-qv98-3369-g364). This link is maintained to preserve external references.\n\n## Original Description\n\n**Summary**\nAs part of a Kubevirt audit performed by NCC group, a finding dealing with systemic lack of path sanitization which leads to a path traversal was identified.  Google tested the exploitability of the paths in the audit report and identified that when combined with another vulnerability one of the paths leads to an arbitrary file read on the host from the VM.\n\nThe read operations are limited to files which are publicly readable or which are readable for UID 107 or GID 107. /proc/self/<> is not accessible.\n\n**Severity**\n\nModerate - The vulnerability is proven to exist in an open source version of KubeVirt by NCC Group while being combined with Systemic Lack of Path Sanitization, which leads to Path traversal.\n\n**Proof of Concept**\n\nThe initial VMI specifications can be written as such to reproduce the issue:\n\n```\n\napiVersion: kubevirt.io/v1\nkind: VirtualMachineInstance\nmetadata:\n  name: vmi-fedora\nspec:\n  domain:\n    devices:\n      disks:\n      - disk:\n          bus: virtio\n        name: containerdisk\n      - disk:\n          bus: virtio\n        name: cloudinitdisk\n      - disk:\n          bus: virtio\n        name: containerdisk1\n      rng: {}\n    resources:\n      requests:\n        memory: 1024M\n  terminationGracePeriodSeconds: 0\n  volumes:\n  - containerDisk:\n      image: quay.io/kubevirt/cirros-container-disk-demo:v0.52.0\n    name: containerdisk\n  - containerDisk:\n      image: quay.io/kubevirt/cirros-container-disk-demo:v0.52.0\n      path: test3/../../../../../../../../etc/passwd\n    name: containerdisk1\n  - cloudInitNoCloud:\n      userData: |\n        #!/bin/sh\n        echo 'just something to make cirros happy'\n    name: cloudinitdisk\n\n\n```\nThe VMI can then be started through kubectl apply -f vm-test-ncc.yaml.\nThe requested file is accessible once the VM is up and can be accessed under /dev/vdc.\n\nDepending on the environment, path may contain more or less /.., something that can easily be tested by checking the events until the VMI can start without failure.\nRestrictions \n\nSELinux may mitigate this vulnerability.\n\nWhen using a node with selinux, selinux denies the access and the VM start was aborted:\n\n```\n\n19s         Warning   SyncFailed                virtualmachineinstance/vmi-fedora    server error. command SyncVMI failed: \"preparing ephemeral container disk images failed: stat /var/run/kubevirt/container-disks/disk_0.img: permission denied\"\n\ntype=AVC msg=audit(1651828898.296:1266): avc:  denied  { setattr } for  pid=44402 comm=\"rpc-worker\" name=\"passwd\" dev=\"vda1\" ino=691477 scontext=system_u:system_r:virt_launcher.process:s0:c255,c849 tcontext=system_u:object_r:passwd_file_t:s0 tclass=file permissive=1\n\n```\n\nAfter making selinux permissive the VM can boot and access /etc/passwd from the node within the guest:\n\n```\n\n$ sudo cat /dev/vdc\nroot:x:0:0:root:/root:/bin/bash\nbin:x:1:1:bin:/bin:/sbin/nologin\ndaemon:x:2:2:daemon:/sbin:/sbin/nologin\nadm:x:3:4:adm:/var/adm:/sbin/nologin\nlp:x:4:7:lp:/var/spool/lpd:/sbin/nologin\n[...]\n\n```\n\n**Further Analysis**\nIn order to mitigate this vulnerability, Sanitize imagePath in pkg/container-disk/container-disk.go following ISE best practices described and Add checks in pkg/virt-api/webhooks/validating-webhook/admitters/vmi-create-admitter.go\n\n**Timeline**\nDate reported: 05/10/2022\nDate fixed: N/A\nDate disclosed: 08/08/2022",
+    "url": "https://osv.dev/GHSA-cvx8-ppmc-78hm",
+    "source": "fedora",
+    "aliases": [],
+    "affected_packages": [
+      "kubevirt.io/kubevirt"
+    ],
+    "ecosystem": "go"
+  },
+  {
+    "id": "GHSA-hj57-j5cw-2mwp",
+    "title": "Ignition config accessible to unprivileged software on VMware",
+    "description": "### Impact\nUnprivileged software in VMware VMs, including software running in unprivileged containers, can retrieve an Ignition config stored in a hypervisor guestinfo variable or OVF environment.  If the Ignition config contains secrets, this can result in the compromise of sensitive information.\n\n### Patches\nIgnition 2.14.0 and later [adds](https://github.com/coreos/ignition/pull/1350) a new systemd service, `ignition-delete-config.service`, that deletes the Ignition config from supported hypervisors (currently VMware and VirtualBox) during the first boot.  This ensures that unprivileged software cannot retrieve the Ignition config from the hypervisor.\n\nIf you have external tooling that requires the Ignition config to remain accessible in VM metadata after provisioning, and your Ignition config does not include sensitive information, you can prevent Ignition 2.14.0 and later from deleting the config by masking `ignition-delete-config.service`.  For example:\n\n```json\n{\n  \"ignition\": {\n    \"version\": \"3.0.0\"\n  },\n  \"systemd\": {\n    \"units\": [\n      {\n        \"name\": \"ignition-delete-config.service\",\n        \"mask\": true\n      }\n    ]\n  }\n}\n```\n\n### Workarounds\n[Avoid storing secrets](https://coreos.github.io/ignition/operator-notes/#secrets) in Ignition configs. In addition to VMware, many cloud platforms allow unprivileged software in a VM to retrieve the Ignition config from a networked cloud metadata service. While platform-specific mitigation is possible, such as firewall rules that prevent access to the metadata service, it's best to store secrets in a dedicated platform such as [Hashicorp Vault](https://www.vaultproject.io/).\n\n### Advice to Linux distributions\nLinux distributions that ship Ignition should ensure the new `ignition-delete-config.service` is installed and enabled by default.\n\nIn addition, we recommend shipping a service similar to `ignition-delete-config.service` that runs when existing machines are upgraded, similar to the one in https://github.com/coreos/fedora-coreos-config/pull/1738. Consider giving your users advance notice of this change, and providing instructions for masking `ignition-delete-config.service` on existing nodes if users have tooling that requires the Ignition config to remain accessible in VM metadata.\n\n### References\nFor more information, see #1300 and #1350.\n\n### For more information\nIf you have any questions or comments about this advisory, [open an issue in Ignition](https://github.com/coreos/ignition/issues/new/choose) or email the CoreOS [development mailing list](https://lists.fedoraproject.org/archives/list/coreos@lists.fedoraproject.org/).",
+    "url": "https://osv.dev/GHSA-hj57-j5cw-2mwp",
+    "source": "fedora",
+    "aliases": [
+      "CVE-2022-1706",
+      "GO-2022-0451"
+    ],
+    "affected_packages": [
+      "github.com/coreos/ignition/v2",
+      "github.com/coreos/ignition"
+    ],
+    "ecosystem": "go"
+  },
+  {
+    "id": "GHSA-qv98-3369-g364",
+    "title": "KubeVirt vulnerable to arbitrary file read on host",
+    "description": "### Impact\n\nUsers with the permission to create VMIs can construct VMI specs which allow them to read arbitrary files on the host. There are three main attack vectors:\n\n1. Some path fields on the VMI spec were not properly validated and allowed passing in relative paths which would have been mounted into the virt-launcher pod. The fields are: `spec.domain.firmware.kernelBoot.container.kernelPath`, `spec.domain.firmware.kernelBoot.container.initrdPath` as well as `spec.volumes[*].containerDisk.path`.\n\nExample:\n\n```yaml\napiVersion: [kubevirt.io/v1](http://kubevirt.io/v1)\nkind: VirtualMachineInstance\nmetadata:\n  name: vmi-fedora\nspec:\n  domain:\n    devices:\n      disks:\n      - disk:\n          bus: virtio\n        name: containerdisk\n      - disk:\n          bus: virtio\n        name: cloudinitdisk\n      - disk:\n          bus: virtio\n        name: containerdisk1\n      rng: {}\n    resources:\n      requests:\n        memory: 1024M\n  terminationGracePeriodSeconds: 0\n  volumes:\n  - containerDisk:\n      image: [quay.io/kubevirt/cirros-container-disk-demo:v0.52.0](http://quay.io/kubevirt/cirros-container-disk-demo:v0.52.0)\n    name: containerdisk\n  - containerDisk:\n      image: [quay.io/kubevirt/cirros-container-disk-demo:v0.52.0](http://quay.io/kubevirt/cirros-container-disk-demo:v0.52.0)\n      path: test3/../../../../../../../../etc/passwd\n    name: containerdisk1\n  - cloudInitNoCloud:\n      userData: |\n        #!/bin/sh\n        echo 'just something to make cirros happy'\n    name: cloudinitdisk\n```\n\n2. Instead of passing in relative links on the API, using malicious links in the containerDisk itself can have the same effect:\n\n```Dockerfile\nFROM <anybase>\nRUN mkdir -p /etc/ && touch /etc/passwd\nRUN mkdir -p /disks/ && ln -s /etc/passwd /disks/disk.img\n```\n\n3. KubeVirt allows PVC hotplugging. The hotplugged PVC is under user-control and it is possible to place absolute links there. Since containerDisk and hotplug code use the same mechanism to provide the disk to the virt-launcher pod, it can be used too to do arbitrary host file reads.\n\nIn all three cases it is then possible to at lest read any host file:\n\n```\n$ sudo cat /dev/vdc\nroot:x:0:0:root:/root:/bin/bash\nbin:x:1:1:bin:/bin:/sbin/nologin\ndaemon:x:2:2:daemon:/sbin:/sbin/nologin\nadm:x:3:4:adm:/var/adm:/sbin/nologin\nlp:x:4:7:lp:/var/spool/lpd:/sbin/nologin\n[...]\n```\n\n\n### Patches\n\nKubeVirt 0.55.1 provides patches to fix the vulnerability.\n\n\n### Workarounds\n\n* Ensure that the `HotplugVolumes` feature-gate is disabled\n* ContainerDisk support can't be disabled. The only known way to mitigate this issue is create with e.g. policy controller a conditiontemplate which ensures that no containerDisk gets added and that `spec.domain.firmware.kernelBoot` is not used on VirtualMachineInstances.|\n* Ensure that SELinux is enabled. It blocks most attempts to read host files but does not provide a 100% guarantee (like vm-to-vm read may still work).\n\n### References\n\n\nDisclosure notice form the discovering party: https://github.com/google/security-research/security/advisories/GHSA-cvx8-ppmc-78hm\n\n### For more information\n\nFor interested vendors which have to provide a fix for their supported versions, the following PRs are providing the fix:\n\n * https://github.com/kubevirt/kubevirt/pull/8198\n * https://github.com/kubevirt/kubevirt/pull/8268\n \n### Credits\nOliver Brooks and James Klopchic of NCC Group\nDiane Dubois and Roman Mohr of Google\n",
+    "url": "https://osv.dev/GHSA-qv98-3369-g364",
+    "source": "fedora",
+    "aliases": [
+      "GO-2022-1000"
+    ],
+    "affected_packages": [
+      "kubevirt.io/kubevirt"
+    ],
+    "ecosystem": "go"
+  },
+  {
+    "id": "GHSA-5jfw-gq64-q45f",
+    "title": "HTML Cleaner allows crafted scripts in special contexts like svg or math to pass through",
+    "description": "### Impact\n\nThe HTML Parser in lxml does not properly handle context-switching for special HTML tags such as `<svg>`, `<math>` and `<noscript>`. This behavior deviates from how web browsers parse and interpret such tags. Specifically, content in CSS comments is ignored by lxml_html_clean but may be interpreted differently by web browsers, enabling malicious scripts to bypass the cleaning process. This vulnerability could lead to Cross-Site Scripting (XSS) attacks, compromising the security of users relying on lxml_html_clean in default configuration for sanitizing untrusted HTML content.\n\n### Patches\n\nUsers employing the HTML cleaner in a security-sensitive context should upgrade to lxml 0.4.0, which addresses this issue.\n\n### Workarounds\n\nAs a temporary mitigation, users can configure lxml_html_clean with the following settings to prevent the exploitation of this vulnerability:\n* `remove_tags`: Specify tags to remove - their content is moved to their parents' tags.\n* `kill_tags`: Specify tags to be removed completely.\n* `allow_tags`: Restrict the set of permissible tags, excluding context-switching tags like `<svg>`, `<math>` and `<noscript>`.\n\n### References\n\n* https://github.com/fedora-python/lxml_html_clean/pull/19\n* https://github.com/fedora-python/lxml_html_clean/pull/19/commits/c5d816f86eb3707d72a8ecf5f3823e0daa1b3808\n",
+    "url": "https://osv.dev/GHSA-5jfw-gq64-q45f",
+    "source": "fedora",
+    "aliases": [
+      "CVE-2024-52595",
+      "PYSEC-2024-160"
+    ],
+    "affected_packages": [
+      "lxml-html-clean"
+    ],
+    "ecosystem": "pypi"
+  },
+  {
+    "id": "GHSA-m242-wc86-8768",
+    "title": "python-fedora vulnerable to an open redirect resulting in loss of CSRF protection",
+    "description": "python-fedora 0.8.0 and lower is vulnerable to an open redirect, resulting in loss of CSRF protection.",
+    "url": "https://osv.dev/GHSA-m242-wc86-8768",
+    "source": "fedora",
+    "aliases": [
+      "CVE-2017-1002150"
+    ],
+    "affected_packages": [
+      "python-fedora"
+    ],
+    "ecosystem": "pypi"
+  },
+  {
+    "id": "GHSA-pxxv-rv32-2qgv",
+    "title": "OpenStack Nova uses insecure keystone middleware tmpdir by default",
+    "description": "keystone/middleware/auth_token.py in OpenStack Nova Folsom, Grizzly, and Havana uses an insecure temporary directory for storing signing certificates, which allows local users to spoof servers by pre-creating this directory, which is reused by Nova, as demonstrated using /tmp/keystone-signing-nova on Fedora.",
+    "url": "https://osv.dev/GHSA-pxxv-rv32-2qgv",
+    "source": "fedora",
+    "aliases": [
+      "CVE-2013-2030"
+    ],
+    "affected_packages": [
+      "python-keystoneclient"
+    ],
+    "ecosystem": "pypi"
+  },
+  {
+    "id": "PYSEC-2013-45",
+    "title": "Vulnerability PYSEC-2013-45",
+    "description": "keystone/middleware/auth_token.py in OpenStack Nova Folsom, Grizzly, and Havana uses an insecure temporary directory for storing signing certificates, which allows local users to spoof servers by pre-creating this directory, which is reused by Nova, as demonstrated using /tmp/keystone-signing-nova on Fedora.",
+    "url": "https://osv.dev/PYSEC-2013-45",
+    "source": "fedora",
+    "aliases": [],
+    "affected_packages": [
+      "nova"
+    ],
+    "ecosystem": "pypi"
+  },
+  {
+    "id": "GHSA-9jfq-54vc-9rr2",
+    "title": "Foreman Transpilation Enables OS Command Injection",
+    "description": "A command injection flaw was found in foreman. This flaw allows an authenticated user with admin privileges on the foreman instance to transpile commands through CoreOS and Fedora CoreOS configurations in templates, possibly resulting in arbitrary command execution on the underlying operating system.",
+    "url": "https://osv.dev/GHSA-9jfq-54vc-9rr2",
+    "source": "fedora",
+    "aliases": [],
+    "affected_packages": [
+      "foreman"
+    ],
+    "ecosystem": "rubygems"
+  },
+  {
+    "id": "MAL-2024-6314",
+    "title": "Malicious code in aasm-active-fedora (RubyGems)",
+    "description": "\n---\n_-= Per source details. Do not edit below this line.=-_\n",
+    "url": "https://osv.dev/MAL-2024-6314",
+    "source": "fedora",
+    "aliases": [],
+    "affected_packages": [
+      "aasm-active-fedora"
+    ],
+    "ecosystem": "rubygems"
+  },
+  {
+    "id": "GHSA-58mj-pw57-4vm2",
+    "title": "Cross-site scripting in PHPMailer",
+    "description": "PHPMailer versions prior to 5.2.24 (released July 26th 2017) have an XSS vulnerability in one of the code examples, CVE-2017-11503. The code_generator.phps example did not filter user input prior to output. This file is distributed with a `.phps` extension, so it it not normally executable unless it is explicitly renamed, and the file is not included when PHPMailer is loaded through composer, so it is safe by default. There was also an undisclosed potential XSS vulnerability in the default exception handler (unused by default). Patches for both issues kindly provided by Patrick Monnerat of the Fedora Project.\n\n### Impact\nPHPMailer 5.2.23 has XSS in the &quot;From Email Address&quot; and &quot;To Email Address&quot; fields of code_generator.php.\n\n### Patches\nFixed in 5.2.24\n\n### Workarounds\nNone.\n\n### References\nhttps://nvd.nist.gov/vuln/detail/CVE-2017-11503\n\n### For more information\nIf you have any questions or comments about this advisory:\n* Open a private issue in [the PHPMailer project](https://github.com/PHPMailer/PHPMailer)",
+    "url": "https://osv.dev/GHSA-58mj-pw57-4vm2",
+    "source": "fedora",
+    "aliases": [
+      "CVE-2017-11503"
+    ],
+    "affected_packages": [
+      "phpmailer/phpmailer"
+    ],
+    "ecosystem": "packagist"
+  },
+  {
+    "id": "GHSA-3r3g-g73x-g593",
+    "title": "coreos-installer improperly verifies GPG signature when decompressing gzipped artifact",
+    "description": "### Impact\n\ncoreos-installer fails to correctly verify GPG signatures when decompressing gzip-compressed artifacts.  This allows bypass of signature verification in cases where coreos-installer decompresses a downloaded OS image, allowing an attacker who can modify the OS image to compromise a newly-installed system.\n\nDefault installations from ISO or PXE media in Fedora CoreOS, RHEL CoreOS, and RHEL for Edge are **not** affected, as coreos-installer installs from an OS image shipped as part of the install media.\n\nThese flows are affected:\n\n1.  Installing with `--image-file`, `--image-url`, or `coreos.inst.image_url`.  For example, if a user has a local mirror of installation images, an attacker could replace an image with a gzip-compressed alternative (even if the file extension is `.xz`).  The result:\n\n    ```\n    $ coreos-installer install --image-url http://localhost:8080/image.xz /dev/loop0\n    Downloading image from http://localhost:8080/image.xz\n    Downloading signature from http://localhost:8080/image.xz.sig\n    > Read disk 749.9 MiB/749.9 MiB (100%)\n    gpg: Signature made Mon 20 Sep 2021 02:41:50 PM EDT\n    gpg: using RSA key 8C5BA6990BDB26E19F2A1A801161AE6945719A39\n    gpg: BAD signature from \"Fedora (34) <fedora-34-primary@fedoraproject.org>\" [ultimate]\n    Install complete.\n    ```\n\n    Notice that GPG reports a bad signature, but coreos-installer continues anyway.  Automation that relies on coreos-installer's exit status will not notice either.\n\n2. `coreos-installer download --decompress --image-url`:\n\n    ```\n    $ coreos-installer download --decompress --image-url http://localhost:8080/image.xz\n    > Read disk 749.9 MiB/749.9 MiB (100%)\n    gpg: Signature made Mon 20 Sep 2021 02:41:50 PM EDT\n    gpg: using RSA key 8C5BA6990BDB26E19F2A1A801161AE6945719A39\n    gpg: BAD signature from \"Fedora (34) <fedora-34-primary@fedoraproject.org>\" [ultimate]\n    ./image\n    ```\n\n    Again, coreos-installer reports success.\n\n3. Installing with default parameters, when **not** installing from the image built into live ISO or PXE media, if the hosting service is compromised or if an active attacker gains control of the HTTPS response.\n\n4. `coreos-installer download --decompress` if the hosting service is compromised or if an active attacker gains control of the HTTPS response.\n\n### Patches\n\nThe vulnerability is [fixed](https://github.com/coreos/coreos-installer/pull/659) in coreos-installer 0.10.1.\n\n### Workarounds\n\nFor `coreos-installer download`, do not use the `-d` or `--decompress` options.\n\nFor `coreos-installer install`, manually inspect the stderr output.  If `BAD signature` appears, do not boot from the target disk.  Note, however, that some OS services may have already accessed data on the compromised disk.\n\n### References\n\nFor more information, see [PR 655](https://github.com/coreos/coreos-installer/pull/655).\n\n### For more information\n\nIf you have any questions or comments about this advisory, [open an issue in coreos-installer](https://github.com/coreos/coreos-installer/issues/new/choose) or email the CoreOS [development mailing list](https://lists.fedoraproject.org/archives/list/coreos@lists.fedoraproject.org/).",
+    "url": "https://osv.dev/GHSA-3r3g-g73x-g593",
+    "source": "fedora",
+    "aliases": [
+      "CVE-2021-20319"
+    ],
+    "affected_packages": [
+      "coreos-installer"
+    ],
+    "ecosystem": "crates.io"
+  },
+  {
+    "id": "GHSA-862g-9h5m-m3qv",
+    "title": "coreos-installer < 0.10.0 writes world-readable Ignition config to installed system",
+    "description": "### Impact\nOn systems installed with coreos-installer before 0.10.0, the user-provided Ignition config was written to `/boot/ignition/config.ign` with world-readable permissions, granting unprivileged users access to any secrets included in the config.\n\nDefault configurations of Fedora CoreOS and RHEL CoreOS do not include any unprivileged user accounts.  In addition, instances launched from a cloud image, and systems provisioned with the `ignition.config.url` kernel argument, do not use the `config.ign` file and are unaffected.\n\n### Patches\ncoreos-installer 0.10.0 and later [writes](https://github.com/coreos/coreos-installer/pull/571) the Ignition config with restricted permissions.\n\n### Workarounds\n\nOn Fedora CoreOS systems installed from version 34.20210711.3.0 (stable), 34.20210711.2.0 (testing), 34.20210711.1.1 (next) and later, the `/boot/ignition` directory and its contents are removed after provisioning is complete. All Fedora CoreOS systems that have updated to these versions or later have automatically removed the `/boot/ignition` directory and no action is required.\n\nOn other systems, `/boot/ignition/config.ign` can be removed manually, as it is not used after provisioning is complete:\n\n```\nsudo mount -o remount,rw /boot\nsudo rm -rf /boot/ignition\n```\n\n### References\nFor more information, see https://github.com/coreos/fedora-coreos-tracker/issues/889.\n\n### For more information\nIf you have any questions or comments about this advisory, [open an issue in coreos-installer](https://github.com/coreos/coreos-installer/issues/new/choose) or email the CoreOS [development mailing list](https://lists.fedoraproject.org/archives/list/coreos@lists.fedoraproject.org/).",
+    "url": "https://osv.dev/GHSA-862g-9h5m-m3qv",
+    "source": "fedora",
+    "aliases": [
+      "CVE-2021-3917"
+    ],
+    "affected_packages": [
+      "coreos-installer"
+    ],
+    "ecosystem": "crates.io"
+  },
+  {
+    "id": "GHSA-w6fv-6gcc-x825",
+    "title": "Zincati allows unprivileged access to rpm-ostree D-Bus `Deploy()` and `FinalizeDeployment()` methods",
+    "description": "### Impact\n\nZincati ships a polkit rule which allows the `zincati` system user to use the following actions:\n- `org.projectatomic.rpmostree1.deploy`: used to deploy updates to the system\n- `org.projectatomic.rpmostree1.finalize-deployment`: used to reboot the system into the deployed update\n\nSince Zincati [v0.0.24](https://github.com/coreos/zincati/releases/tag/v0.0.24), this polkit rule contains a logic error which broadens access of those polkit actions to any unprivileged user rather than just the `zincati` system user.\n\nIn practice, this means that any unprivileged user with access to the system D-Bus socket is able to deploy older Fedora CoreOS versions (which may have other known vulnerabilities). Note that rpm-ostree enforces that the selected version must be from the same branch the system is currently on so this cannot directly be used to deploy an attacker-controlled update payload.\n\nThis primarily impacts users running untrusted workloads with access to the system D-Bus socket. Note that in general, untrusted workloads should not be given this access, whether containerized or not. By default, containers do not have access to the system D-Bus socket.\n\n### Patches\n\nThe logic error is fixed in Zincati v0.0.30. The fix is included in the following FCOS releases:\n- On the `stable` stream: 41.20250302.3.2\n- On the `testing` stream: 41.20250315.2.0\n- On the `next` stream: 42.20250316.1.0\n\n### Workarounds\n\nA workaround is to add the following polkit rule:\n\n```javascript\npolkit.addRule(function(action, subject) {\n    if (action.id == \"org.projectatomic.rpmostree1.deploy\" ||\n        action.id == \"org.projectatomic.rpmostree1.finalize-deployment\" ||\n        action.id == \"org.projectatomic.rpmostree1.cleanup\") {\n        if (subject.user != \"zincati\") {\n                return polkit.Result.NO;\n        }\n    }\n});\n```\n\nto e.g. `/etc/polkit-1/rules.d/00-zincati-fix.rules` (it must sort earlier than `zincati.rules` lexicographically).\n\nNote that this rule will deny all non-root users other than `zincati` from using those actions. If you've added polkit rules to allow e.g. the `core` user or other users, you will need to adjust the policy (or make sure the ordering is appropriate).\n\n### References\n\nThis issue was introduced by [this commit](https://github.com/coreos/zincati/commit/28a43aa2c1edda091ba659677d73c13e6e3ea99d), and is fixed in [v0.0.30](https://github.com/coreos/zincati/releases/tag/v0.0.30).",
+    "url": "https://osv.dev/GHSA-w6fv-6gcc-x825",
+    "source": "fedora",
+    "aliases": [
+      "CVE-2025-27512"
+    ],
+    "affected_packages": [
+      "zincati"
+    ],
+    "ecosystem": "crates.io"
+  },
+  {
+    "id": "RUSTSEC-2023-0088",
+    "title": "`loopdev` crate is unmaintained; use 'loopdev-3` instead.",
+    "description": "The `loopdev` crate was last released in Oct, 2021. It has been unable to\nbuild in Fedora 38 and above since April, 2023.\n\nThe `loopdev-3` crate is a maintained fork:\n\nhttps://github.com/stratis-storage/loopdev-3",
+    "url": "https://osv.dev/RUSTSEC-2023-0088",
+    "source": "fedora",
+    "aliases": [],
+    "affected_packages": [
+      "loopdev"
+    ],
+    "ecosystem": "crates.io"
+  }
+]
