@@ -1,4 +1,4 @@
-name: VulnFeed - Database Vulnerabilities
+name: 🧠 VulnFeed - Database Vulnerabilities
 
 on:
   workflow_dispatch:
@@ -34,17 +34,34 @@ jobs:
           # Create data directory
           os.makedirs("data", exist_ok=True)
           
-          # Database products and search terms
+          # Database products with their package ecosystems and names
           products = {
-              "mysql": ["mysql", "mariadb", "percona"],
-              "postgresql": ["postgresql", "pgsql", "postgres"],
-              "redis": ["redis"]
+              "mysql": [
+                  {"ecosystem": "PyPI", "name": "mysql-connector-python"},
+                  {"ecosystem": "npm", "name": "mysql"},
+                  {"ecosystem": "npm", "name": "mysql2"},
+                  {"ecosystem": "Maven", "name": "mysql:mysql-connector-java"},
+                  {"ecosystem": "Go", "name": "github.com/go-sql-driver/mysql"},
+              ],
+              "postgresql": [
+                  {"ecosystem": "PyPI", "name": "psycopg2"},
+                  {"ecosystem": "PyPI", "name": "psycopg2-binary"},
+                  {"ecosystem": "npm", "name": "pg"},
+                  {"ecosystem": "Maven", "name": "org.postgresql:postgresql"},
+                  {"ecosystem": "Go", "name": "github.com/lib/pq"},
+              ],
+              "redis": [
+                  {"ecosystem": "PyPI", "name": "redis"},
+                  {"ecosystem": "npm", "name": "redis"},
+                  {"ecosystem": "Maven", "name": "redis.clients:jedis"},
+                  {"ecosystem": "Go", "name": "github.com/go-redis/redis"},
+              ]
           }
           
-          # Current timestamp for metadata (not for display)
+          # Current timestamp for metadata
           fetch_timestamp = datetime.now(timezone.utc).isoformat()
           
-          def fetch_vulnerabilities(product_name, search_terms):
+          def fetch_vulnerabilities(product_name, packages):
               """Fetch vulnerabilities for a given product from OSV.dev"""
               all_vulns = []
               seen_ids = set()
@@ -53,38 +70,43 @@ jobs:
               print(f"📦 Processing: {product_name.upper()}")
               print(f"{'='*60}")
               
-              for term in search_terms:
-                  print(f"\n🔍 Searching for: '{term}'")
+              for pkg in packages:
+                  ecosystem = pkg["ecosystem"]
+                  name = pkg["name"]
+                  print(f"\n🔍 Searching: {ecosystem}/{name}")
                   
                   try:
+                      # Correct OSV.dev API query format
+                      payload = {
+                          "package": {
+                              "ecosystem": ecosystem,
+                              "name": name
+                          }
+                      }
+                      
                       response = requests.post(
                           "https://api.osv.dev/v1/query",
                           headers={"Content-Type": "application/json"},
-                          json={"query": term},
+                          json=payload,
                           timeout=30
                       )
                       response.raise_for_status()
                       data = response.json()
                       
                       # Extract vulnerabilities from response
-                      vulns = []
-                      if isinstance(data, dict):
-                          if "vulns" in data:
-                              vulns = data["vulns"]
-                          elif data.get("id"):  # Single vulnerability
-                              vulns = [data]
+                      vulns = data.get("vulns", [])
                       
-                      # Deduplicate and preserve original data
+                      # Deduplicate and add metadata
                       new_count = 0
                       for vuln in vulns:
                           vuln_id = vuln.get("id")
                           if vuln_id and vuln_id not in seen_ids:
                               seen_ids.add(vuln_id)
                               
-                              # CRITICAL: Add metadata WITHOUT modifying original dates
+                              # Add metadata WITHOUT modifying original dates
                               vuln["_metadata"] = {
                                   "fetched_at": fetch_timestamp,
-                                  "search_term": term
+                                  "source_package": f"{ecosystem}/{name}"
                               }
                               
                               all_vulns.append(vuln)
@@ -92,6 +114,10 @@ jobs:
                       
                       print(f"   ✓ Found {len(vulns)} vulnerabilities ({new_count} new)")
                       
+                  except requests.exceptions.HTTPError as e:
+                      print(f"   ✗ HTTP error: {e}")
+                      if hasattr(e.response, 'text'):
+                          print(f"   Response: {e.response.text[:200]}")
                   except requests.exceptions.RequestException as e:
                       print(f"   ✗ Network error: {e}")
                   except json.JSONDecodeError as e:
@@ -118,8 +144,8 @@ jobs:
                   return vulns
           
           # Process each product
-          for product_name, search_terms in products.items():
-              vulnerabilities = fetch_vulnerabilities(product_name, search_terms)
+          for product_name, packages in products.items():
+              vulnerabilities = fetch_vulnerabilities(product_name, packages)
               
               # Sort by original published date
               vulnerabilities = sort_by_published_date(vulnerabilities)
@@ -139,6 +165,8 @@ jobs:
                   first_date = vulnerabilities[0].get("published", "N/A")
                   last_date = vulnerabilities[-1].get("published", "N/A")
                   print(f"   📅 Date range: {first_date} → {last_date}")
+              else:
+                  print(f"   ⚠️ No vulnerabilities found for {product_name}")
           
           print(f"\n{'='*60}")
           print("🎉 Successfully fetched all database vulnerabilities!")
