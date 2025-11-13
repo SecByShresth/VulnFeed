@@ -2,22 +2,19 @@ name: Database Vulnerabilities Feed
 
 on:
   schedule:
-    - cron: '0 0 * * *' # runs daily at midnight UTC
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  update-database-vulns:
+  update-db-vulns:
     runs-on: ubuntu-latest
 
     steps:
       - name: 🧾 Checkout Repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🐍 Set up Python
         uses: actions/setup-python@v5
@@ -25,131 +22,121 @@ jobs:
           python-version: '3.10'
 
       - name: 📦 Install dependencies
-        run: |
-          pip install requests
+        run: pip install requests
 
-      - name: 🌐 Fetch Last 100 Vulnerabilities (MySQL, PostgreSQL, Redis)
+      - name: 🌐 Fetch Latest 100 Vulnerabilities (Full Details)
         run: |
           python3 << 'EOF'
-          import requests
-          import json
-          import os
+          import requests, json, os, time
           from datetime import datetime
 
-          # === Configuration ===
           OUTPUT_DIR = "data"
           os.makedirs(OUTPUT_DIR, exist_ok=True)
 
           DATABASES = {
               "mysql": ["mysql", "mariadb", "percona"],
-              "postgresql": ["postgres", "postgresql", "pgsql"],
+              "postgresql": ["postgresql", "pgsql", "postgres"],
               "redis": ["redis"]
           }
 
-          def fetch_vulns(keyword):
-              """Fetch up to 100 most recent vulnerabilities for a given keyword."""
-              print(f"🔍 Fetching recent vulnerabilities for '{keyword}'...")
+          def fetch_summary(keyword):
+              """Get 100 latest vulnerabilities for a keyword."""
               url = "https://api.osv.dev/v1/query"
-              payload = {
-                  "query": keyword,
-                  "limit": 100,
-                  "sort": "published"
-              }
+              payload = {"query": keyword, "limit": 100, "sort": "published"}
               try:
-                  r = requests.post(url, json=payload, timeout=30)
+                  r = requests.post(url, json=payload, timeout=25)
                   r.raise_for_status()
-                  data = r.json().get("vulns", [])
-                  print(f"✅ {keyword}: {len(data)} entries fetched.")
-                  return data
+                  return r.json().get("vulns", [])
               except Exception as e:
                   print(f"⚠️ Error fetching {keyword}: {e}")
                   return []
 
-          def normalize_entry(vuln):
-              """Normalize the vulnerability structure."""
-              vid = vuln.get("id", "")
-              title = vuln.get("summary") or vuln.get("details", "").split("\n")[0][:120]
-              description = vuln.get("details", "No description available.")
-              published = vuln.get("published") or vuln.get("modified") or ""
-              aliases = vuln.get("aliases", [])
-              affected_pkgs = []
+          def fetch_details(vuln_id):
+              """Fetch detailed vulnerability info (includes published date)."""
+              url = f"https://api.osv.dev/v1/vuln/{vuln_id}"
+              try:
+                  r = requests.get(url, timeout=25)
+                  r.raise_for_status()
+                  return r.json()
+              except Exception:
+                  return {}
 
-              for a in vuln.get("affected", []):
-                  pkg = a.get("package", {}).get("name")
-                  if pkg:
-                      affected_pkgs.append(pkg)
+          def normalize(v):
+              """Clean and normalize the vulnerability object."""
+              published = v.get("published") or v.get("modified") or ""
+              severity = None
+              if v.get("severity"):
+                  try:
+                      severity = v["severity"][0].get("score") or v["severity"][0].get("type")
+                  except Exception:
+                      pass
+
+              affected_pkgs = []
+              ecosystem = None
+              for a in v.get("affected", []):
+                  pkg = a.get("package", {})
+                  if pkg.get("name"):
+                      affected_pkgs.append(pkg["name"])
+                      ecosystem = pkg.get("ecosystem")
 
               return {
-                  "id": vid,
-                  "title": title,
-                  "description": description,
+                  "id": v.get("id", ""),
+                  "title": v.get("summary") or v.get("details", "").split("\n")[0][:150],
+                  "description": v.get("details", "No description available."),
                   "published_date": published,
-                  "url": f"https://osv.dev/{vid}",
-                  "aliases": aliases,
-                  "affected_packages": affected_pkgs
+                  "severity": severity,
+                  "url": f"https://osv.dev/{v.get('id','')}",
+                  "source": "osv",
+                  "aliases": v.get("aliases", []),
+                  "affected_packages": affected_pkgs,
+                  "ecosystem": ecosystem,
+                  "references": [ref.get("url") for ref in v.get("references", []) if ref.get("url")]
               }
 
           all_results = {}
 
-          for db_name, keywords in DATABASES.items():
-              collected = []
+          for db, keywords in DATABASES.items():
+              print(f"\n=== Processing {db.upper()} ===")
+              entries = {}
               for kw in keywords:
-                  vulns = fetch_vulns(kw)
+                  print(f"🔍 Searching '{kw}'...")
+                  vulns = fetch_summary(kw)
                   for v in vulns:
-                      entry = normalize_entry(v)
-                      entry["source"] = db_name
-                      collected.append(entry)
+                      vid = v.get("id")
+                      if vid and vid not in entries:
+                          details = fetch_details(vid)
+                          if details:
+                              n = normalize(details)
+                              entries[vid] = n
+                              print(f"✅ {vid} ({n['title'][:60]}...)")
+                              time.sleep(0.5)  # avoid API rate limits
 
-              # Deduplicate by vulnerability ID
-              unique_vulns = {v["id"]: v for v in collected}.values()
-              sorted_vulns = sorted(unique_vulns, key=lambda x: x["published_date"] or "", reverse=True)
-              all_results[db_name] = sorted_vulns[:100]
-
-              # Save individual file
-              file_path = os.path.join(OUTPUT_DIR, f"{db_name}.json")
+              sorted_entries = sorted(entries.values(), key=lambda x: x["published_date"] or "", reverse=True)
+              file_path = os.path.join(OUTPUT_DIR, f"{db}.json")
               with open(file_path, "w") as f:
-                  json.dump(sorted_vulns[:100], f, indent=2)
-              print(f"💾 Saved {len(sorted_vulns)} entries to {file_path}")
+                  json.dump(sorted_entries, f, indent=2)
+              all_results[db] = len(sorted_entries)
+              print(f"💾 Saved {len(sorted_entries)} vulnerabilities to {file_path}")
 
-          # Summary print
           print("\n📊 Summary:")
-          for db, vulns in all_results.items():
-              print(f"   {db.upper()}: {len(vulns)} vulnerabilities")
-
-          print("🎉 Vulnerability feed update complete.")
+          for k, v in all_results.items():
+              print(f"  {k}: {v}")
+          print("🎉 Done!")
           EOF
 
-      - name: 📊 Show Summary
-        run: |
-          echo "=== Database Files Generated ==="
-          for f in data/*.json; do
-            [ -f "$f" ] && echo "$(basename $f): $(jq 'length' $f) entries"
-          done
-          echo ""
-          echo "=== Sample Entries ==="
-          for f in data/*.json; do
-            echo "$(basename $f):"
-            jq -r '.[0] | "  ID: \(.id)\n  Published: \(.published_date)\n  Title: \(.title)\n  URL: \(.url)\n"' $f || echo "No data"
-            echo ""
-          done
-
-      - name: 💾 Commit and Push Changes
+      - name: 💾 Commit & Push
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git fetch origin
           git reset --hard origin/main
-
-          git add data/mysql.json data/postgresql.json data/redis.json
+          git add data/*.json
 
           if git diff --staged --quiet; then
-            echo "ℹ️ No new vulnerabilities found."
+            echo "ℹ️ No changes to commit."
           else
-            MYSQL=$(jq 'length' data/mysql.json)
-            POSTGRES=$(jq 'length' data/postgresql.json)
-            REDIS=$(jq 'length' data/redis.json)
-            TOTAL=$((MYSQL + POSTGRES + REDIS))
-            git commit -m "🔄 Update database feeds (Total: $TOTAL | MySQL: $MYSQL | PostgreSQL: $POSTGRES | Redis: $REDIS) - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            git commit -m "🔄 Update DB vulns - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
             git push origin main
-            echo "✅ Database vulnerability data updated successfully."
+            echo "✅ Updated database vulnerability data."
           fi
+          EOF
