@@ -53,17 +53,16 @@
   }
   
   /* SIDEBAR */
-  .sidebar{width:var(--sidebar-w);min-width:72px;display:flex;flex-direction:column;gap:14px;transition:width var(--transition); margin-top: 100px;}
-  .sidebar.collapsed{width:84px}
+  .sidebar{width:var(--sidebar-w);display:flex;flex-direction:column;gap:14px;margin-top: 100px;}
   .brand{display:flex;gap:12px;align-items:center;padding:12px;border-radius:12px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.02));box-shadow:6px 6px 16px var(--shadow-bottom),-6px -6px 16px var(--shadow-top)}
   .logo{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--accent-weak);color:var(--accent)}
   .brand h1{font-size:16px;margin:0}
-  nav.nav{display:flex;flex-direction:column;gap:10px;padding:6px}
+  nav.nav{display:flex;flex-direction:column;gap:10px;padding:6px;max-height:70vh;overflow-y:auto;}
   nav a{display:flex;gap:12px;align-items:center;padding:10px;border-radius:10px;color:var(--text);text-decoration:none;font-weight:700;transition:transform var(--transition),background var(--transition)}
   nav a .ico{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--panel);box-shadow:4px 4px 12px var(--shadow-bottom),-4px -4px 12px var(--shadow-top);color:var(--muted)}
   nav a:hover{transform:translateX(6px)}
   nav a.active{background:linear-gradient(180deg,var(--accent-weak),transparent);color:var(--accent)}
-  .sidebar-footer{margin-top:auto;display:flex;gap:8px;align-items:center;justify-content:center;padding:8px}
+  .sidebar-footer{display:flex;gap:8px;align-items:center;justify-content:center;padding:8px}
   .btn{border:none;cursor:pointer;padding:10px;border-radius:10px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.02));box-shadow:6px 6px 16px var(--shadow-bottom),-6px -6px 16px var(--shadow-top);color:var(--text);font-weight:700}
 
   /* MAIN */
@@ -105,7 +104,6 @@
   @media (max-width:920px){
     .app{padding:12px}
     .sidebar{display:none}
-    .sidebar.collapsed{display:none}
     .header { padding: 15px 12px; }
     .header h1 { font-size: 2rem; }
     .main { margin-top: 80px; }
@@ -133,14 +131,28 @@
       <a href="#" data-section="dashboard" class="active"><span class="ico"><i class="fas fa-chart-pie"></i></span><span class="label">Dashboard</span></a>
       <a href="#" data-section="cisa"><span class="ico"><i class="fas fa-shield-virus"></i></span><span class="label">CISA KEV</span></a>
       <a href="#" data-section="redhat"><span class="ico"><i class="fab fa-redhat"></i></span><span class="label">Red Hat</span></a>
+      
+      <!-- Database Section -->
       <a href="#" data-section="mysql"><span class="ico"><i class="fas fa-database"></i></span><span class="label">MySQL</span></a>
       <a href="#" data-section="postgresql"><span class="ico"><i class="fas fa-server"></i></span><span class="label">PostgreSQL</span></a>
       <a href="#" data-section="redis"><span class="ico"><i class="fas fa-bolt"></i></span><span class="label">Redis</span></a>
+      
+      <!-- Linux Distributions Section -->
+      <a href="#" data-section="almalinux"><span class="ico"><i class="fab fa-linux"></i></span><span class="label">AlmaLinux</span></a>
+      <a href="#" data-section="rockylinux"><span class="ico"><i class="fab fa-linux"></i></span><span class="label">Rocky Linux</span></a>
+      <a href="#" data-section="amazonlinux"><span class="ico"><i class="fab fa-linux"></i></span><span class="label">Amazon Linux</span></a>
+      <a href="#" data-section="archlinux"><span class="ico"><i class="fab fa-linux"></i></span><span class="label">Arch Linux</span></a>
+      <a href="#" data-section="canonical"><span class="ico"><i class="fab fa-ubuntu"></i></span><span class="label">Canonical</span></a>
+      <a href="#" data-section="debian"><span class="ico"><i class="fab fa-linux"></i></span><span class="label">Debian</span></a>
+      <a href="#" data-section="ubuntu"><span class="ico"><i class="fab fa-ubuntu"></i></span><span class="label">Ubuntu</span></a>
+      <a href="#" data-section="fedora"><span class="ico"><i class="fab fa-fedora"></i></span><span class="label">Fedora</span></a>
+      <a href="#" data-section="oraclelinux"><span class="ico"><i class="fab fa-linux"></i></span><span class="label">Oracle Linux</span></a>
+      <a href="#" data-section="suse"><span class="ico"><i class="fab fa-suse"></i></span><span class="label">SUSE Linux</span></a>
+      
       <a href="#" data-section="settings"><span class="ico"><i class="fas fa-cog"></i></span><span class="label">Settings</span></a>
     </nav>
 
     <div class="sidebar-footer">
-      <button class="btn" id="collapseBtn" title="Toggle sidebar"><i class="fas fa-chevron-left"></i></button>
       <button class="btn" id="themeBtn" title="Toggle theme"><i class="fas fa-moon"></i></button>
     </div>
   </aside>
@@ -175,7 +187,6 @@
 /* ------- App state ------- */
 const state = {
   theme: localStorage.getItem('vf_theme') || 'light',
-  sidebarCollapsed: false,
   activeSection: 'dashboard',
   allVulns: [], // loaded for active section
   lastLoadMeta: {}, // store per-file metadata
@@ -188,8 +199,6 @@ const setTheme = (t) => { state.theme = t; document.documentElement.setAttribute
 setTheme(state.theme);
 
 /* ------- DOM refs ------- */
-const sidebar = document.getElementById('sidebar');
-const collapseBtn = document.getElementById('collapseBtn');
 const themeBtn = document.getElementById('themeBtn');
 const navLinks = document.querySelectorAll('nav.nav a');
 const contentArea = document.getElementById('contentArea');
@@ -201,11 +210,6 @@ const sortSelect = document.getElementById('sortSelect');
 const refreshBtn = document.getElementById('refreshBtn');
 
 /* ------- Event wiring ------- */
-collapseBtn.addEventListener('click', () => {
-  state.sidebarCollapsed = !state.sidebarCollapsed;
-  sidebar.classList.toggle('collapsed', state.sidebarCollapsed);
-  collapseBtn.innerHTML = state.sidebarCollapsed ? '<i class="fas fa-chevron-right"></i>' : '<i class="fas fa-chevron-left"></i>';
-});
 themeBtn.addEventListener('click', () => setTheme(state.theme==='dark'?'light':'dark'));
 navLinks.forEach(a => a.addEventListener('click', ev => {
   ev.preventDefault();
@@ -225,9 +229,21 @@ const FEEDS = {
   dashboard: null,
   cisa: 'data/cisa-kev.json',
   redhat: 'data/redhat-cves.json',
+  // Databases
   mysql: 'data/mysql.json',
   postgresql: 'data/postgresql.json',
   redis: 'data/redis.json',
+  // Linux Distributions
+  almalinux: 'data/almalinux.json',
+  rockylinux: 'data/rockylinux.json',
+  amazonlinux: 'data/amazonlinux.json',
+  archlinux: 'data/archlinux.json',
+  canonical: 'data/canonical.json',
+  debian: 'data/debian.json',
+  ubuntu: 'data/ubuntu.json',
+  fedora: 'data/fedora.json',
+  oraclelinux: 'data/oraclelinux.json',
+  suse: 'data/suse.json',
   settings: null
 };
 
@@ -255,7 +271,7 @@ function detectAndNormalize(items, feedKey){
   }
   
   // Special handling for different feed types
-  if (['mysql', 'postgresql', 'redis'].includes(feedKey)) {
+  if (['mysql', 'postgresql', 'redis', 'almalinux', 'rockylinux', 'amazonlinux', 'archlinux', 'canonical', 'debian', 'ubuntu', 'fedora', 'oraclelinux', 'suse'].includes(feedKey)) {
     // OSV format from GitHub Action
     return items.map(raw => {
       const id = extractField(raw, ['id', 'cveID', 'CVE', 'name']) || '';
@@ -407,6 +423,10 @@ async function renderDashboard(){
   // Calculate total vulnerabilities
   const totalVulns = Object.values(stats).reduce((sum, count) => sum + count, 0);
   
+  // Calculate Linux distribution total
+  const linuxDistros = ['almalinux', 'rockylinux', 'amazonlinux', 'archlinux', 'canonical', 'debian', 'ubuntu', 'fedora', 'oraclelinux', 'suse'];
+  const linuxTotal = linuxDistros.reduce((sum, distro) => sum + (stats[distro] || 0), 0);
+  
   // Render dashboard with statistics
   const dashboardHtml = `
     <div class="card">
@@ -427,8 +447,8 @@ async function renderDashboard(){
           <div class="stat-label">Red Hat CVEs</div>
         </div>
         <div class="stat-card">
-          <div class="stat-number">${(stats.mysql || 0) + (stats.postgresql || 0) + (stats.redis || 0)}</div>
-          <div class="stat-label">Database Vulns</div>
+          <div class="stat-number">${linuxTotal}</div>
+          <div class="stat-label">Linux Distributions</div>
         </div>
       </div>
       
