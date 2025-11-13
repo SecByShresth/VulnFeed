@@ -3,218 +3,529 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>VulnFeed — Vulnerability Intelligence Dashboard</title>
+<title>VulnFeed — Unified Vulnerability Dashboard</title>
 <style>
-:root {
-  --bg-light: #f6f6f6;
-  --bg-dark: #181a1b;
-  --card-light: #ffffff;
-  --card-dark: #232527;
-  --text-light: #222;
-  --text-dark: #e6e6e6;
-  --accent: #5c6bc0;
-  --shadow-light: rgba(0,0,0,0.08);
-  --shadow-dark: rgba(255,255,255,0.08);
-}
-body {
-  margin: 0;
-  font-family: "Inter", system-ui, sans-serif;
-  background: var(--bg-light);
-  color: var(--text-light);
-  transition: background 0.3s, color 0.3s;
-}
-body.dark {
-  background: var(--bg-dark);
-  color: var(--text-dark);
-}
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background: var(--card-light);
-  box-shadow: 0 2px 6px var(--shadow-light);
-}
-body.dark header {
-  background: var(--card-dark);
-  box-shadow: 0 2px 6px var(--shadow-dark);
-}
-h1 { margin: 0; font-size: 1.4rem; }
-button {
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 0.4rem 0.8rem;
-  cursor: pointer;
-}
-main { padding: 2rem; }
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1rem;
-}
-.card {
-  background: var(--card-light);
-  border-radius: 1rem;
-  box-shadow: 4px 4px 8px var(--shadow-light), -4px -4px 8px white;
-  padding: 1rem 1.4rem;
-  cursor: pointer;
-  transition: 0.3s;
-}
-body.dark .card {
-  background: var(--card-dark);
-  box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px #111;
-}
-.card:hover { transform: translateY(-3px); }
-.feed-detail { display: none; }
-.feed-detail.active { display: block; }
-.back-btn {
-  margin-bottom: 1rem;
-  background: var(--accent);
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-}
-.vuln-card {
-  background: var(--card-light);
-  border-radius: 0.8rem;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  box-shadow: 2px 2px 5px var(--shadow-light), -2px -2px 5px white;
-}
-body.dark .vuln-card {
-  background: var(--card-dark);
-  box-shadow: 2px 2px 5px var(--shadow-dark), -2px -2px 5px #111;
-}
-.vuln-card h3 { margin: 0 0 0.4rem; color: var(--accent); }
-.vuln-meta { font-size: 0.9rem; color: gray; margin-bottom: 0.6rem; }
-a.ref { display: block; font-size: 0.85rem; color: var(--accent); text-decoration: none; }
+  :root{
+    --bg:#f6f7fb; --card:#fff; --text:#111; --muted:#6b7280; --accent:#2563eb;
+    --shadow1: rgba(16,24,40,0.06);
+  }
+  [data-theme="dark"]{
+    --bg:#0f1113; --card:#17191b; --text:#e6eef8; --muted:#9aa4b2; --accent:#4ea8ff;
+    --shadow1: rgba(0,0,0,0.6);
+  }
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui, -apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+  header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;background:var(--card);box-shadow:0 4px 14px var(--shadow1);position:sticky;top:0;z-index:10;}
+  h1{margin:0;font-size:1.1rem;letter-spacing:-0.01em}
+  .controls{display:flex;gap:0.5rem;align-items:center}
+  button,select,input{font:inherit}
+  .btn{background:var(--accent);color:white;border:none;padding:0.5rem 0.7rem;border-radius:8px;cursor:pointer}
+  .toggle{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:0.4rem;border-radius:8px;cursor:pointer;color:var(--muted)}
+  main{padding:1rem 1.5rem 2.5rem}
+  .toolbar{display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin:1rem 0}
+  .search {flex:1;min-width:220px}
+  .search input{width:100%;padding:0.6rem 0.9rem;border-radius:999px;border:none;background:var(--card);box-shadow:inset 4px 4px 10px rgba(0,0,0,0.03);color:var(--text)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+  .feed-card{background:var(--card);padding:1rem;border-radius:12px;box-shadow:6px 6px 18px var(--shadow1), -6px -6px 18px rgba(255,255,255,0.5);cursor:pointer;transition:transform .12s}
+  .feed-card:hover{transform:translateY(-4px)}
+  .feed-card h3{margin:0 0 .4rem 0;font-size:1rem}
+  .muted{color:var(--muted);font-size:0.9rem}
+  .count{font-weight:700;font-size:1.2rem;margin-top:.6rem}
+  /* detail view */
+  .detail {display:none;margin-top:1rem}
+  .detail.active{display:block}
+  .back{background:transparent;border:1px solid rgba(0,0,0,0.06);padding:0.45rem 0.7rem;border-radius:8px;cursor:pointer;color:var(--muted)}
+  .vuln-list{margin-top:1rem;display:grid;gap:1rem}
+  .vuln-card{background:var(--card);padding:1rem;border-radius:10px;box-shadow:4px 4px 12px var(--shadow1);display:flex;flex-direction:column;gap:0.4rem}
+  .vuln-card h4{margin:0;color:var(--accent);font-size:1rem}
+  .meta-row{font-size:0.85rem;color:var(--muted)}
+  .desc{white-space:pre-wrap}
+  a.ref{color:var(--accent);font-size:0.9rem;text-decoration:none}
+  .small{font-size:0.85rem;color:var(--muted)}
+  .empty{padding:2rem;text-align:center;color:var(--muted)}
+  footer{padding:1rem;text-align:center;color:var(--muted)}
+  @media (max-width:560px){header{padding:0.8rem} main{padding:0.8rem}}
 </style>
 </head>
-<body>
+<body data-theme="light">
 <header>
-  <h1>VulnFeed Dashboard</h1>
-  <button id="theme-toggle">Toggle Theme</button>
+  <h1>🛡️ VulnFeed — Unified Vulnerability Dashboard</h1>
+  <div class="controls">
+    <button class="btn" id="refreshBtn" title="Refresh data">Refresh</button>
+    <button class="toggle" id="themeBtn">🌙</button>
+  </div>
 </header>
 
 <main>
+  <!-- toolbar -->
+  <div class="toolbar">
+    <div class="search">
+      <input id="globalSearch" placeholder="Search by CVE, vendor, product, description..." />
+    </div>
+
+    <select id="severityFilter" title="Filter by severity">
+      <option value="">All severities</option>
+      <option value="critical">Critical</option>
+      <option value="high">High</option>
+      <option value="important">Important</option>
+      <option value="medium">Medium</option>
+      <option value="low">Low</option>
+      <option value="unknown">Unknown</option>
+    </select>
+
+    <select id="sortSelect" title="Sort">
+      <option value="date_desc">Date: New → Old</option>
+      <option value="date_asc">Date: Old → New</option>
+      <option value="alpha">Alphabetical</option>
+    </select>
+  </div>
+
+  <!-- Dashboard: feed cards -->
   <section id="dashboard">
-    <h2>Feeds Overview</h2>
-    <div id="feed-grid" class="grid"></div>
+    <h2 class="small">Dashboard</h2>
+    <div id="feedGrid" class="grid" aria-live="polite"></div>
   </section>
 
-  <section id="feed-detail" class="feed-detail">
-    <button class="back-btn" onclick="showDashboard()">← Back</button>
-    <h2 id="feed-title"></h2>
-    <div id="feed-content"></div>
+  <!-- Detail: per-feed -->
+  <section id="detail" class="detail">
+    <button class="back" id="backBtn">← Back to Dashboard</button>
+    <h2 id="detailTitle" style="margin-top:.75rem"></h2>
+    <div class="small" id="detailMeta"></div>
+
+    <div style="margin-top:0.8rem" class="small">
+      <label>Search within feed: <input id="feedSearch" placeholder="keyword or CVE"/></label>
+    </div>
+
+    <div id="vulnList" class="vuln-list"></div>
+    <div id="noResults" class="empty" style="display:none">No vulnerabilities match your filter/search.</div>
   </section>
 </main>
 
+<footer>VulnFeed • data from /data/*.json • static • GitHub Pages</footer>
+
 <script>
+/* ========= Configuration ========= */
 const feeds = [
-  "mysql","postgresql","redis","redhat-cves","cisa-kev",
-  "almalinux","debian","ubuntu","rocky","suse"
+  'cisa-kev','mysql','postgresql','redis','redhat','almalinux','debian','ubuntu','rocky','suse'
 ];
-const grid = document.getElementById("feed-grid");
-const dashboard = document.getElementById("dashboard");
-const detail = document.getElementById("feed-detail");
-const content = document.getElementById("feed-content");
-const title = document.getElementById("feed-title");
+const feedFiles = {
+  'cisa-kev': 'data/cisa-kev.json',
+  'mysql':     'data/mysql.json',
+  'postgresql':'data/postgresql.json',
+  'redis':     'data/redis.json',
+  'redhat':    'data/redhat.json',
+  'almalinux': 'data/almalinux.json',
+  'debian':    'data/debian.json',
+  'ubuntu':    'data/ubuntu.json',
+  'rocky':     'data/rocky.json',
+  'suse':      'data/suse.json'
+};
 
-// Theme toggle
-document.getElementById("theme-toggle").onclick = () =>
-  document.body.classList.toggle("dark");
+/* ========= Utilities & Normalizer ========= */
 
-// --- DASHBOARD ---
-async function loadDashboard() {
-  grid.innerHTML = "";
-  for (const f of feeds) {
-    try {
-      const res = await fetch(`data/${f}.json`);
-      const data = await res.json();
-      const { count, lastUpdated } = summarizeFeed(data);
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        <h3>${f.toUpperCase()}</h3>
-        <p>Total Entries: <b>${count}</b></p>
-        <p>Last Updated: <b>${lastUpdated || "N/A"}</b></p>`;
-      card.onclick = () => loadFeedDetail(f);
-      grid.appendChild(card);
-    } catch (e) {
-      console.warn("Failed to load", f, e);
+function safe(v, def=''){ return v===undefined || v===null ? def : v; }
+
+function parseDatePick(...candidates){
+  for(const d of candidates){
+    if(!d) continue;
+    const parsed = new Date(d);
+    if(!isNaN(parsed)) return parsed;
+  }
+  return null;
+}
+
+/*
+ Normalizes an input vulnerability object (from any feed) into a common shape:
+ {
+   feed, id, cve, title, summary, description, severity, date (Date obj), vendor, product, cwes, notes[], references[], ecosystem
+ }
+*/
+function normalizeItem(feedName, raw){
+  const r = raw || {};
+  const out = { feed: feedName, id: null, cve: null, title:null, summary:null, description:null, severity:null, date:null, vendor:null, product:null, cwes:[], notes:[], references:[], ecosystem:null };
+
+  // CISA KEV special structure
+  if(feedName === 'cisa-kev'){
+    out.id = r.cveID || r.id || null;
+    out.cve = r.cveID || null;
+    out.title = r.vulnerabilityName || r.vulnerability_name || r.shortDescription || null;
+    out.summary = r.shortDescription || r.vulnerabilityName || null;
+    out.description = r.requiredAction ? `${r.requiredAction}\n\n${r.shortDescription || ''}` : (r.shortDescription || '');
+    out.severity = null; // CISA doesn't publish severity in KEV
+    out.date = parseDatePick(r.dateAdded);
+    out.vendor = r.vendorProject || null;
+    out.product = r.product || null;
+    out.cwes = Array.isArray(r.cwes) ? r.cwes.slice() : [];
+    out.notes = r.notes ? r.notes.split(';').map(s=>s.trim()).filter(Boolean) : [];
+    // sometimes notes include urls separated by semicolons or semicolons + spaces
+    out.references = out.notes.slice();
+    return out;
+  }
+
+  // GitHub-advisory / OSV style (like mysql sample)
+  // Usually top-level object has id, summary, details, aliases, database_specific, _metadata
+  if(r.id || r.summary || r.database_specific){
+    out.id = r.id || (Array.isArray(r.aliases) && r.aliases[0]) || null;
+    out.cve = (Array.isArray(r.aliases) && r.aliases.find(a=>/^CVE-/i.test(a))) || (r.id && /^CVE-/i.test(r.id) ? r.id : null);
+    out.title = r.summary || r.title || null;
+    out.summary = r.summary || r.details || null;
+    out.description = r.details || r.summary || null;
+    out.severity = r.database_specific?.severity || (r.severity && (typeof r.severity === 'string' ? r.severity : r.severity[0]?.score )) || null;
+    out.date = parseDatePick(r.published, r.modified, r._metadata?.fetched_at);
+    out.vendor = r._metadata?.source_package || r.source || null;
+    out.product = null;
+    // references
+    if(Array.isArray(r.references)){
+      out.references = r.references.map(ref => ref.url || ref).filter(Boolean);
+      out.notes = out.references.slice();
+    } else if(r.references && typeof r.references === 'object'){
+      out.references = Object.values(r.references).flat().map(x => x.url||x).filter(Boolean);
+      out.notes = out.references.slice();
+    }
+    return out;
+  }
+
+  // Red Hat format (array of objects with CVE, bugzilla_description, public_date)
+  if(r.CVE || r.CVE === '' || r.bugzilla_description ){
+    out.id = r.CVE || null;
+    out.cve = r.CVE || null;
+    out.title = r.bugzilla_description || r.CVE || null;
+    out.summary = r.bugzilla_description || null;
+    out.description = r.bugzilla_description || null;
+    out.severity = r.severity || r.cvss3_score || r.cvss_score || null;
+    out.date = parseDatePick(r.public_date, r.publicDate, r.updated);
+    out.vendor = 'Red Hat';
+    out.product = null;
+    if(r.resource_url) out.references.push(r.resource_url);
+    return out;
+  }
+
+  // Debian/OSV style -> top-level array entries with id, details, published, modified
+  if(r.details || r.published || r.modified){
+    out.id = r.id || (Array.isArray(r.upstream) && r.upstream[0]) || null;
+    out.cve = (Array.isArray(r.upstream) && r.upstream.find(a=>/^CVE-/i.test(a))) || out.id;
+    out.title = r.details && r.details.split('\n')[0] || r.id || null;
+    out.summary = r.details || null;
+    out.description = r.details || null;
+    out.severity = r.ecosystem_specific?.urgency || r.database_specific?.severity || null;
+    out.date = parseDatePick(r.published, r.modified);
+    out.vendor = null;
+    out.product = r.affected?.[0]?.package?.name || null;
+    if(r.database_specific?.source) out.references.push(r.database_specific.source);
+    return out;
+  }
+
+  // Generic fallback: try to map common fields
+  out.id = r.cveID || r.CVE || r.id || r.aliases?.[0] || null;
+  out.cve = out.id;
+  out.title = r.title || r.vulnerabilityName || r.summary || null;
+  out.summary = r.summary || r.shortDescription || null;
+  out.description = r.description || r.shortDescription || r.details || null;
+  out.severity = r.severity || r.severity?.[0] || null;
+  out.date = parseDatePick(r.dateAdded, r.published, r.modified, r.date);
+  out.vendor = r.vendorProject || null;
+  out.product = r.product || null;
+  out.cwes = r.cwes || [];
+  if(r.notes) out.notes = (typeof r.notes === 'string')? r.notes.split(';').map(s=>s.trim()).filter(Boolean) : [].concat(r.notes||[]);
+  if(r.references) out.references = (Array.isArray(r.references)? r.references.map(x=>x.url||x):[r.references]).filter(Boolean);
+  return out;
+}
+
+/* ========= App State ========= */
+let cache = {}; // feedName => raw JSON
+let currentFeed = null;
+
+/* ========= DOM helpers ========= */
+const feedGrid = document.getElementById('feedGrid');
+const vulnList = document.getElementById('vulnList');
+const detail = document.getElementById('detail');
+const dashboard = document.getElementById('dashboard');
+const detailTitle = document.getElementById('detailTitle');
+const detailMeta = document.getElementById('detailMeta');
+const backBtn = document.getElementById('backBtn');
+const globalSearch = document.getElementById('globalSearch');
+const feedSearch = document.getElementById('feedSearch');
+const severityFilter = document.getElementById('severityFilter');
+const sortSelect = document.getElementById('sortSelect');
+const refreshBtn = document.getElementById('refreshBtn');
+const noResults = document.getElementById('noResults');
+const themeBtn = document.getElementById('themeBtn');
+
+/* ========= Loading & Rendering ========= */
+
+async function fetchFeedRaw(feedName, bypassCache=false){
+  if(!feedFiles[feedName]) return null;
+  if(cache[feedName] && !bypassCache) return cache[feedName];
+  try{
+    const res = await fetch(feedFiles[feedName], {cache: 'no-cache'});
+    if(!res.ok) throw new Error('fetch failed: ' + res.status);
+    const json = await res.json();
+    cache[feedName] = json;
+    return json;
+  }catch(e){
+    console.warn('Failed to fetch', feedName, e);
+    cache[feedName] = null;
+    return null;
+  }
+}
+
+function feedSummaryFromRaw(feedName, raw){
+  if(!raw) return {count:0, lastUpdated:null};
+  // CISA: top-level count + dateReleased
+  if(feedName === 'cisa-kev'){
+    const count = raw.count ?? (Array.isArray(raw.vulnerabilities) ? raw.vulnerabilities.length : 0);
+    const last = raw.dateReleased || extractLatestFromArray(raw.vulnerabilities) || null;
+    return {count, lastUpdated: last};
+  }
+  // If array
+  if(Array.isArray(raw)){
+    const count = raw.length;
+    const last = extractLatestFromArray(raw);
+    return {count, lastUpdated: last};
+  }
+  // Generic object with vulnerabilities arr
+  if(raw.vulnerabilities && Array.isArray(raw.vulnerabilities)){
+    return { count: raw.vulnerabilities.length, lastUpdated: raw.dateReleased || extractLatestFromArray(raw.vulnerabilities) };
+  }
+  // fallback
+  return {count: 0, lastUpdated: null};
+}
+
+function extractLatestFromArray(arr){
+  if(!Array.isArray(arr) || arr.length===0) return null;
+  const candidates = arr.map(item =>
+    item.dateAdded || item.published || item.modified || item.public_date || item._metadata?.fetched_at || null
+  ).filter(Boolean).map(d=>new Date(d)).filter(d=>!isNaN(d));
+  if(!candidates.length) return null;
+  const latest = new Date(Math.max(...candidates.map(d=>d.getTime())));
+  return latest.toISOString().split('T')[0];
+}
+
+async function renderDashboard(){
+  feedGrid.innerHTML = '';
+  for(const f of feeds){
+    const raw = await fetchFeedRaw(f);
+    const summary = feedSummaryFromRaw(f, raw);
+    const card = document.createElement('div');
+    card.className = 'feed-card';
+    card.innerHTML = `<h3>${f.toUpperCase()}</h3>
+      <div class="muted">${(summary.lastUpdated) ? 'Last updated: ' + summary.lastUpdated : 'Last updated: N/A'}</div>
+      <div class="count">${summary.count}</div>
+      <div class="small muted" style="margin-top:.6rem">Click to open feed</div>`;
+    card.onclick = ()=> openFeed(f);
+    feedGrid.appendChild(card);
+  }
+}
+
+/* Open a feed detail view */
+async function openFeed(feedName){
+  currentFeed = feedName;
+  // UI
+  dashboard.style.display = 'none';
+  detail.classList.add('active');
+  detailTitle.textContent = feedName.toUpperCase();
+  detailMeta.textContent = 'Loading metadata...';
+  vulnList.innerHTML = '';
+  noResults.style.display = 'none';
+  // load raw
+  const raw = await fetchFeedRaw(feedName);
+  if(!raw){
+    detailMeta.textContent = 'Failed to load feed.';
+    vulnList.innerHTML = '<div class="empty">Could not load feed data.</div>';
+    return;
+  }
+  // metadata
+  if(feedName === 'cisa-kev'){
+    const count = raw.count ?? (raw.vulnerabilities?.length ?? 0);
+    const released = raw.dateReleased ? (new Date(raw.dateReleased).toLocaleString()) : 'N/A';
+    detailMeta.innerHTML = `Catalog version: ${safe(raw.catalogVersion,'N/A')} • Released: ${released} • Total: ${count}`;
+  } else {
+    const summary = feedSummaryFromRaw(feedName, raw);
+    detailMeta.textContent = `Total: ${summary.count} • Last updated: ${summary.lastUpdated ?? 'N/A'}`;
+  }
+  // normalize entries
+  let arr = [];
+  if(feedName === 'cisa-kev') arr = Array.isArray(raw.vulnerabilities) ? raw.vulnerabilities : [];
+  else if(Array.isArray(raw)) arr = raw;
+  else if(raw.vulnerabilities && Array.isArray(raw.vulnerabilities)) arr = raw.vulnerabilities;
+  else { // try to extract first array property
+    const arrprop = Object.values(raw).find(v => Array.isArray(v));
+    arr = arrprop || [];
+  }
+  const normalized = arr.map(r=>normalizeItem(feedName, r)).filter(Boolean);
+
+  // store for filtering & searching (in-memory)
+  detail.dataset.rawCount = normalized.length;
+
+  // initial render
+  renderVulnList(normalized);
+}
+
+/* Render vulnerability list from normalized array, applying filters/search/sort */
+function renderVulnList(items){
+  const qGlobal = (globalSearch.value || '').trim().toLowerCase();
+  const qFeed = (feedSearch.value || '').trim().toLowerCase();
+  const severityQ = (severityFilter.value || '').trim().toLowerCase();
+  const sort = sortSelect.value;
+
+  let list = items.slice();
+
+  // global search across feed selection (only applied if user typed into global search)
+  if(qGlobal){
+    list = list.filter(it => {
+      const hay = `${it.cve||''} ${it.title||''} ${it.summary||''} ${it.description||''} ${it.vendor||''} ${it.product||''}`.toLowerCase();
+      return hay.includes(qGlobal);
+    });
+  }
+
+  // feed-specific search
+  if(qFeed){
+    list = list.filter(it => {
+      const hay = `${it.cve||''} ${it.title||''} ${it.summary||''} ${it.description||''}`.toLowerCase();
+      return hay.includes(qFeed);
+    });
+  }
+
+  // severity filter (note: many feeds have non-standard severity strings)
+  if(severityQ){
+    list = list.filter(it => {
+      const s = (it.severity || '').toString().toLowerCase();
+      if(!s) return severityQ === 'unknown' ? true : false;
+      // try to match broadly: numeric vs words
+      return s.includes(severityQ);
+    });
+  }
+
+  // sorting
+  list.sort((a,b)=>{
+    if(sort === 'date_desc'){
+      const da = a.date ? a.date.getTime() : 0;
+      const db = b.date ? b.date.getTime() : 0;
+      return db - da;
+    } else if(sort === 'date_asc'){
+      const da = a.date ? a.date.getTime() : 0;
+      const db = b.date ? b.date.getTime() : 0;
+      return da - db;
+    } else if(sort === 'alpha'){
+      return (a.cve||a.title||'').localeCompare(b.cve||b.title||'');
+    }
+    return 0;
+  });
+
+  // render
+  vulnList.innerHTML = '';
+  if(list.length === 0){
+    noResults.style.display = 'block';
+  } else {
+    noResults.style.display = 'none';
+    for(const it of list){
+      const el = document.createElement('article');
+      el.className = 'vuln-card';
+      const when = it.date ? (it.date.toISOString().split('T')[0]) : 'Unknown';
+      const sev = it.severity || 'Unknown';
+      const vendor = it.vendor || it.feed || '—';
+      const product = it.product || '—';
+      const cwes = (it.cwes && it.cwes.length) ? it.cwes.join(', ') : '';
+      const refsHtml = (it.references && it.references.length) ? it.references.map(u=>`<div><a class="ref" href="${u}" target="_blank" rel="noopener">${u}</a></div>`).join('') : (it.notes && it.notes.length ? it.notes.map(u=>`<div><a class="ref" href="${u}" target="_blank" rel="noopener">${u}</a></div>`).join('') : '');
+      el.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <h4>${escapeHtml(it.cve || it.id || it.title || 'Unknown')}</h4>
+          <div class="small">${escapeHtml(sev)}</div>
+        </div>
+        <div class="meta-row">${escapeHtml(vendor)} ${product ? '• ' + escapeHtml(product) : ''} • ${escapeHtml(when)}</div>
+        ${it.title ? `<div class="small"><strong>${escapeHtml(it.title)}</strong></div>` : ''}
+        ${it.summary ? `<div class="desc">${escapeHtml(it.summary)}</div>` : ''}
+        ${cwes ? `<div class="small">CWE: ${escapeHtml(cwes)}</div>` : ''}
+        ${refsHtml ? `<div style="margin-top:.6rem">${refsHtml}</div>` : ''}
+      `;
+      vulnList.appendChild(el);
     }
   }
 }
-function summarizeFeed(data) {
-  let arr = [];
-  if (Array.isArray(data)) arr = data;
-  else if (data.vulnerabilities) arr = data.vulnerabilities;
-  const count = arr.length;
-  const lastUpdated = extractLatestDate(arr);
-  return { count, lastUpdated };
-}
-function extractLatestDate(arr) {
-  const dates = arr.map(x =>
-    x.modified || x.dateAdded || x.public_date || x.published || x._metadata?.fetched_at
-  ).filter(Boolean);
-  if (!dates.length) return null;
-  return new Date(Math.max(...dates.map(d => new Date(d)))).toISOString().split("T")[0];
+
+/* helpers */
+function escapeHtml(s){
+  if(!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// --- DETAIL VIEW ---
-async function loadFeedDetail(feedName) {
-  dashboard.style.display = "none";
-  detail.classList.add("active");
-  title.textContent = feedName.toUpperCase();
-  content.innerHTML = "<p>Loading...</p>";
+/* ========= Events ========= */
+backBtn.onclick = ()=>{
+  detail.classList.remove('active');
+  dashboard.style.display = '';
+  currentFeed = null;
+};
 
-  try {
-    const res = await fetch(`data/${feedName}.json`);
-    const data = await res.json();
-    renderFeed(data);
-  } catch {
-    content.innerHTML = `<p>Error loading ${feedName}</p>`;
-  }
-}
-
-function renderFeed(data) {
-  let vulns = Array.isArray(data) ? data : data.vulnerabilities || [];
-  if (!vulns.length) {
-    content.innerHTML = "<p>No vulnerabilities found.</p>";
+globalSearch.addEventListener('input', async ()=>{
+  // If dashboard showing, allow global search to filter feed cards as simple improvement
+  if(!currentFeed){
+    // simple highlight: re-render dashboard quickly (could be optimised)
+    // For simplicity, reload dashboard cards (they remain same)
+    // but if user typed a query, open feed detail if only one feed matches? (skip)
     return;
+  } else {
+    // filter within current feed
+    const raw = cache[currentFeed];
+    const arr = prepareNormalizedArray(currentFeed, raw);
+    renderVulnList(arr);
   }
+});
 
-  content.innerHTML = "";
-  vulns.forEach(v => {
-    const cve = v.aliases?.[0] || v.id || v.CVE || "Unknown";
-    const summary = v.summary || v.shortDescription || v.details || "No summary.";
-    const desc = v.details || v.bugzilla_description || "";
-    const sev = v.database_specific?.severity || v.severity || "N/A";
-    const date = v.published || v.public_date || v.modified || v._metadata?.fetched_at || "Unknown";
-    const eco = v.affected?.[0]?.package?.ecosystem || "N/A";
-    const refs = v.references?.map(r => `<a class="ref" href="${r.url}" target="_blank">${r.url}</a>`).join("") || "";
+document.getElementById('feedSearch').addEventListener('input', ()=>{
+  if(!currentFeed) return;
+  const raw = cache[currentFeed];
+  const arr = prepareNormalizedArray(currentFeed, raw);
+  renderVulnList(arr);
+});
+severityFilter.onchange = ()=>{
+  if(!currentFeed) return;
+  const raw = cache[currentFeed];
+  const arr = prepareNormalizedArray(currentFeed, raw);
+  renderVulnList(arr);
+};
+sortSelect.onchange = ()=>{
+  if(!currentFeed) return;
+  const raw = cache[currentFeed];
+  const arr = prepareNormalizedArray(currentFeed, raw);
+  renderVulnList(arr);
+};
 
-    const card = document.createElement("div");
-    card.className = "vuln-card";
-    card.innerHTML = `
-      <h3>${cve}</h3>
-      <div class="vuln-meta"><b>Severity:</b> ${sev} | <b>Date:</b> ${date} | <b>Ecosystem:</b> ${eco}</div>
-      <p><b>${summary}</b></p>
-      <p>${desc}</p>
-      ${refs}`;
-    content.appendChild(card);
-  });
+refreshBtn.onclick = async ()=>{
+  cache = {}; // clear cache and reload
+  await renderDashboard();
+  if(currentFeed) openFeed(currentFeed);
+};
+
+themeBtn.onclick = ()=>{
+  const body = document.body;
+  const cur = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  body.setAttribute('data-theme', cur);
+  themeBtn.textContent = cur === 'dark' ? '☀️' : '🌙';
+  localStorage.setItem('vulnfeed_theme', cur);
+};
+
+/* helper to prepare normalized array for current feed */
+function prepareNormalizedArray(feedName, raw){
+  let arr = [];
+  if(!raw) return arr;
+  if(feedName === 'cisa-kev') arr = Array.isArray(raw.vulnerabilities) ? raw.vulnerabilities : [];
+  else if(Array.isArray(raw)) arr = raw;
+  else if(raw.vulnerabilities && Array.isArray(raw.vulnerabilities)) arr = raw.vulnerabilities;
+  else {
+    const arrprop = Object.values(raw).find(v => Array.isArray(v));
+    arr = arrprop || [];
+  }
+  return arr.map(r=>normalizeItem(feedName, r));
 }
 
-function showDashboard() {
-  dashboard.style.display = "block";
-  detail.classList.remove("active");
-}
+/* ========= Init ========= */
+(async function init(){
+  // theme
+  const saved = localStorage.getItem('vulnfeed_theme');
+  if(saved) { document.body.setAttribute('data-theme', saved); themeBtn.textContent = saved === 'dark' ? '☀️' : '🌙'; }
+  // render dashboard
+  await renderDashboard();
+})();
 
-loadDashboard();
 </script>
 </body>
 </html>
