@@ -22,8 +22,6 @@ jobs:
         run: |
           pip install requests
 
-      ---
-
       - name: 🌐 Fetch and Process Vulnerabilities from OSV.dev
         run: |
           python3 << 'EOF'
@@ -62,7 +60,6 @@ jobs:
           csv_data = io.StringIO(response.text)
           reader = csv.reader(csv_data)
           
-          # Use a set to store processed IDs to avoid duplicates if the CSV is malformed
           osv_ids_to_fetch = set()
           for row in reader:
               if row and row[0].strip().startswith(("GHSA", "CVE", "OSV")):
@@ -77,7 +74,7 @@ jobs:
                   vuln_response.raise_for_status()
                   vuln_data = vuln_response.json()
               except requests.RequestException:
-                  continue # Skip if we can't fetch the record
+                  continue 
               
               
               # 5. Determine the source and normalize the data
@@ -101,7 +98,7 @@ jobs:
                   
                   if any(k in search_text for k in keywords) or any(k in affected_names for k in keywords):
                       source = db_source
-                      break # Found the most specific source
+                      break 
               
               # Normalize the entry format
               normalized_entry = {
@@ -122,13 +119,12 @@ jobs:
           # Group by the detected source
           grouped_data = {}
           for entry in all_vulnerabilities:
-              db_name = entry['source'].split('-')[0] # e.g., 'mysql', 'postgresql', 'exploitdb', 'redis', 'osv'
+              db_name = entry['source'].split('-')[0]
               if db_name not in grouped_data:
                   grouped_data[db_name] = []
               grouped_data[db_name].append(entry)
 
           for db, data in grouped_data.items():
-              # This ensures file names are: data/mysql.json, data/exploitdb.json, etc.
               with open(f"data/{db}.json", "w") as f:
                   json.dump(data, f, indent=2)
 
@@ -144,14 +140,11 @@ jobs:
               
           EOF
 
-      ---
-
       - name: Commit and Push Changes
         uses: stefanprodan/git-tools@v1
         with:
           action: commit
           branch: ${{ github.ref_name }}
-          # Commit only the files in the data directory
           files: data/*.json
           message: "Auto-update feeds from OSV.dev"
           github_token: ${{ secrets.GITHUB_TOKEN }}
