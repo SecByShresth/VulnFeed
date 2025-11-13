@@ -1,142 +1,85 @@
-name: Database Vulnerabilities Feed
+name: 🧠 VulnFeed - Database Vulnerabilities
 
 on:
-  schedule:
-    - cron: '0 0 * * *'
   workflow_dispatch:
-
-permissions:
-  contents: write
+  schedule:
+    - cron: "0 3 * * *"  # Runs daily at 03:00 UTC
 
 jobs:
-  update-db-vulns:
+  fetch-db-vulns:
     runs-on: ubuntu-latest
-
     steps:
-      - name: 🧾 Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: 🐍 Set up Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.11"
 
-      - name: 📦 Install dependencies
-        run: pip install requests
-
-      - name: 🌐 Fetch Latest 100 Vulnerabilities (Full Details)
+      - name: Install dependencies
         run: |
-          python3 << 'EOF'
+          python3 -m pip install --upgrade pip requests
+
+      - name: Fetch Database Vulnerabilities
+        run: |
+          python3 <<'EOF'
           import requests, json, os, time
-          from datetime import datetime
 
-          OUTPUT_DIR = "data"
-          os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-          DATABASES = {
+          os.makedirs("data", exist_ok=True)
+          products = {
               "mysql": ["mysql", "mariadb", "percona"],
               "postgresql": ["postgresql", "pgsql", "postgres"],
               "redis": ["redis"]
           }
 
-          def fetch_summary(keyword):
-              """Get 100 latest vulnerabilities for a keyword."""
-              url = "https://api.osv.dev/v1/query"
-              payload = {"query": keyword, "limit": 100, "sort": "published"}
-              try:
-                  r = requests.post(url, json=payload, timeout=25)
-                  r.raise_for_status()
-                  return r.json().get("vulns", [])
-              except Exception as e:
-                  print(f"⚠️ Error fetching {keyword}: {e}")
-                  return []
-
-          def fetch_details(vuln_id):
-              """Fetch detailed vulnerability info (includes published date)."""
-              url = f"https://api.osv.dev/v1/vuln/{vuln_id}"
-              try:
-                  r = requests.get(url, timeout=25)
-                  r.raise_for_status()
-                  return r.json()
-              except Exception:
-                  return {}
-
-          def normalize(v):
-              """Clean and normalize the vulnerability object."""
-              published = v.get("published") or v.get("modified") or ""
-              severity = None
-              if v.get("severity"):
+          for product, terms in products.items():
+              results = []
+              print(f"=== Processing {product.upper()} ===")
+              for term in terms:
+                  print(f"🔍 Searching '{term}'...")
                   try:
-                      severity = v["severity"][0].get("score") or v["severity"][0].get("type")
-                  except Exception:
-                      pass
+                      response = requests.post(
+                          "https://api.osv.dev/v1/query",
+                          headers={"Content-Type": "application/json"},
+                          json={"query": term}
+                      )
+                      response.raise_for_status()
+                      data = response.json()
 
-              affected_pkgs = []
-              ecosystem = None
-              for a in v.get("affected", []):
-                  pkg = a.get("package", {})
-                  if pkg.get("name"):
-                      affected_pkgs.append(pkg["name"])
-                      ecosystem = pkg.get("ecosystem")
+                      # Handle OSV response variations
+                      if isinstance(data, dict) and "vulns" in data:
+                          results.extend(data["vulns"])
+                      elif isinstance(data, dict) and data.get("id"):
+                          results.append(data)
+                      else:
+                          print(f"⚠️ No valid vulns found for {term}")
 
-              return {
-                  "id": v.get("id", ""),
-                  "title": v.get("summary") or v.get("details", "").split("\n")[0][:150],
-                  "description": v.get("details", "No description available."),
-                  "published_date": published,
-                  "severity": severity,
-                  "url": f"https://osv.dev/{v.get('id','')}",
-                  "source": "osv",
-                  "aliases": v.get("aliases", []),
-                  "affected_packages": affected_pkgs,
-                  "ecosystem": ecosystem,
-                  "references": [ref.get("url") for ref in v.get("references", []) if ref.get("url")]
-              }
+                  except Exception as e:
+                      print(f"⚠️ Error fetching {term}: {e}")
+                  time.sleep(1)  # be gentle with OSV API
 
-          all_results = {}
+              # Save only latest 100 (sorted by modified date if present)
+              try:
+                  results = sorted(
+                      results,
+                      key=lambda x: x.get("modified", x.get("published", "")),
+                      reverse=True
+                  )
+              except Exception:
+                  pass
 
-          for db, keywords in DATABASES.items():
-              print(f"\n=== Processing {db.upper()} ===")
-              entries = {}
-              for kw in keywords:
-                  print(f"🔍 Searching '{kw}'...")
-                  vulns = fetch_summary(kw)
-                  for v in vulns:
-                      vid = v.get("id")
-                      if vid and vid not in entries:
-                          details = fetch_details(vid)
-                          if details:
-                              n = normalize(details)
-                              entries[vid] = n
-                              print(f"✅ {vid} ({n['title'][:60]}...)")
-                              time.sleep(0.5)  # avoid API rate limits
+              print(f"💾 Saved {len(results)} vulnerabilities to data/{product}.json")
+              with open(f"data/{product}.json", "w") as f:
+                  json.dump(results[:100], f, indent=2)
 
-              sorted_entries = sorted(entries.values(), key=lambda x: x["published_date"] or "", reverse=True)
-              file_path = os.path.join(OUTPUT_DIR, f"{db}.json")
-              with open(file_path, "w") as f:
-                  json.dump(sorted_entries, f, indent=2)
-              all_results[db] = len(sorted_entries)
-              print(f"💾 Saved {len(sorted_entries)} vulnerabilities to {file_path}")
-
-          print("\n📊 Summary:")
-          for k, v in all_results.items():
-              print(f"  {k}: {v}")
-          print("🎉 Done!")
+          print("🎉 Done fetching all database vulnerabilities!")
           EOF
 
-      - name: 💾 Commit & Push
+      - name: Commit and Push Changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git fetch origin
-          git reset --hard origin/main
-          git add data/*.json
-
-          if git diff --staged --quiet; then
-            echo "ℹ️ No changes to commit."
-          else
-            git commit -m "🔄 Update DB vulns - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-            git push origin main
-            echo "✅ Updated database vulnerability data."
-          fi
-          EOF
+          git add data/
+          git diff-index --quiet HEAD || git commit -m "🔄 Update DB VulnFeed data"
+          git push
