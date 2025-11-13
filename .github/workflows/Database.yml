@@ -14,6 +14,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -33,6 +34,7 @@ jobs:
           import zipfile
           import io
           import re
+          from datetime import datetime
           
           print("🚀 Starting OSV.dev vulnerability feed update...")
           
@@ -40,7 +42,7 @@ jobs:
           OSV_EXPORT_URL = "https://osv-vulnerabilities.storage.googleapis.com"
           
           # Focus on ecosystems most likely to have DB-related vulnerabilities
-          ECOSYSTEMS = ["Go", "PyPI", "npm", "Maven", "NuGet", "RubyGems", "Packagist", "crates.io"]  # Fixed crates.io casing
+          ECOSYSTEMS = ["Go", "PyPI", "npm", "Maven", "NuGet", "RubyGems", "Packagist", "crates.io"]
           
           # Enhanced keyword matching with word boundaries
           TARGET_KEYWORDS = {
@@ -60,6 +62,27 @@ jobs:
                       return True
               return False
           
+          def extract_published_date(vuln_data):
+              """Extract published date from OSV vulnerability data"""
+              # Try published field first
+              published = vuln_data.get('published')
+              if published:
+                  try:
+                      return datetime.fromisoformat(published.replace('Z', '+00:00'))
+                  except (ValueError, TypeError):
+                      pass
+              
+              # Try modified field as fallback
+              modified = vuln_data.get('modified')
+              if modified:
+                  try:
+                      return datetime.fromisoformat(modified.replace('Z', '+00:00'))
+                  except (ValueError, TypeError):
+                      pass
+              
+              # If no date found, use a very old date so it appears at the bottom
+              return datetime(2000, 1, 1)
+          
           def process_vulnerability(vuln_data, all_vulnerabilities):
               """Process a single vulnerability and add to results if it matches our criteria"""
               
@@ -67,6 +90,9 @@ jobs:
               summary = vuln_data.get('summary', '')
               details = vuln_data.get('details', '')
               aliases = vuln_data.get('aliases', [])
+              
+              # Extract published date
+              published_date = extract_published_date(vuln_data)
               
               # Get affected package names
               affected_names = []
@@ -103,6 +129,7 @@ jobs:
                       "id": vuln_id,
                       "title": summary or f"Vulnerability {vuln_id}",
                       "description": details or summary or "No description available",
+                      "published_date": published_date.isoformat(),
                       "url": f"https://osv.dev/{vuln_id}",
                       "source": source,
                       "aliases": aliases,
@@ -174,13 +201,14 @@ jobs:
                   json.dump(grouped_data[db], f, indent=2)
               print(f"💾 Saved {len(grouped_data[db])} entries to data/{db}.json")
           
-          # Print some examples for debugging
+          # Print some examples for debugging with dates
           if all_vulnerabilities:
               print(f"\n🔍 Sample vulnerabilities found:")
               for source in sorted(grouped_data.keys()):
                   if grouped_data[source]:
                       sample = grouped_data[source][0]
-                      print(f"   {source.upper()}: {sample['id']} - {sample['title'][:60]}...")
+                      published_date = sample.get('published_date', 'Unknown')
+                      print(f"   {source.upper()}: {sample['id']} - Published: {published_date[:10]} - {sample['title'][:50]}...")
           
           print("🎉 Vulnerability feed update completed!")
           EOF
@@ -202,6 +230,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Pull latest changes and rebase before committing
+          git pull --rebase origin main
           
           git add data/*.json
           
