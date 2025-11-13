@@ -1,19 +1,18 @@
-name: Database
+name: Database - OSV (Full Enrichment)
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * *'   # daily at 00:00 UTC
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  update-feeds:
+  update-database-feeds:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -26,272 +25,287 @@ jobs:
 
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install requests
 
-      - name: 🌐 Fetch and Process Database Vulnerabilities from OSV.dev
+      - name: 🌐 Fetch and Enrich Database Vulnerabilities from OSV.dev
+        env:
+          OSV_EXPORT_BASE: "https://osv-vulnerabilities.storage.googleapis.com"
         run: |
-          python3 << 'EOF'
-          import requests
-          import json
-          import os
-          import zipfile
-          import io
-          import re
+          python3 << 'PY'
+          import requests, json, zipfile, io, os, re, time
           from datetime import datetime
-          
-          print("🚀 Starting OSV.dev DATABASE vulnerability feed update...")
-          
-          # Configuration - Using OSV export endpoints
-          OSV_EXPORT_URL = "https://osv-vulnerabilities.storage.googleapis.com"
-          
-          # Get ALL ecosystems to ensure we capture older vulnerabilities
-          ALL_ECOSYSTEMS = [
-              "Go", "PyPI", "npm", "Maven", "NuGet", "RubyGems", "Packagist", "crates.io",
-              "Linux", "Debian", "Ubuntu", "Alpine", "Hex", "Android", "GitHub Actions",
-              "OSS-Fuzz", "GSD", "UVI"
+          from requests.adapters import HTTPAdapter, Retry
+
+          print("🚀 Starting OSV.dev DATABASE vulnerability feed update (with enrichment)...")
+
+          OSV_EXPORT_BASE = "${{ env.OSV_EXPORT_BASE }}"
+          # Ecosystems to download - adjust if you want fewer or more
+          ECOSYSTEMS = [
+            "Go", "PyPI", "npm", "Maven", "NuGet", "RubyGems", "Packagist", "crates.io",
+            "Debian", "Ubuntu", "Alpine", "Linux", "Android", "OSS-Fuzz", "GSD", "UVI"
           ]
-          
-          # Database keywords - EXPANDED to include connector terms
+
           TARGET_KEYWORDS = {
               "mysql": ["mysql", "mariadb", "percona", "connector", "connectors"],
-              "postgresql": ["postgres", "postgresql", "pgsql", "postgresql", "postgres-"],
+              "postgresql": ["postgres", "postgresql", "pgsql", "pg_dump", "pg_restore"],
               "redis": ["redis", "redislabs"]
           }
-          
+
+          # Controls: lower to be gentler; increase if you need faster runs
+          SLEEP_BETWEEN_API_CALLS = 0.12
+          API_RETRY_SLEEP = 1.5
+          API_MAX_RETRIES = 3
+
+          # Prepare requests session with retries
+          session = requests.Session()
+          retries = Retry(total=3, backoff_factor=0.5, status_forcelist=[429,500,502,503,504], allowed_methods=["GET","POST"])
+          session.mount("https://", HTTPAdapter(max_retries=retries))
+          session.headers.update({"User-Agent": "VulnFeed-GitHubAction/1.0 +https://github.com/SecByShresth/VulnFeed"})
+
           def contains_keyword(text, keywords):
-              """Check if text contains any of the keywords with flexible matching"""
-              if not text or not keywords:
+              if not text:
                   return False
               text_lower = text.lower()
-              for keyword in keywords:
-                  # For connector-related terms, use more flexible matching
-                  if keyword in ["connector", "connectors"]:
-                      if keyword in text_lower:
+              for kw in keywords:
+                  if kw in ["connector", "connectors"]:
+                      if kw in text_lower:
                           return True
                   else:
-                      # Use word boundaries for other keywords to avoid partial matches
-                      if re.search(r'\b' + re.escape(keyword) + r'\b', text_lower):
+                      if re.search(r'\b' + re.escape(kw) + r'\b', text_lower):
                           return True
               return False
-          
-          def extract_published_date(vuln_data):
-              """Extract published date from OSV vulnerability data with better error handling"""
-              # Try published field first
-              published = vuln_data.get('published')
-              if published:
-                  try:
-                      # Handle various date formats
-                      if published.endswith('Z'):
-                          return datetime.fromisoformat(published[:-1] + '+00:00')
-                      else:
-                          return datetime.fromisoformat(published.replace('Z', '+00:00'))
-                  except (ValueError, TypeError) as e:
-                      print(f"⚠️ Could not parse published date: {published} - {e}")
-              
-              # Try modified field as fallback
-              modified = vuln_data.get('modified')
-              if modified:
-                  try:
-                      if modified.endswith('Z'):
-                          return datetime.fromisoformat(modified[:-1] + '+00:00')
-                      else:
-                          return datetime.fromisoformat(modified.replace('Z', '+00:00'))
-                  except (ValueError, TypeError) as e:
-                      print(f"⚠️ Could not parse modified date: {modified} - {e}")
-              
-              # Try to get date from ID for older vulnerabilities
-              vuln_id = vuln_data.get('id', '')
-              if 'CVE-2017' in vuln_id:
-                  return datetime(2017, 1, 1)
-              elif 'CVE-2018' in vuln_id:
-                  return datetime(2018, 1, 1)
-              elif 'CVE-2019' in vuln_id:
-                  return datetime(2019, 1, 1)
-              elif 'CVE-2020' in vuln_id:
-                  return datetime(2020, 1, 1)
-              
-              # If no date found, use a very old date so it appears at the bottom
-              return datetime(2000, 1, 1)
-          
-          def process_vulnerability(vuln_data, all_vulnerabilities):
-              """Process a single vulnerability and add to results if it matches our criteria"""
-              
-              vuln_id = vuln_data.get('id', '')
-              summary = vuln_data.get('summary', '')
-              details = vuln_data.get('details', '')
-              aliases = vuln_data.get('aliases', [])
-              
-              # Extract published date
-              published_date = extract_published_date(vuln_data)
-              
-              # Get affected package names
-              affected_names = []
-              package_ecosystem = ""
-              for affected in vuln_data.get('affected', []):
-                  if affected.get('package'):
-                      pkg = affected['package']
-                      pkg_name = pkg.get('name', '').lower()
-                      pkg_ecosystem = pkg.get('ecosystem', '').lower()
-                      if pkg_name:
-                          affected_names.append(pkg_name)
-                      if pkg_ecosystem:
-                          package_ecosystem = pkg_ecosystem
-              
-              # Combine all text for keyword searching
-              search_text = f"{summary} {details} {' '.join(affected_names)}".lower()
-              
-              # Determine which feed this belongs to - DATABASES ONLY
-              source = None
-              
-              # Check MySQL keywords
-              if contains_keyword(search_text, TARGET_KEYWORDS["mysql"]):
-                  source = "mysql"
-              # Check PostgreSQL keywords  
-              elif contains_keyword(search_text, TARGET_KEYWORDS["postgresql"]):
-                  source = "postgresql"
-              # Check Redis keywords
-              elif contains_keyword(search_text, TARGET_KEYWORDS["redis"]):
-                  source = "redis"
-              
-              # Only include if it matches one of our DATABASE categories
-              if source:
-                  normalized_entry = {
-                      "id": vuln_id,
-                      "title": summary or f"Vulnerability {vuln_id}",
-                      "description": details or summary or "No description available",
-                      "published_date": published_date.isoformat(),
-                      "url": f"https://osv.dev/{vuln_id}",
-                      "source": source,
-                      "aliases": aliases,
-                      "affected_packages": affected_names,
-                      "ecosystem": package_ecosystem
-                  }
-                  
-                  all_vulnerabilities.append(normalized_entry)
-                  
-                  # Debug output for specific vulnerability we're looking for
-                  if 'GHSA-2cf3-g243-hhfx' in vuln_id or 'CVE-2017-3590' in vuln_id:
-                      print(f"🎯 FOUND TARGET VULNERABILITY: {vuln_id}")
-                      print(f"   Published: {published_date}")
-                      print(f"   Title: {summary}")
-                      print(f"   Source: {source}")
-          
-          all_vulnerabilities = []
 
-          # Step 1: Download and process each ecosystem
-          for ecosystem in ALL_ECOSYSTEMS:
-              print(f"📥 Processing {ecosystem} ecosystem for DATABASE vulnerabilities...")
-              
-              url = f"{OSV_EXPORT_URL}/{ecosystem}/all.zip"
-              
+          def parse_iso(dt):
+              if not dt:
+                  return None
               try:
-                  response = requests.get(url, timeout=120)
-                  response.raise_for_status()
-                  
-                  # The response is a ZIP file containing individual JSON files
-                  with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
-                      # Process each JSON file in the ZIP
-                      for file_name in zip_file.namelist():
-                          if file_name.endswith('.json'):
-                              with zip_file.open(file_name) as json_file:
-                                  try:
-                                      vuln_data = json.load(json_file)
-                                      process_vulnerability(vuln_data, all_vulnerabilities)
-                                  except json.JSONDecodeError as e:
-                                      continue
-                  
-                  current_matches = len([v for v in all_vulnerabilities])
-                  print(f"✅ Processed {ecosystem} - found {current_matches} DATABASE matches so far")
-                  
-              except requests.RequestException as e:
-                  print(f"⚠️ Failed to download {ecosystem}: {e}")
-                  continue
-              except zipfile.BadZipFile:
-                  print(f"⚠️ Invalid ZIP file for {ecosystem}")
+                  # Accept various ISO-like formats
+                  if isinstance(dt, str):
+                      if dt.endswith('Z'):
+                          return datetime.fromisoformat(dt[:-1] + "+00:00").isoformat()
+                      return datetime.fromisoformat(dt).isoformat()
+                  return None
+              except Exception:
+                  return None
+
+          # Cache to avoid repeat API calls within one workflow run
+          osv_api_cache = {}
+
+          def fetch_osv_api(vuln_id):
+              """Fetch full OSV API payload for a vulnerability ID (cached)."""
+              if not vuln_id:
+                  return None
+              if vuln_id in osv_api_cache:
+                  return osv_api_cache[vuln_id]
+              url = f"https://api.osv.dev/v1/vulns/{vuln_id}"
+              for attempt in range(1, API_MAX_RETRIES + 1):
+                  try:
+                      resp = session.get(url, timeout=30)
+                      if resp.status_code == 200:
+                          data = resp.json()
+                          osv_api_cache[vuln_id] = data
+                          time.sleep(SLEEP_BETWEEN_API_CALLS)
+                          return data
+                      elif resp.status_code == 404:
+                          # Not found via API - store negative to avoid re-trying
+                          osv_api_cache[vuln_id] = None
+                          return None
+                      else:
+                          print(f"⚠️ OSV API returned {resp.status_code} for {vuln_id} (attempt {attempt})")
+                          time.sleep(API_RETRY_SLEEP * attempt)
+                  except requests.RequestException as e:
+                      print(f"⚠️ OSV API request error for {vuln_id}: {e} (attempt {attempt})")
+                      time.sleep(API_RETRY_SLEEP * attempt)
+              return None
+
+          def extract_published(v):
+              # Try fields commonly present in detailed OSV API responses
+              for key in ("published", "modified", "date"):
+                  val = v.get(key) if isinstance(v, dict) else None
+                  if val:
+                      parsed = parse_iso(val)
+                      if parsed:
+                          return parsed
+              # Try top-level fields under other names
+              return None
+
+          all_matches = []
+
+          # Helper to normalize an OSV vuln entry (merge partial zip JSON + api)
+          def normalize_and_enrich(partial):
+              """
+              partial: dict from zip JSON (an OSV vuln object)
+              returns: enriched dict with desired fields
+              """
+              vid = partial.get("id") or partial.get("ID") or partial.get("id_lower") or ""
+              if not vid:
+                  return None
+              api_data = fetch_osv_api(vid)
+              # merge partial and api_data with API preference
+              source_obj = api_data or partial
+              # gather title/summary/details
+              title = source_obj.get("summary") or source_obj.get("title") or partial.get("summary") or partial.get("title") or ""
+              details = source_obj.get("details") or partial.get("details") or ""
+              aliases = source_obj.get("aliases") or partial.get("aliases") or []
+              # affected packages
+              affected_list = []
+              pkg_ecosystem = ""
+              for a in source_obj.get("affected", []) or []:
+                  pkg = a.get("package") or {}
+                  name = (pkg.get("name") or "").strip()
+                  eco = (pkg.get("ecosystem") or "").strip()
+                  if name:
+                      affected_list.append(name)
+                  if eco and not pkg_ecosystem:
+                      pkg_ecosystem = eco
+              # published / modified
+              published = None
+              modified = None
+              if api_data:
+                  published = parse_iso(api_data.get("published")) or parse_iso(api_data.get("modified"))
+                  modified = parse_iso(api_data.get("modified"))
+              else:
+                  # fallback to partial data
+                  published = parse_iso(partial.get("published") or partial.get("modified"))
+                  modified = parse_iso(partial.get("modified"))
+
+              # severity / references / database_specific
+              severity = api_data.get("severity") if api_data else partial.get("severity") or []
+              references = []
+              if api_data and api_data.get("references"):
+                  references = [r.get("url") for r in api_data.get("references") if r.get("url")]
+              elif partial.get("references"):
+                  # sometimes partial contains simple references array
+                  refs = partial.get("references")
+                  if isinstance(refs, list):
+                      references = [r.get("url") if isinstance(r, dict) else r for r in refs]
+
+              db_specific = api_data.get("database_specific") if api_data else partial.get("database_specific", {})
+
+              normalized = {
+                  "id": vid,
+                  "title": title,
+                  "description": details or title,
+                  "published_date": published or "",
+                  "modified": modified or "",
+                  "url": f"https://osv.dev/{vid}",
+                  "aliases": aliases,
+                  "affected_packages": affected_list,
+                  "ecosystem": pkg_ecosystem,
+                  "severity": severity,
+                  "references": references,
+                  "database_specific": db_specific
+              }
+              return normalized
+
+          # Process each ecosystem export ZIP
+          for eco in ECOSYSTEMS:
+              eco_name = eco
+              zip_url = f"{OSV_EXPORT_BASE}/{eco_name}/all.zip"
+              print(f"📥 Downloading {zip_url} ...")
+              try:
+                  resp = session.get(zip_url, timeout=120)
+                  resp.raise_for_status()
+              except Exception as e:
+                  print(f"⚠️ Failed to download {eco_name} export: {e}")
                   continue
 
-          print(f"\n📊 DATABASE Processing complete:")
-          print(f"   📝 Total DATABASE vulnerabilities: {len(all_vulnerabilities)}")
-          
-          # Sort all vulnerabilities by published date (newest first)
-          all_vulnerabilities.sort(key=lambda x: x['published_date'], reverse=True)
-          
-          # Step 2: Group by source and save to files
+              try:
+                  z = zipfile.ZipFile(io.BytesIO(resp.content))
+              except zipfile.BadZipFile:
+                  print(f"⚠️ Bad ZIP file for {eco_name}, skipping")
+                  continue
+
+              filecount = 0
+              for fname in z.namelist():
+                  if not fname.endswith(".json"):
+                      continue
+                  filecount += 1
+                  try:
+                      with z.open(fname) as fh:
+                          data = json.load(fh)
+                  except Exception:
+                      # skip bad json
+                      continue
+
+                  # Normal OSV structure can be either full vuln object or nested
+                  vulndata = data
+                  # If the file contains the vuln under key (rare), try to find a dict with id
+                  if not isinstance(vulndata, dict):
+                      continue
+
+                  # normalize and enrich
+                  normalized = normalize_and_enrich(vulndata)
+                  if not normalized:
+                      continue
+
+                  # Decide if this vuln is database-related
+                  search_blob = " ".join([
+                      normalized.get("title",""),
+                      normalized.get("description",""),
+                      " ".join(normalized.get("affected_packages", []))
+                  ]).lower()
+
+                  target = None
+                  if contains_keyword(search_blob, TARGET_KEYWORDS["mysql"]):
+                      target = "mysql"
+                  elif contains_keyword(search_blob, TARGET_KEYWORDS["postgresql"]):
+                      target = "postgresql"
+                  elif contains_keyword(search_blob, TARGET_KEYWORDS["redis"]):
+                      target = "redis"
+
+                  if target:
+                      normalized["source"] = target
+                      all_matches.append(normalized)
+
+              print(f"✅ Processed {eco_name} export (files checked: {filecount}), matches so far: {len(all_matches)}")
+
+          # Sort and group results
+          print(f"\n📊 Total database vulnerabilities matched: {len(all_matches)}")
+          # fallback sort by published_date (empty strings go last)
+          def sort_key(x):
+              pd = x.get("published_date") or ""
+              return pd
+          all_matches.sort(key=sort_key, reverse=True)
+
+          grouped = {"mysql": [], "postgresql": [], "redis": []}
+          for item in all_matches:
+              src = item.get("source")
+              if src in grouped:
+                  grouped[src].append(item)
+
+          # Ensure data dir
           if not os.path.exists("data"):
               os.makedirs("data")
 
-          grouped_data = {}
-          for entry in all_vulnerabilities:
-              source = entry['source']
-              if source not in grouped_data:
-                  grouped_data[source] = []
-              grouped_data[source].append(entry)
-
-          # Print breakdown before saving
-          print(f"\n📈 DATABASE Vulnerability Breakdown:")
-          for source in sorted(grouped_data.keys()):
-              print(f"   {source.upper()}: {len(grouped_data[source])} entries")
-
-          # Only save database files
-          database_files = ["mysql", "postgresql", "redis"]
-          
-          for db in database_files:
-              if db not in grouped_data:
-                  grouped_data[db] = []
-              
-              # Sort each database's vulnerabilities by published date
-              grouped_data[db].sort(key=lambda x: x['published_date'], reverse=True)
-              
+          for db in ("mysql","postgresql","redis"):
+              # Save
               with open(f"data/{db}.json", "w") as f:
-                  json.dump(grouped_data[db], f, indent=2)
-              print(f"💾 Saved {len(grouped_data[db])} entries to data/{db}.json")
-          
-          # Print some examples for debugging with dates
-          if all_vulnerabilities:
-              print(f"\n🔍 Sample DATABASE vulnerabilities found (with dates):")
-              for source in sorted(grouped_data.keys()):
-                  if grouped_data[source]:
-                      sample = grouped_data[source][0]
-                      published_date = sample.get('published_date', 'Unknown')
-                      print(f"   {source.upper()}: {sample['id']} - Published: {published_date[:10]} - {sample['title'][:50]}...")
-              
-              # Print oldest and newest for reference
-              if all_vulnerabilities:
-                  oldest = all_vulnerabilities[-1]
-                  newest = all_vulnerabilities[0]
-                  print(f"\n📅 Date Range:")
-                  print(f"   Newest: {newest['published_date'][:10]} - {newest['id']}")
-                  print(f"   Oldest: {oldest['published_date'][:10]} - {oldest['id']}")
-          
-          print("🎉 DATABASE vulnerability feed update completed!")
-          EOF
+                  json.dump(grouped.get(db,[]), f, indent=2)
+              print(f"💾 Saved {len(grouped.get(db,[]))} entries to data/{db}.json")
 
-      - name: 📊 Display Database Results
+          # Print sample entries for verification
+          for db in ("mysql","postgresql","redis"):
+              arr = grouped.get(db,[])
+              if arr:
+                  s = arr[0]
+                  print(f"🔎 Sample {db}: {s['id']} Published: {s.get('published_date','N/A')} Title: {s.get('title','')[:80]}")
+              else:
+                  print(f"ℹ️ No matches for {db}")
+
+          print("🎉 OSV database feed update complete.")
+          PY
+
+      - name: Display generated files (summary)
         run: |
-          echo "=== Database Files Generated ==="
-          ls -la data/mysql.json data/postgresql.json data/redis.json 2>/dev/null || echo "Some database files not found"
-          echo ""
-          echo "=== Database File Contents ==="
+          echo "=== Generated Files ==="
+          ls -la data || true
           for file in data/mysql.json data/postgresql.json data/redis.json; do
             if [ -f "$file" ]; then
-              count=$(jq 'length' "$file" 2>/dev/null || echo "0")
-              echo "$(basename "$file"): $count entries"
-            fi
-          done
-          echo ""
-          echo "=== Sample with Published Dates ==="
-          for file in data/mysql.json data/postgresql.json data/redis.json; do
-            if [ -f "$file" ]; then
-              echo "$(basename "$file"):"
-              jq -r '.[0] | "  ID: \(.id)\n  Published: \(.published_date)\n  Title: \(.title)\n"' "$file" 2>/dev/null || echo "  No entries or invalid JSON"
               echo ""
-            fi
-          done
-          echo "=== Checking for specific vulnerability ==="
-          for file in data/mysql.json data/postgresql.json data/redis.json; do
-            if [ -f "$file" ]; then
-              echo "Searching in $(basename $file):"
-              jq -r '.[] | select(.id == "GHSA-2cf3-g243-hhfx" or .aliases[]? == "CVE-2017-3590") | "  FOUND: \(.id) - Published: \(.published_date) - \(.title)"' "$file" 2>/dev/null || echo "  Not found"
+              echo "File: $file"
+              jq '.[0:3] | {count: (length), sample: .}' "$file" || echo "Could not display $file"
             fi
           done
 
@@ -299,24 +313,17 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          
-          # Get the latest changes to avoid conflicts
           git fetch origin
           git reset --hard origin/main
-          
-          # Add only the specific database files we want to track
           git add data/mysql.json data/postgresql.json data/redis.json
-          
-          # Check if there are changes after adding
           if git diff --staged --quiet; then
             echo "ℹ️ No changes to Database vulnerability data"
           else
             MYSQL_COUNT=$(jq '. | length' data/mysql.json)
             POSTGRES_COUNT=$(jq '. | length' data/postgresql.json)
             REDIS_COUNT=$(jq '. | length' data/redis.json)
-            TOTAL_COUNT=$((MYSQL_COUNT + POSTGRES_COUNT + REDIS_COUNT))
-            
-            git commit -m "🔄 Update Database vulnerability feeds - $TOTAL_COUNT vulnerabilities (MySQL: $MYSQL_COUNT, PostgreSQL: $POSTGRES_COUNT, Redis: $REDIS_COUNT) - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            TOTAL=$((MYSQL_COUNT + POSTGRES_COUNT + REDIS_COUNT))
+            git commit -m "🔄 Update Database feeds - total: $TOTAL (mysql:$MYSQL_COUNT postgresql:$POSTGRES_COUNT redis:$REDIS_COUNT) - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
             git push origin main
-            echo "✅ Successfully pushed Database vulnerability data to repository"
+            echo "✅ Pushed database feeds to repository"
           fi
