@@ -8,6 +8,8 @@ on:
 jobs:
   update-feeds:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Explicitly grant write access for GITHUB_TOKEN
 
     steps:
       - name: Checkout Repository
@@ -174,7 +176,7 @@ jobs:
                   continue
 
           print(f"\n📊 DATABASE Processing complete:")
-          print(f"   📝 Total DATABASE vulnerabilities: {len(all_vulnerabilities)}")
+          print(f"    📝 Total DATABASE vulnerabilities: {len(all_vulnerabilities)}")
           
           # Step 2: Group by source and save to files
           if not os.path.exists("data"):
@@ -190,7 +192,7 @@ jobs:
           # Print breakdown before saving
           print(f"\n📈 DATABASE Vulnerability Breakdown:")
           for source in sorted(grouped_data.keys()):
-              print(f"   {source.upper()}: {len(grouped_data[source])} entries")
+              print(f"    {source.upper()}: {len(grouped_data[source])} entries")
 
           # Only save database files
           database_files = ["mysql", "postgresql", "redis"]
@@ -210,7 +212,7 @@ jobs:
                   if grouped_data[source]:
                       sample = grouped_data[source][0]
                       published_date = sample.get('published_date', 'Unknown')
-                      print(f"   {source.upper()}: {sample['id']} - Published: {published_date[:10]} - {sample['title'][:50]}...")
+                      print(f"    {source.upper()}: {sample['id']} - Published: {published_date[:10]} - {sample['title'][:50]}...")
           
           print("🎉 DATABASE vulnerability feed update completed!")
           EOF
