@@ -1,281 +1,208 @@
-name: LinuxFeed
+name: 🐧 VulnFeed - Linux Vulnerabilities
 
 on:
-  schedule:
-    - cron: '0 0 * * *'
   workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * *"  # Runs daily at 04:00 UTC
 
 jobs:
-  update-feeds:
+  fetch-linux-vulns:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
+        
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-
+          python-version: "3.11"
+          
       - name: Install dependencies
         run: |
-          pip install requests
-
-      - name: 🌐 Fetch and Process Vulnerabilities from OSV.dev
+          python3 -m pip install --upgrade pip requests
+          
+      - name: Fetch Linux Vulnerabilities
         run: |
-          python3 << 'EOF'
+          python3 <<'EOF'
           import requests
           import json
           import os
-          import zipfile
-          import io
-          import re
-          from datetime import datetime
+          import time
+          from datetime import datetime, timezone
           
-          print("🚀 Starting OSV.dev vulnerability feed update...")
+          # Create data directory
+          os.makedirs("data", exist_ok=True)
           
-          # Configuration - Using OSV export endpoints
-          OSV_EXPORT_URL = "https://osv-vulnerabilities.storage.googleapis.com"
-          
-          # Focus on ecosystems most likely to have DB-related vulnerabilities
-          ECOSYSTEMS = ["Go", "PyPI", "npm", "Maven", "NuGet", "RubyGems", "Packagist", "crates.io"]
-          
-          # Enhanced keyword matching with word boundaries for Linux distributions
-          TARGET_KEYWORDS = {
-              "mysql": ["mysql", "mariadb", "percona"],
-              "postgresql": ["postgres", "postgresql", "pgsql"],
-              "redis": ["redis"],
-              "almalinux": ["almalinux", "alma linux"],
-              "rockylinux": ["rockylinux", "rocky linux"],
-              "amazonlinux": ["amazonlinux", "amazon linux"],
-              "archlinux": ["archlinux", "arch linux"],
-              "canonical": ["canonical", "ubuntu"],
-              "debian": ["debian"],
-              "ubuntu": ["ubuntu"],
-              "fedora": ["fedora"],
-              "oraclelinux": ["oraclelinux", "oracle linux"],
-              "suse": ["suse", "sles", "opensuse", "openSUSE", "suse linux"]
+          # Linux distributions with their OSV ecosystem names and sample packages
+          # Using common packages to get broad vulnerability coverage
+          distributions = {
+              "almalinux": {
+                  "ecosystem": "AlmaLinux",
+                  "packages": ["kernel", "glibc", "openssl", "curl", "python3", "nginx", "docker", "systemd"]
+              },
+              "rocky": {
+                  "ecosystem": "Rocky Linux",
+                  "packages": ["kernel", "glibc", "openssl", "curl", "python3", "nginx", "docker", "systemd"]
+              },
+              "amazon": {
+                  "ecosystem": "Amazon Linux",
+                  "packages": ["kernel", "glibc", "openssl", "curl", "python3", "nginx", "docker", "systemd"]
+              },
+              "arch": {
+                  "ecosystem": "Arch Linux",
+                  "packages": ["linux", "glibc", "openssl", "curl", "python", "nginx", "docker", "systemd"]
+              },
+              "debian": {
+                  "ecosystem": "Debian",
+                  "packages": ["linux", "libc6", "openssl", "curl", "python3", "nginx", "docker.io", "systemd"]
+              },
+              "ubuntu": {
+                  "ecosystem": "Ubuntu",
+                  "packages": ["linux", "libc6", "openssl", "curl", "python3", "nginx", "docker.io", "systemd"]
+              },
+              "fedora": {
+                  "ecosystem": "Fedora",
+                  "packages": ["kernel", "glibc", "openssl", "curl", "python3", "nginx", "docker", "systemd"]
+              },
+              "oracle": {
+                  "ecosystem": "Oracle Linux",
+                  "packages": ["kernel", "glibc", "openssl", "curl", "python3", "nginx", "docker", "systemd"]
+              },
+              "suse": {
+                  "ecosystem": "SUSE",
+                  "packages": ["kernel-default", "glibc", "openssl", "curl", "python3", "nginx", "docker", "systemd"]
+              }
           }
           
-          def contains_keyword(text, keywords):
-              """Check if text contains any of the keywords with word boundaries"""
-              if not text or not keywords:
-                  return False
-              text_lower = text.lower()
-              for keyword in keywords:
-                  # Use word boundaries to avoid partial matches
-                  if re.search(r'\b' + re.escape(keyword) + r'\b', text_lower):
-                      return True
-              return False
+          # Current timestamp for metadata
+          fetch_timestamp = datetime.now(timezone.utc).isoformat()
           
-          def extract_published_date(vuln_data):
-              """Extract published date from OSV vulnerability data"""
-              # Try published field first
-              published = vuln_data.get('published')
-              if published:
-                  try:
-                      return datetime.fromisoformat(published.replace('Z', '+00:00'))
-                  except (ValueError, TypeError):
-                      pass
+          def fetch_vulnerabilities(distro_name, distro_config):
+              """Fetch vulnerabilities for a Linux distribution from OSV.dev"""
+              all_vulns = []
+              seen_ids = set()
               
-              # Try modified field as fallback
-              modified = vuln_data.get('modified')
-              if modified:
-                  try:
-                      return datetime.fromisoformat(modified.replace('Z', '+00:00'))
-                  except (ValueError, TypeError):
-                      pass
+              ecosystem = distro_config["ecosystem"]
+              packages = distro_config["packages"]
               
-              # If no date found, use a very old date so it appears at the bottom
-              return datetime(2000, 1, 1)
-          
-          def process_vulnerability(vuln_data, all_vulnerabilities):
-              """Process a single vulnerability and add to results if it matches our criteria"""
+              print(f"\n{'='*60}")
+              print(f"🐧 Processing: {distro_name.upper()} ({ecosystem})")
+              print(f"{'='*60}")
               
-              vuln_id = vuln_data.get('id', '')
-              summary = vuln_data.get('summary', '')
-              details = vuln_data.get('details', '')
-              aliases = vuln_data.get('aliases', [])
-              
-              # Extract published date
-              published_date = extract_published_date(vuln_data)
-              
-              # Get affected package names
-              affected_names = []
-              package_ecosystem = ""
-              for affected in vuln_data.get('affected', []):
-                  if affected.get('package'):
-                      pkg = affected['package']
-                      pkg_name = pkg.get('name', '').lower()
-                      pkg_ecosystem = pkg.get('ecosystem', '').lower()
-                      if pkg_name:
-                          affected_names.append(pkg_name)
-                      if pkg_ecosystem:
-                          package_ecosystem = pkg_ecosystem
-              
-              # Combine all text for keyword searching
-              search_text = f"{summary} {details} {' '.join(affected_names)}".lower()
-              
-              # Determine which feed this belongs to
-              source = None
-              
-              # Check database keywords first
-              if contains_keyword(search_text, TARGET_KEYWORDS["mysql"]):
-                  source = "mysql"
-              elif contains_keyword(search_text, TARGET_KEYWORDS["postgresql"]):
-                  source = "postgresql"
-              elif contains_keyword(search_text, TARGET_KEYWORDS["redis"]):
-                  source = "redis"
-              # Check Linux distributions
-              elif contains_keyword(search_text, TARGET_KEYWORDS["almalinux"]):
-                  source = "almalinux"
-              elif contains_keyword(search_text, TARGET_KEYWORDS["rockylinux"]):
-                  source = "rockylinux"
-              elif contains_keyword(search_text, TARGET_KEYWORDS["amazonlinux"]):
-                  source = "amazonlinux"
-              elif contains_keyword(search_text, TARGET_KEYWORDS["archlinux"]):
-                  source = "archlinux"
-              elif contains_keyword(search_text, TARGET_KEYWORDS["canonical"]):
-                  source = "canonical"
-              elif contains_keyword(search_text, TARGET_KEYWORDS["debian"]):
-                  source = "debian"
-              elif contains_keyword(search_text, TARGET_KEYWORDS["ubuntu"]):
-                  source = "ubuntu"
-              elif contains_keyword(search_text, TARGET_KEYWORDS["fedora"]):
-                  source = "fedora"
-              elif contains_keyword(search_text, TARGET_KEYWORDS["oraclelinux"]):
-                  source = "oraclelinux"
-              elif contains_keyword(search_text, TARGET_KEYWORDS["suse"]):
-                  source = "suse"
-              
-              # Only include if it matches one of our target categories
-              if source:
-                  normalized_entry = {
-                      "id": vuln_id,
-                      "title": summary or f"Vulnerability {vuln_id}",
-                      "description": details or summary or "No description available",
-                      "published_date": published_date.isoformat(),
-                      "url": f"https://osv.dev/{vuln_id}",
-                      "source": source,
-                      "aliases": aliases,
-                      "affected_packages": affected_names,
-                      "ecosystem": package_ecosystem
-                  }
+              for package in packages:
+                  print(f"\n🔍 Searching: {ecosystem}/{package}")
                   
-                  all_vulnerabilities.append(normalized_entry)
-          
-          all_vulnerabilities = []
-
-          # Step 1: Download and process each ecosystem
-          for ecosystem in ECOSYSTEMS:
-              print(f"📥 Processing {ecosystem} ecosystem...")
+                  try:
+                      # Correct OSV.dev API query format for Linux distributions
+                      payload = {
+                          "package": {
+                              "ecosystem": ecosystem,
+                              "name": package
+                          }
+                      }
+                      
+                      response = requests.post(
+                          "https://api.osv.dev/v1/query",
+                          headers={"Content-Type": "application/json"},
+                          json=payload,
+                          timeout=30
+                      )
+                      response.raise_for_status()
+                      data = response.json()
+                      
+                      # Extract vulnerabilities from response
+                      vulns = data.get("vulns", [])
+                      
+                      # Deduplicate and add metadata
+                      new_count = 0
+                      for vuln in vulns:
+                          vuln_id = vuln.get("id")
+                          if vuln_id and vuln_id not in seen_ids:
+                              seen_ids.add(vuln_id)
+                              
+                              # Add metadata WITHOUT modifying original dates
+                              vuln["_metadata"] = {
+                                  "fetched_at": fetch_timestamp,
+                                  "source_package": f"{ecosystem}/{package}",
+                                  "distribution": distro_name
+                              }
+                              
+                              all_vulns.append(vuln)
+                              new_count += 1
+                      
+                      print(f"   ✓ Found {len(vulns)} vulnerabilities ({new_count} new)")
+                      
+                  except requests.exceptions.HTTPError as e:
+                      print(f"   ✗ HTTP error: {e}")
+                      if hasattr(e.response, 'text'):
+                          print(f"   Response: {e.response.text[:200]}")
+                  except requests.exceptions.RequestException as e:
+                      print(f"   ✗ Network error: {e}")
+                  except json.JSONDecodeError as e:
+                      print(f"   ✗ JSON decode error: {e}")
+                  except Exception as e:
+                      print(f"   ✗ Unexpected error: {e}")
+                  
+                  # Rate limiting - be nice to OSV API
+                  time.sleep(1)
               
-              url = f"{OSV_EXPORT_URL}/{ecosystem}/all.zip"
+              return all_vulns
+          
+          def sort_by_published_date(vulns):
+              """Sort vulnerabilities by published date (newest first)"""
+              def get_sort_key(vuln):
+                  # Try published date first, fallback to modified, then empty string
+                  date_str = vuln.get("published") or vuln.get("modified") or ""
+                  return date_str
               
               try:
-                  response = requests.get(url, timeout=120)
-                  response.raise_for_status()
-                  
-                  # The response is a ZIP file containing individual JSON files
-                  with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
-                      # Process each JSON file in the ZIP
-                      for file_name in zip_file.namelist():
-                          if file_name.endswith('.json'):
-                              with zip_file.open(file_name) as json_file:
-                                  try:
-                                      vuln_data = json.load(json_file)
-                                      process_vulnerability(vuln_data, all_vulnerabilities)
-                                  except json.JSONDecodeError as e:
-                                      continue
-                  
-                  current_matches = len([v for v in all_vulnerabilities])
-                  print(f"✅ Processed {ecosystem} - found {current_matches} total matches so far")
-                  
-              except requests.RequestException as e:
-                  print(f"⚠️ Failed to download {ecosystem}: {e}")
-                  continue
-              except zipfile.BadZipFile:
-                  print(f"⚠️ Invalid ZIP file for {ecosystem}")
-                  continue
-
-          print(f"\n📊 Processing complete:")
-          print(f"   📝 Total matching vulnerabilities: {len(all_vulnerabilities)}")
+                  return sorted(vulns, key=get_sort_key, reverse=True)
+              except Exception as e:
+                  print(f"   ⚠️ Sorting warning: {e}")
+                  return vulns
           
-          # Step 2: Group by source and save to files
-          if not os.path.exists("data"):
-              os.makedirs("data")
-
-          grouped_data = {}
-          for entry in all_vulnerabilities:
-              source = entry['source']
-              if source not in grouped_data:
-                  grouped_data[source] = []
-              grouped_data[source].append(entry)
-
-          # Print breakdown before saving
-          print(f"\n📈 Vulnerability Breakdown:")
-          for source in sorted(grouped_data.keys()):
-              print(f"   {source.upper()}: {len(grouped_data[source])} entries")
-
-          # Ensure all target files exist (even if empty)
-          target_files = [
-              "mysql", "postgresql", "redis", 
-              "almalinux", "rockylinux", "amazonlinux", "archlinux",
-              "canonical", "debian", "ubuntu", "fedora", 
-              "oraclelinux", "suse"
-          ]
-          
-          for db in target_files:
-              if db not in grouped_data:
-                  grouped_data[db] = []
+          # Process each distribution
+          for distro_name, distro_config in distributions.items():
+              vulnerabilities = fetch_vulnerabilities(distro_name, distro_config)
               
-              with open(f"data/{db}.json", "w") as f:
-                  json.dump(grouped_data[db], f, indent=2)
-              print(f"💾 Saved {len(grouped_data[db])} entries to data/{db}.json")
+              # Sort by original published date
+              vulnerabilities = sort_by_published_date(vulnerabilities)
+              
+              # Limit to latest 100
+              vulnerabilities = vulnerabilities[:100]
+              
+              # Save to file
+              output_file = f"data/{distro_name}.json"
+              with open(output_file, "w", encoding="utf-8") as f:
+                  json.dump(vulnerabilities, f, indent=2, ensure_ascii=False)
+              
+              print(f"\n💾 Saved {len(vulnerabilities)} vulnerabilities to {output_file}")
+              
+              # Show date range for verification
+              if vulnerabilities:
+                  first_date = vulnerabilities[0].get("published", "N/A")
+                  last_date = vulnerabilities[-1].get("published", "N/A")
+                  print(f"   📅 Date range: {first_date} → {last_date}")
+              else:
+                  print(f"   ⚠️ No vulnerabilities found for {distro_name}")
           
-          # Print some examples for debugging with dates
-          if all_vulnerabilities:
-              print(f"\n🔍 Sample vulnerabilities found:")
-              for source in sorted(grouped_data.keys()):
-                  if grouped_data[source]:
-                      sample = grouped_data[source][0]
-                      published_date = sample.get('published_date', 'Unknown')
-                      print(f"   {source.upper()}: {sample['id']} - Published: {published_date[:10]} - {sample['title'][:50]}...")
-          
-          print("🎉 Vulnerability feed update completed!")
+          print(f"\n{'='*60}")
+          print("🎉 Successfully fetched all Linux vulnerabilities!")
+          print(f"{'='*60}\n")
           EOF
-
-      - name: 📊 Display Results
-        run: |
-          echo "=== Generated Files ==="
-          ls -la data/ || echo "No data directory found"
-          echo ""
-          echo "=== File Contents ==="
-          for file in data/*.json; do
-            if [ -f "$file" ]; then
-              count=$(jq 'length' "$file" 2>/dev/null || echo "0")
-              echo "$(basename "$file"): $count entries"
-            fi
-          done
-
+          
       - name: Commit and Push Changes
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/
           
-          # Pull latest changes and rebase before committing
-          git pull --rebase origin main
-          
-          git add data/*.json
-          
-          if git diff --staged --quiet; then
-            echo "No changes to commit."
-          else
-            git commit -m "Auto-update: OSV.dev vulnerability feeds $(date +'%Y-%m-%d')"
+          # Only commit if there are changes
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "🔄 Update Linux VulnFeed data - $(date -u +'%Y-%m-%d %H:%M UTC')"
             git push
-            echo "Changes committed and pushed."
+            echo "✓ Changes committed and pushed"
+          else
+            echo "✓ No changes detected - skipping commit"
           fi
