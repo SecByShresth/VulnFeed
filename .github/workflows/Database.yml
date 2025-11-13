@@ -1,4 +1,4 @@
-name: 🧠 VulnFeed - Database Vulnerabilities
+name: VulnFeed - Database Vulnerabilities
 
 on:
   workflow_dispatch:
@@ -8,78 +8,154 @@ on:
 jobs:
   fetch-db-vulns:
     runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+        
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
+          
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip requests
-
+          
       - name: Fetch Database Vulnerabilities
         run: |
           python3 <<'EOF'
-          import requests, json, os, time
-
+          import requests
+          import json
+          import os
+          import time
+          from datetime import datetime, timezone
+          
+          # Create data directory
           os.makedirs("data", exist_ok=True)
+          
+          # Database products and search terms
           products = {
               "mysql": ["mysql", "mariadb", "percona"],
               "postgresql": ["postgresql", "pgsql", "postgres"],
               "redis": ["redis"]
           }
-
-          for product, terms in products.items():
-              results = []
-              print(f"=== Processing {product.upper()} ===")
-              for term in terms:
-                  print(f"🔍 Searching '{term}'...")
+          
+          # Current timestamp for metadata (not for display)
+          fetch_timestamp = datetime.now(timezone.utc).isoformat()
+          
+          def fetch_vulnerabilities(product_name, search_terms):
+              """Fetch vulnerabilities for a given product from OSV.dev"""
+              all_vulns = []
+              seen_ids = set()
+              
+              print(f"\n{'='*60}")
+              print(f"📦 Processing: {product_name.upper()}")
+              print(f"{'='*60}")
+              
+              for term in search_terms:
+                  print(f"\n🔍 Searching for: '{term}'")
+                  
                   try:
                       response = requests.post(
                           "https://api.osv.dev/v1/query",
                           headers={"Content-Type": "application/json"},
-                          json={"query": term}
+                          json={"query": term},
+                          timeout=30
                       )
                       response.raise_for_status()
                       data = response.json()
-
-                      # Handle OSV response variations
-                      if isinstance(data, dict) and "vulns" in data:
-                          results.extend(data["vulns"])
-                      elif isinstance(data, dict) and data.get("id"):
-                          results.append(data)
-                      else:
-                          print(f"⚠️ No valid vulns found for {term}")
-
+                      
+                      # Extract vulnerabilities from response
+                      vulns = []
+                      if isinstance(data, dict):
+                          if "vulns" in data:
+                              vulns = data["vulns"]
+                          elif data.get("id"):  # Single vulnerability
+                              vulns = [data]
+                      
+                      # Deduplicate and preserve original data
+                      new_count = 0
+                      for vuln in vulns:
+                          vuln_id = vuln.get("id")
+                          if vuln_id and vuln_id not in seen_ids:
+                              seen_ids.add(vuln_id)
+                              
+                              # CRITICAL: Add metadata WITHOUT modifying original dates
+                              vuln["_metadata"] = {
+                                  "fetched_at": fetch_timestamp,
+                                  "search_term": term
+                              }
+                              
+                              all_vulns.append(vuln)
+                              new_count += 1
+                      
+                      print(f"   ✓ Found {len(vulns)} vulnerabilities ({new_count} new)")
+                      
+                  except requests.exceptions.RequestException as e:
+                      print(f"   ✗ Network error: {e}")
+                  except json.JSONDecodeError as e:
+                      print(f"   ✗ JSON decode error: {e}")
                   except Exception as e:
-                      print(f"⚠️ Error fetching {term}: {e}")
-                  time.sleep(1)  # be gentle with OSV API
-
-              # Save only latest 100 (sorted by modified date if present)
+                      print(f"   ✗ Unexpected error: {e}")
+                  
+                  # Rate limiting - be nice to OSV API
+                  time.sleep(1)
+              
+              return all_vulns
+          
+          def sort_by_published_date(vulns):
+              """Sort vulnerabilities by published date (newest first)"""
+              def get_sort_key(vuln):
+                  # Try published date first, fallback to modified, then empty string
+                  date_str = vuln.get("published") or vuln.get("modified") or ""
+                  return date_str
+              
               try:
-                  results = sorted(
-                      results,
-                      key=lambda x: x.get("modified", x.get("published", "")),
-                      reverse=True
-                  )
-              except Exception:
-                  pass
-
-              print(f"💾 Saved {len(results)} vulnerabilities to data/{product}.json")
-              with open(f"data/{product}.json", "w") as f:
-                  json.dump(results[:100], f, indent=2)
-
-          print("🎉 Done fetching all database vulnerabilities!")
+                  return sorted(vulns, key=get_sort_key, reverse=True)
+              except Exception as e:
+                  print(f"   ⚠️ Sorting warning: {e}")
+                  return vulns
+          
+          # Process each product
+          for product_name, search_terms in products.items():
+              vulnerabilities = fetch_vulnerabilities(product_name, search_terms)
+              
+              # Sort by original published date
+              vulnerabilities = sort_by_published_date(vulnerabilities)
+              
+              # Limit to latest 100
+              vulnerabilities = vulnerabilities[:100]
+              
+              # Save to file
+              output_file = f"data/{product_name}.json"
+              with open(output_file, "w", encoding="utf-8") as f:
+                  json.dump(vulnerabilities, f, indent=2, ensure_ascii=False)
+              
+              print(f"\n💾 Saved {len(vulnerabilities)} vulnerabilities to {output_file}")
+              
+              # Show date range for verification
+              if vulnerabilities:
+                  first_date = vulnerabilities[0].get("published", "N/A")
+                  last_date = vulnerabilities[-1].get("published", "N/A")
+                  print(f"   📅 Date range: {first_date} → {last_date}")
+          
+          print(f"\n{'='*60}")
+          print("🎉 Successfully fetched all database vulnerabilities!")
+          print(f"{'='*60}\n")
           EOF
-
+          
       - name: Commit and Push Changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add data/
-          git diff-index --quiet HEAD || git commit -m "🔄 Update DB VulnFeed data"
-          git push
+          
+          # Only commit if there are changes
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "🔄 Update DB VulnFeed data - $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
+            echo "✓ Changes committed and pushed"
+          else
+            echo "✓ No changes detected - skipping commit"
+          fi
