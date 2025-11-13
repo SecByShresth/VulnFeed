@@ -46,8 +46,7 @@ jobs:
           TARGET_KEYWORDS = {
               "mysql": ["mysql", "mariadb", "percona"],
               "postgresql": ["postgres", "postgresql", "pgsql"],
-              "redis": ["redis"],
-              "exploitdb": []  # We'll handle this separately
+              "redis": ["redis"]
           }
           
           def contains_keyword(text, keywords):
@@ -88,12 +87,8 @@ jobs:
               # Determine which feed this belongs to
               source = None
               
-              # Check for ExploitDB first (via aliases) - be more specific
-              edb_aliases = [alias for alias in aliases if alias.upper().startswith('EDB-')]
-              if edb_aliases:
-                  source = "exploitdb"
               # Check MySQL keywords
-              elif contains_keyword(search_text, TARGET_KEYWORDS["mysql"]):
+              if contains_keyword(search_text, TARGET_KEYWORDS["mysql"]):
                   source = "mysql"
               # Check PostgreSQL keywords  
               elif contains_keyword(search_text, TARGET_KEYWORDS["postgresql"]):
@@ -171,7 +166,7 @@ jobs:
               print(f"   {source.upper()}: {len(grouped_data[source])} entries")
 
           # Ensure all target files exist (even if empty)
-          for db in ["mysql", "postgresql", "redis", "exploitdb"]:
+          for db in ["mysql", "postgresql", "redis"]:
               if db not in grouped_data:
                   grouped_data[db] = []
               
