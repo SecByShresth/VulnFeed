@@ -32,6 +32,7 @@ jobs:
           import os
           import zipfile
           import io
+          import re
           
           print("🚀 Starting OSV.dev vulnerability feed update...")
           
@@ -39,15 +40,26 @@ jobs:
           OSV_EXPORT_URL = "https://osv-vulnerabilities.storage.googleapis.com"
           
           # Focus on ecosystems most likely to have DB-related vulnerabilities
-          ECOSYSTEMS = ["Go", "PyPI", "npm", "Maven", "NuGet", "RubyGems", "Packagist", "Crates.io"]
+          ECOSYSTEMS = ["Go", "PyPI", "npm", "Maven", "NuGet", "RubyGems", "Packagist", "crates.io"]  # Fixed crates.io casing
           
-          # Enhanced keyword matching
+          # Enhanced keyword matching with word boundaries
           TARGET_KEYWORDS = {
               "mysql": ["mysql", "mariadb", "percona"],
               "postgresql": ["postgres", "postgresql", "pgsql"],
-              "redis": ["redis", "redis-server"],
-              "exploitdb": ["exploit", "edb-id"] 
+              "redis": ["redis"],
+              "exploitdb": []  # We'll handle this separately
           }
+          
+          def contains_keyword(text, keywords):
+              """Check if text contains any of the keywords with word boundaries"""
+              if not text or not keywords:
+                  return False
+              text_lower = text.lower()
+              for keyword in keywords:
+                  # Use word boundaries to avoid partial matches
+                  if re.search(r'\b' + re.escape(keyword) + r'\b', text_lower):
+                      return True
+              return False
           
           def process_vulnerability(vuln_data, all_vulnerabilities):
               """Process a single vulnerability and add to results if it matches our criteria"""
@@ -59,11 +71,16 @@ jobs:
               
               # Get affected package names
               affected_names = []
+              package_ecosystem = ""
               for affected in vuln_data.get('affected', []):
                   if affected.get('package'):
-                      pkg_name = affected['package'].get('name', '').lower()
+                      pkg = affected['package']
+                      pkg_name = pkg.get('name', '').lower()
+                      pkg_ecosystem = pkg.get('ecosystem', '').lower()
                       if pkg_name:
                           affected_names.append(pkg_name)
+                      if pkg_ecosystem:
+                          package_ecosystem = pkg_ecosystem
               
               # Combine all text for keyword searching
               search_text = f"{summary} {details} {' '.join(affected_names)}".lower()
@@ -71,21 +88,19 @@ jobs:
               # Determine which feed this belongs to
               source = None
               
-              # Check for ExploitDB first (via aliases)
-              if any('edb-' in alias.lower() for alias in aliases):
+              # Check for ExploitDB first (via aliases) - be more specific
+              edb_aliases = [alias for alias in aliases if alias.upper().startswith('EDB-')]
+              if edb_aliases:
                   source = "exploitdb"
               # Check MySQL keywords
-              elif any(keyword in search_text for keyword in TARGET_KEYWORDS["mysql"]):
+              elif contains_keyword(search_text, TARGET_KEYWORDS["mysql"]):
                   source = "mysql"
               # Check PostgreSQL keywords  
-              elif any(keyword in search_text for keyword in TARGET_KEYWORDS["postgresql"]):
+              elif contains_keyword(search_text, TARGET_KEYWORDS["postgresql"]):
                   source = "postgresql"
               # Check Redis keywords
-              elif any(keyword in search_text for keyword in TARGET_KEYWORDS["redis"]):
+              elif contains_keyword(search_text, TARGET_KEYWORDS["redis"]):
                   source = "redis"
-              # Check ExploitDB in text as fallback
-              elif any(keyword in search_text for keyword in TARGET_KEYWORDS["exploitdb"]):
-                  source = "exploitdb"
               
               # Only include if it matches one of our target categories
               if source:
@@ -96,7 +111,8 @@ jobs:
                       "url": f"https://osv.dev/{vuln_id}",
                       "source": source,
                       "aliases": aliases,
-                      "affected_packages": affected_names
+                      "affected_packages": affected_names,
+                      "ecosystem": package_ecosystem
                   }
                   
                   all_vulnerabilities.append(normalized_entry)
@@ -125,7 +141,8 @@ jobs:
                                   except json.JSONDecodeError as e:
                                       continue
                   
-                  print(f"✅ Processed {ecosystem} - found {len([v for v in all_vulnerabilities if v.get('source')])} matches so far")
+                  current_matches = len([v for v in all_vulnerabilities])
+                  print(f"✅ Processed {ecosystem} - found {current_matches} total matches so far")
                   
               except requests.RequestException as e:
                   print(f"⚠️ Failed to download {ecosystem}: {e}")
@@ -148,6 +165,11 @@ jobs:
                   grouped_data[source] = []
               grouped_data[source].append(entry)
 
+          # Print breakdown before saving
+          print(f"\n📈 Vulnerability Breakdown:")
+          for source in sorted(grouped_data.keys()):
+              print(f"   {source.upper()}: {len(grouped_data[source])} entries")
+
           # Ensure all target files exist (even if empty)
           for db in ["mysql", "postgresql", "redis", "exploitdb"]:
               if db not in grouped_data:
@@ -160,7 +182,7 @@ jobs:
           # Print some examples for debugging
           if all_vulnerabilities:
               print(f"\n🔍 Sample vulnerabilities found:")
-              for source in grouped_data:
+              for source in sorted(grouped_data.keys()):
                   if grouped_data[source]:
                       sample = grouped_data[source][0]
                       print(f"   {source.upper()}: {sample['id']} - {sample['title'][:60]}...")
@@ -174,10 +196,10 @@ jobs:
           ls -la data/ || echo "No data directory found"
           echo ""
           echo "=== File Contents ==="
-          for file in data/*.json 2>/dev/null; do
+          for file in data/*.json; do
             if [ -f "$file" ]; then
-              count=$(jq length "$file" 2>/dev/null || echo "0")
-              echo "$(basename $file): $count entries"
+              count=$(jq 'length' "$file" 2>/dev/null || echo "0")
+              echo "$(basename "$file"): $count entries"
             fi
           done
 
