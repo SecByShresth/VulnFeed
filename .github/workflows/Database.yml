@@ -44,44 +44,71 @@ jobs:
           # Configuration - Using OSV export endpoints
           OSV_EXPORT_URL = "https://osv-vulnerabilities.storage.googleapis.com"
           
-          # Focus on ecosystems most likely to have DB-related vulnerabilities
-          ECOSYSTEMS = ["Go", "PyPI", "npm", "Maven", "NuGet", "RubyGems", "Packagist", "crates.io"]
+          # Get ALL ecosystems to ensure we capture older vulnerabilities
+          ALL_ECOSYSTEMS = [
+              "Go", "PyPI", "npm", "Maven", "NuGet", "RubyGems", "Packagist", "crates.io",
+              "Linux", "Debian", "Ubuntu", "Alpine", "Hex", "Android", "GitHub Actions",
+              "OSS-Fuzz", "GSD", "UVI"
+          ]
           
-          # Database keywords only
+          # Database keywords - EXPANDED to include connector terms
           TARGET_KEYWORDS = {
-              "mysql": ["mysql", "mariadb", "percona"],
-              "postgresql": ["postgres", "postgresql", "pgsql"],
-              "redis": ["redis"]
+              "mysql": ["mysql", "mariadb", "percona", "connector", "connectors"],
+              "postgresql": ["postgres", "postgresql", "pgsql", "postgresql", "postgres-"],
+              "redis": ["redis", "redislabs"]
           }
           
           def contains_keyword(text, keywords):
-              """Check if text contains any of the keywords with word boundaries"""
+              """Check if text contains any of the keywords with flexible matching"""
               if not text or not keywords:
                   return False
               text_lower = text.lower()
               for keyword in keywords:
-                  # Use word boundaries to avoid partial matches
-                  if re.search(r'\b' + re.escape(keyword) + r'\b', text_lower):
-                      return True
+                  # For connector-related terms, use more flexible matching
+                  if keyword in ["connector", "connectors"]:
+                      if keyword in text_lower:
+                          return True
+                  else:
+                      # Use word boundaries for other keywords to avoid partial matches
+                      if re.search(r'\b' + re.escape(keyword) + r'\b', text_lower):
+                          return True
               return False
           
           def extract_published_date(vuln_data):
-              """Extract published date from OSV vulnerability data"""
+              """Extract published date from OSV vulnerability data with better error handling"""
               # Try published field first
               published = vuln_data.get('published')
               if published:
                   try:
-                      return datetime.fromisoformat(published.replace('Z', '+00:00'))
-                  except (ValueError, TypeError):
-                      pass
+                      # Handle various date formats
+                      if published.endswith('Z'):
+                          return datetime.fromisoformat(published[:-1] + '+00:00')
+                      else:
+                          return datetime.fromisoformat(published.replace('Z', '+00:00'))
+                  except (ValueError, TypeError) as e:
+                      print(f"⚠️ Could not parse published date: {published} - {e}")
               
               # Try modified field as fallback
               modified = vuln_data.get('modified')
               if modified:
                   try:
-                      return datetime.fromisoformat(modified.replace('Z', '+00:00'))
-                  except (ValueError, TypeError):
-                      pass
+                      if modified.endswith('Z'):
+                          return datetime.fromisoformat(modified[:-1] + '+00:00')
+                      else:
+                          return datetime.fromisoformat(modified.replace('Z', '+00:00'))
+                  except (ValueError, TypeError) as e:
+                      print(f"⚠️ Could not parse modified date: {modified} - {e}")
+              
+              # Try to get date from ID for older vulnerabilities
+              vuln_id = vuln_data.get('id', '')
+              if 'CVE-2017' in vuln_id:
+                  return datetime(2017, 1, 1)
+              elif 'CVE-2018' in vuln_id:
+                  return datetime(2018, 1, 1)
+              elif 'CVE-2019' in vuln_id:
+                  return datetime(2019, 1, 1)
+              elif 'CVE-2020' in vuln_id:
+                  return datetime(2020, 1, 1)
               
               # If no date found, use a very old date so it appears at the bottom
               return datetime(2000, 1, 1)
@@ -132,7 +159,7 @@ jobs:
                       "id": vuln_id,
                       "title": summary or f"Vulnerability {vuln_id}",
                       "description": details or summary or "No description available",
-                      "published_date": published_date.isoformat(),  # FIXED: Include published_date in JSON
+                      "published_date": published_date.isoformat(),
                       "url": f"https://osv.dev/{vuln_id}",
                       "source": source,
                       "aliases": aliases,
@@ -141,11 +168,18 @@ jobs:
                   }
                   
                   all_vulnerabilities.append(normalized_entry)
+                  
+                  # Debug output for specific vulnerability we're looking for
+                  if 'GHSA-2cf3-g243-hhfx' in vuln_id or 'CVE-2017-3590' in vuln_id:
+                      print(f"🎯 FOUND TARGET VULNERABILITY: {vuln_id}")
+                      print(f"   Published: {published_date}")
+                      print(f"   Title: {summary}")
+                      print(f"   Source: {source}")
           
           all_vulnerabilities = []
 
           # Step 1: Download and process each ecosystem
-          for ecosystem in ECOSYSTEMS:
+          for ecosystem in ALL_ECOSYSTEMS:
               print(f"📥 Processing {ecosystem} ecosystem for DATABASE vulnerabilities...")
               
               url = f"{OSV_EXPORT_URL}/{ecosystem}/all.zip"
@@ -179,6 +213,9 @@ jobs:
           print(f"\n📊 DATABASE Processing complete:")
           print(f"   📝 Total DATABASE vulnerabilities: {len(all_vulnerabilities)}")
           
+          # Sort all vulnerabilities by published date (newest first)
+          all_vulnerabilities.sort(key=lambda x: x['published_date'], reverse=True)
+          
           # Step 2: Group by source and save to files
           if not os.path.exists("data"):
               os.makedirs("data")
@@ -202,18 +239,29 @@ jobs:
               if db not in grouped_data:
                   grouped_data[db] = []
               
+              # Sort each database's vulnerabilities by published date
+              grouped_data[db].sort(key=lambda x: x['published_date'], reverse=True)
+              
               with open(f"data/{db}.json", "w") as f:
                   json.dump(grouped_data[db], f, indent=2)
               print(f"💾 Saved {len(grouped_data[db])} entries to data/{db}.json")
           
           # Print some examples for debugging with dates
           if all_vulnerabilities:
-              print(f"\n🔍 Sample DATABASE vulnerabilities found:")
+              print(f"\n🔍 Sample DATABASE vulnerabilities found (with dates):")
               for source in sorted(grouped_data.keys()):
                   if grouped_data[source]:
                       sample = grouped_data[source][0]
                       published_date = sample.get('published_date', 'Unknown')
                       print(f"   {source.upper()}: {sample['id']} - Published: {published_date[:10]} - {sample['title'][:50]}...")
+              
+              # Print oldest and newest for reference
+              if all_vulnerabilities:
+                  oldest = all_vulnerabilities[-1]
+                  newest = all_vulnerabilities[0]
+                  print(f"\n📅 Date Range:")
+                  print(f"   Newest: {newest['published_date'][:10]} - {newest['id']}")
+                  print(f"   Oldest: {oldest['published_date'][:10]} - {oldest['id']}")
           
           print("🎉 DATABASE vulnerability feed update completed!")
           EOF
@@ -237,6 +285,13 @@ jobs:
               echo "$(basename "$file"):"
               jq -r '.[0] | "  ID: \(.id)\n  Published: \(.published_date)\n  Title: \(.title)\n"' "$file" 2>/dev/null || echo "  No entries or invalid JSON"
               echo ""
+            fi
+          done
+          echo "=== Checking for specific vulnerability ==="
+          for file in data/mysql.json data/postgresql.json data/redis.json; do
+            if [ -f "$file" ]; then
+              echo "Searching in $(basename $file):"
+              jq -r '.[] | select(.id == "GHSA-2cf3-g243-hhfx" or .aliases[]? == "CVE-2017-3590") | "  FOUND: \(.id) - Published: \(.published_date) - \(.title)"' "$file" 2>/dev/null || echo "  Not found"
             fi
           done
 
