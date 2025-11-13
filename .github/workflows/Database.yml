@@ -25,7 +25,7 @@ jobs:
         run: |
           pip install requests
 
-      - name: 🌐 Fetch and Process Vulnerabilities from OSV.dev
+      - name: 🌐 Fetch and Process Database Vulnerabilities from OSV.dev
         run: |
           python3 << 'EOF'
           import requests
@@ -36,7 +36,7 @@ jobs:
           import re
           from datetime import datetime
           
-          print("🚀 Starting OSV.dev vulnerability feed update...")
+          print("🚀 Starting OSV.dev DATABASE vulnerability feed update...")
           
           # Configuration - Using OSV export endpoints
           OSV_EXPORT_URL = "https://osv-vulnerabilities.storage.googleapis.com"
@@ -44,7 +44,7 @@ jobs:
           # Focus on ecosystems most likely to have DB-related vulnerabilities
           ECOSYSTEMS = ["Go", "PyPI", "npm", "Maven", "NuGet", "RubyGems", "Packagist", "crates.io"]
           
-          # Enhanced keyword matching with word boundaries
+          # Database keywords only
           TARGET_KEYWORDS = {
               "mysql": ["mysql", "mariadb", "percona"],
               "postgresql": ["postgres", "postgresql", "pgsql"],
@@ -110,7 +110,7 @@ jobs:
               # Combine all text for keyword searching
               search_text = f"{summary} {details} {' '.join(affected_names)}".lower()
               
-              # Determine which feed this belongs to
+              # Determine which feed this belongs to - DATABASES ONLY
               source = None
               
               # Check MySQL keywords
@@ -123,7 +123,7 @@ jobs:
               elif contains_keyword(search_text, TARGET_KEYWORDS["redis"]):
                   source = "redis"
               
-              # Only include if it matches one of our target categories
+              # Only include if it matches one of our DATABASE categories
               if source:
                   normalized_entry = {
                       "id": vuln_id,
@@ -143,7 +143,7 @@ jobs:
 
           # Step 1: Download and process each ecosystem
           for ecosystem in ECOSYSTEMS:
-              print(f"📥 Processing {ecosystem} ecosystem...")
+              print(f"📥 Processing {ecosystem} ecosystem for DATABASE vulnerabilities...")
               
               url = f"{OSV_EXPORT_URL}/{ecosystem}/all.zip"
               
@@ -164,7 +164,7 @@ jobs:
                                       continue
                   
                   current_matches = len([v for v in all_vulnerabilities])
-                  print(f"✅ Processed {ecosystem} - found {current_matches} total matches so far")
+                  print(f"✅ Processed {ecosystem} - found {current_matches} DATABASE matches so far")
                   
               except requests.RequestException as e:
                   print(f"⚠️ Failed to download {ecosystem}: {e}")
@@ -173,8 +173,8 @@ jobs:
                   print(f"⚠️ Invalid ZIP file for {ecosystem}")
                   continue
 
-          print(f"\n📊 Processing complete:")
-          print(f"   📝 Total matching vulnerabilities: {len(all_vulnerabilities)}")
+          print(f"\n📊 DATABASE Processing complete:")
+          print(f"   📝 Total DATABASE vulnerabilities: {len(all_vulnerabilities)}")
           
           # Step 2: Group by source and save to files
           if not os.path.exists("data"):
@@ -188,12 +188,14 @@ jobs:
               grouped_data[source].append(entry)
 
           # Print breakdown before saving
-          print(f"\n📈 Vulnerability Breakdown:")
+          print(f"\n📈 DATABASE Vulnerability Breakdown:")
           for source in sorted(grouped_data.keys()):
               print(f"   {source.upper()}: {len(grouped_data[source])} entries")
 
-          # Ensure all target files exist (even if empty)
-          for db in ["mysql", "postgresql", "redis"]:
+          # Only save database files
+          database_files = ["mysql", "postgresql", "redis"]
+          
+          for db in database_files:
               if db not in grouped_data:
                   grouped_data[db] = []
               
@@ -203,43 +205,45 @@ jobs:
           
           # Print some examples for debugging with dates
           if all_vulnerabilities:
-              print(f"\n🔍 Sample vulnerabilities found:")
+              print(f"\n🔍 Sample DATABASE vulnerabilities found:")
               for source in sorted(grouped_data.keys()):
                   if grouped_data[source]:
                       sample = grouped_data[source][0]
                       published_date = sample.get('published_date', 'Unknown')
                       print(f"   {source.upper()}: {sample['id']} - Published: {published_date[:10]} - {sample['title'][:50]}...")
           
-          print("🎉 Vulnerability feed update completed!")
+          print("🎉 DATABASE vulnerability feed update completed!")
           EOF
 
-      - name: 📊 Display Results
+      - name: 📊 Display Database Results
         run: |
-          echo "=== Generated Files ==="
-          ls -la data/ || echo "No data directory found"
+          echo "=== Database Files Generated ==="
+          ls -la data/mysql.json data/postgresql.json data/redis.json 2>/dev/null || echo "Some database files not found"
           echo ""
-          echo "=== File Contents ==="
-          for file in data/*.json; do
+          echo "=== Database File Contents ==="
+          for file in data/mysql.json data/postgresql.json data/redis.json; do
             if [ -f "$file" ]; then
               count=$(jq 'length' "$file" 2>/dev/null || echo "0")
               echo "$(basename "$file"): $count entries"
             fi
           done
 
-      - name: Commit and Push Changes
+      - name: Commit and Push Database Changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Pull latest changes and rebase before committing
-          git pull --rebase origin main
-          
-          git add data/*.json
+          # Only add database files
+          git add data/mysql.json data/postgresql.json data/redis.json
           
           if git diff --staged --quiet; then
-            echo "No changes to commit."
+            echo "No database changes to commit."
           else
-            git commit -m "Auto-update: OSV.dev vulnerability feeds $(date +'%Y-%m-%d')"
+            # Stash any other changes, pull, then pop stash
+            git stash
+            git pull origin main
+            git stash pop || true
+            git commit -m "Auto-update: Database vulnerability feeds $(date +'%Y-%m-%d')"
             git push
-            echo "Changes committed and pushed."
+            echo "Database changes committed and pushed."
           fi
