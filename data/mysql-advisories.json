@@ -1,0 +1,38 @@
+[
+  {
+    "cve": "CVE-2025-61884",
+    "description": "MySQL/Oracle security vulnerability",
+    "url": "/security-alerts/alert-cve-2025-61884.html",
+    "published": ""
+  },
+  {
+    "cve": "CVE-2025-61882",
+    "description": "MySQL/Oracle security vulnerability",
+    "url": "/security-alerts/alert-cve-2025-61882.html",
+    "published": ""
+  },
+  {
+    "cve": "CVE-2024-21287",
+    "description": "MySQL/Oracle security vulnerability",
+    "url": "/security-alerts/alert-cve-2024-21287.html",
+    "published": ""
+  },
+  {
+    "cve": "CVE-2022-21500",
+    "description": "MySQL/Oracle security vulnerability",
+    "url": "/security-alerts/alert-cve-2022-21500.html",
+    "published": ""
+  },
+  {
+    "cve": "CVE-2021-44228",
+    "description": "MySQL/Oracle security vulnerability",
+    "url": "/security-alerts/alert-cve-2021-44228.html",
+    "published": ""
+  },
+  {
+    "cve": "CVE-2020-14750",
+    "description": "MySQL/Oracle security vulnerability",
+    "url": "/security-alerts/alert-cve-2020-14750.html",
+    "published": ""
+  }
+]
