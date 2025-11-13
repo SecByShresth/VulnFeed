@@ -233,17 +233,15 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Only add database files
+          # Add only database files
           git add data/mysql.json data/postgresql.json data/redis.json
           
-          if git diff --staged --quiet; then
-            echo "No database changes to commit."
-          else
-            # Stash any other changes, pull, then pop stash
-            git stash
-            git pull origin main
-            git stash pop || true
+          # Check if there are changes to commit
+          if ! git diff --staged --quiet; then
+            # Commit and push directly
             git commit -m "Auto-update: Database vulnerability feeds $(date +'%Y-%m-%d')"
             git push
             echo "Database changes committed and pushed."
+          else
+            echo "No database changes to commit."
           fi
