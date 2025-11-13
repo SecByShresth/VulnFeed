@@ -1,0 +1,2248 @@
+[
+  {
+    "id": "GHSA-hgjp-83m4-h4fj",
+    "summary": "MySQL Connector/Python connector takeover vulnerability",
+    "details": "Vulnerability in the MySQL Connectors product of Oracle MySQL (component: Connector/Python).  Supported versions that are affected are 9.0.0 and prior. Difficult to exploit vulnerability allows low privileged attacker with network access via multiple protocols to compromise MySQL Connectors.  Successful attacks of this vulnerability can result in takeover of MySQL Connectors. CVSS 3.1 Base Score 7.5 (Confidentiality, Integrity and Availability impacts).  CVSS Vector: (CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H).",
+    "aliases": [
+      "CVE-2024-21272"
+    ],
+    "modified": "2024-10-24T17:12:14.830506Z",
+    "published": "2024-10-15T21:30:39Z",
+    "database_specific": {
+      "severity": "HIGH",
+      "github_reviewed_at": "2024-10-24T16:45:37Z",
+      "nvd_published_at": "2024-10-15T20:15:18Z",
+      "github_reviewed": true,
+      "cwe_ids": [
+        "CWE-89"
+      ]
+    },
+    "references": [
+      {
+        "type": "ADVISORY",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-21272"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/mysql/mysql-connector-python/commit/e6b927af06e8a85bd3754f602df96a5592b4558c"
+      },
+      {
+        "type": "PACKAGE",
+        "url": "https://github.com/mysql/mysql-connector-python"
+      },
+      {
+        "type": "WEB",
+        "url": "https://www.oracle.com/security-alerts/cpuoct2024.html"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "mysql-connector-python",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/mysql-connector-python"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "9.1.0"
+              }
+            ]
+          }
+        ],
+        "versions": [
+          "1.0.10",
+          "1.0.12",
+          "1.0.5",
+          "1.0.5b1",
+          "1.0.6b2",
+          "1.0.7",
+          "1.0.9",
+          "1.1.4",
+          "1.1.5",
+          "1.1.6",
+          "1.2.2",
+          "1.2.3",
+          "2.0.1",
+          "2.0.2",
+          "2.0.3",
+          "2.0.4",
+          "8.0.11",
+          "8.0.12",
+          "8.0.13",
+          "8.0.14",
+          "8.0.15",
+          "8.0.16",
+          "8.0.17",
+          "8.0.18",
+          "8.0.19",
+          "8.0.20",
+          "8.0.21",
+          "8.0.22",
+          "8.0.23",
+          "8.0.24",
+          "8.0.25",
+          "8.0.26",
+          "8.0.27",
+          "8.0.28",
+          "8.0.29",
+          "8.0.30",
+          "8.0.31",
+          "8.0.32",
+          "8.0.33",
+          "8.0.5",
+          "8.0.6",
+          "8.1.0",
+          "8.2.0",
+          "8.3.0",
+          "8.4.0",
+          "9.0.0"
+        ],
+        "database_specific": {
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2024/10/GHSA-hgjp-83m4-h4fj/GHSA-hgjp-83m4-h4fj.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "severity": [
+      {
+        "type": "CVSS_V3",
+        "score": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H"
+      },
+      {
+        "type": "CVSS_V4",
+        "score": "CVSS:4.0/AV:N/AC:L/AT:P/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N"
+      }
+    ],
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "PyPI/mysql-connector-python"
+    }
+  },
+  {
+    "id": "GHSA-pmh2-wpjm-fj45",
+    "summary": "mysql2 vulnerable to Prototype Pollution",
+    "details": "Versions of the package mysql2 before 3.9.8 are vulnerable to Prototype Pollution due to improper user input sanitization passed to fields and tables when using nestTables.",
+    "aliases": [
+      "CVE-2024-21512"
+    ],
+    "modified": "2024-07-15T22:00:20.829471Z",
+    "published": "2024-05-30T18:34:32Z",
+    "related": [
+      "CGA-3mh2-3mv5-jfp3"
+    ],
+    "database_specific": {
+      "severity": "HIGH",
+      "github_reviewed_at": "2024-05-30T18:34:32Z",
+      "nvd_published_at": "2024-05-29T05:16:08Z",
+      "github_reviewed": true,
+      "cwe_ids": [
+        "CWE-1321"
+      ]
+    },
+    "references": [
+      {
+        "type": "ADVISORY",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-21512"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/sidorares/node-mysql2/pull/2702"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/sidorares/node-mysql2/commit/efe3db527a2c94a63c2d14045baba8dfefe922bc"
+      },
+      {
+        "type": "WEB",
+        "url": "https://gist.github.com/domdomi3/e9f0f9b9b1ed6bfbbc0bea87c5ca1e4a"
+      },
+      {
+        "type": "PACKAGE",
+        "url": "https://github.com/sidorares/node-mysql2"
+      },
+      {
+        "type": "WEB",
+        "url": "https://security.snyk.io/vuln/SNYK-JAVA-ORGWEBJARSNPM-7176010"
+      },
+      {
+        "type": "WEB",
+        "url": "https://security.snyk.io/vuln/SNYK-JS-MYSQL2-6861580"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "mysql2",
+          "ecosystem": "npm",
+          "purl": "pkg:npm/mysql2"
+        },
+        "ranges": [
+          {
+            "type": "SEMVER",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "3.9.8"
+              }
+            ]
+          }
+        ],
+        "database_specific": {
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2024/05/GHSA-pmh2-wpjm-fj45/GHSA-pmh2-wpjm-fj45.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "severity": [
+      {
+        "type": "CVSS_V3",
+        "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:L"
+      }
+    ],
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "npm/mysql2"
+    }
+  },
+  {
+    "id": "GHSA-4rch-2fh8-94vw",
+    "summary": "MySQL2 for Node Arbitrary Code Injection",
+    "details": "Versions of the package mysql2 before 3.9.7 are vulnerable to Arbitrary Code Injection due to improper sanitization of the timezone parameter in the readCodeFor function by calling a native MySQL Server date/time function.",
+    "aliases": [
+      "CVE-2024-21511"
+    ],
+    "modified": "2024-04-23T21:11:53.942953Z",
+    "published": "2024-04-23T06:30:47Z",
+    "related": [
+      "CGA-q894-55h8-4v53"
+    ],
+    "database_specific": {
+      "severity": "CRITICAL",
+      "github_reviewed_at": "2024-04-23T20:50:56Z",
+      "nvd_published_at": "2024-04-23T05:15:48Z",
+      "github_reviewed": true,
+      "cwe_ids": [
+        "CWE-94"
+      ]
+    },
+    "references": [
+      {
+        "type": "ADVISORY",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-21511"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/sidorares/node-mysql2/pull/2608"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/sidorares/node-mysql2/commit/7d4b098c7e29d5a6cb9eac2633bfcc2f0f1db713"
+      },
+      {
+        "type": "PACKAGE",
+        "url": "https://github.com/sidorares/node-mysql2"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/sidorares/node-mysql2/releases/tag/v3.9.7"
+      },
+      {
+        "type": "WEB",
+        "url": "https://security.snyk.io/vuln/SNYK-JS-MYSQL2-6670046"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "mysql2",
+          "ecosystem": "npm",
+          "purl": "pkg:npm/mysql2"
+        },
+        "ranges": [
+          {
+            "type": "SEMVER",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "3.9.7"
+              }
+            ]
+          }
+        ],
+        "database_specific": {
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2024/04/GHSA-4rch-2fh8-94vw/GHSA-4rch-2fh8-94vw.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "severity": [
+      {
+        "type": "CVSS_V3",
+        "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+      }
+    ],
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "npm/mysql2"
+    }
+  },
+  {
+    "id": "GHSA-fpw7-j2hg-69v5",
+    "summary": "mysql2 Remote Code Execution (RCE) via the readCodeFor function",
+    "details": "Versions of the package mysql2 before 3.9.4 are vulnerable to Remote Code Execution (RCE) via the `readCodeFor` function due to improper validation of the `supportBigNumbers` and `bigNumberStrings` values.",
+    "aliases": [
+      "CVE-2024-21508"
+    ],
+    "modified": "2024-04-12T14:13:52.978459Z",
+    "published": "2024-04-11T06:30:35Z",
+    "related": [
+      "CGA-9p5m-2fmv-28g4"
+    ],
+    "database_specific": {
+      "severity": "CRITICAL",
+      "github_reviewed_at": "2024-04-12T13:50:58Z",
+      "nvd_published_at": "2024-04-11T05:15:47Z",
+      "github_reviewed": true,
+      "cwe_ids": [
+        "CWE-94"
+      ]
+    },
+    "references": [
+      {
+        "type": "ADVISORY",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-21508"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/sidorares/node-mysql2/pull/2572"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/sidorares/node-mysql2/commit/74abf9ef94d76114d9a09415e28b496522a94805"
+      },
+      {
+        "type": "WEB",
+        "url": "https://blog.slonser.info/posts/mysql2-attacker-configuration"
+      },
+      {
+        "type": "PACKAGE",
+        "url": "https://github.com/sidorares/node-mysql2"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/sidorares/node-mysql2/blob/1609b5393516d72a4ae47196837317fbe75e0c13/lib/parsers/text_parser.js%23L14C10-L14C21"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/sidorares/node-mysql2/releases/tag/v3.9.4"
+      },
+      {
+        "type": "WEB",
+        "url": "https://security.snyk.io/vuln/SNYK-JS-MYSQL2-6591085"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "mysql2",
+          "ecosystem": "npm",
+          "purl": "pkg:npm/mysql2"
+        },
+        "ranges": [
+          {
+            "type": "SEMVER",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "3.9.4"
+              }
+            ]
+          }
+        ],
+        "database_specific": {
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2024/04/GHSA-fpw7-j2hg-69v5/GHSA-fpw7-j2hg-69v5.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "severity": [
+      {
+        "type": "CVSS_V3",
+        "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+      }
+    ],
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "npm/mysql2"
+    }
+  },
+  {
+    "id": "GHSA-49j4-86m8-q2jw",
+    "summary": "mysql2 vulnerable to Prototype Poisoning",
+    "details": "Versions of the package mysql2 before 3.9.4 are vulnerable to Prototype Poisoning due to insecure results object creation and improper user input sanitization passed through `parserFn` in `text_parser.js` and `binary_parser.js`.",
+    "aliases": [
+      "CVE-2024-21509"
+    ],
+    "modified": "2024-08-22T16:17:37Z",
+    "published": "2024-04-10T15:30:39Z",
+    "related": [
+      "CGA-c29j-944x-2v7x"
+    ],
+    "database_specific": {
+      "severity": "MODERATE",
+      "github_reviewed_at": "2024-04-12T13:50:12Z",
+      "nvd_published_at": "2024-04-10T05:15:48Z",
+      "github_reviewed": true,
+      "cwe_ids": [
+        "CWE-1321"
+      ]
+    },
+    "references": [
+      {
+        "type": "ADVISORY",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-21509"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/sidorares/node-mysql2/pull/2574"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/sidorares/node-mysql2/commit/4a964a3910a4b8de008696c554ab1b492e9b4691"
+      },
+      {
+        "type": "WEB",
+        "url": "https://blog.slonser.info/posts/mysql2-attacker-configuration"
+      },
+      {
+        "type": "PACKAGE",
+        "url": "https://github.com/sidorares/node-mysql2"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/sidorares/node-mysql2/blob/fd3d117da82cc5c5fa5a3701d7b33ca77691bc61/lib/parsers/text_parser.js%23L134"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/sidorares/node-mysql2/releases/tag/v3.9.4"
+      },
+      {
+        "type": "WEB",
+        "url": "https://security.snyk.io/vuln/SNYK-JS-MYSQL2-6591084"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "mysql2",
+          "ecosystem": "npm",
+          "purl": "pkg:npm/mysql2"
+        },
+        "ranges": [
+          {
+            "type": "SEMVER",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "3.9.4"
+              }
+            ]
+          }
+        ],
+        "database_specific": {
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2024/04/GHSA-49j4-86m8-q2jw/GHSA-49j4-86m8-q2jw.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "severity": [
+      {
+        "type": "CVSS_V3",
+        "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:L"
+      },
+      {
+        "type": "CVSS_V4",
+        "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:L/VA:L/SC:N/SI:N/SA:N"
+      }
+    ],
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "npm/mysql2"
+    }
+  },
+  {
+    "id": "GHSA-mqr2-w7wj-jjgr",
+    "summary": "mysql2 cache poisoning vulnerability",
+    "details": "Versions of the package mysql2 before 3.9.3 are vulnerable to Improper Input Validation through the `keyFromFields` function, resulting in cache poisoning. An attacker can inject a colon `:` character within a value of the attacker-crafted key.",
+    "aliases": [
+      "CVE-2024-21507"
+    ],
+    "modified": "2024-08-02T15:40:05Z",
+    "published": "2024-04-10T15:30:39Z",
+    "related": [
+      "CGA-hgjg-3j78-ggcp"
+    ],
+    "database_specific": {
+      "severity": "MODERATE",
+      "github_reviewed_at": "2024-04-12T13:49:53Z",
+      "nvd_published_at": "2024-04-10T05:15:48Z",
+      "github_reviewed": true,
+      "cwe_ids": [
+        "CWE-20"
+      ]
+    },
+    "references": [
+      {
+        "type": "ADVISORY",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-21507"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/sidorares/node-mysql2/pull/2424"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/sidorares/node-mysql2/commit/0d54b0ca6498c823098426038162ef10df02c818"
+      },
+      {
+        "type": "WEB",
+        "url": "https://blog.slonser.info/posts/mysql2-attacker-configuration"
+      },
+      {
+        "type": "PACKAGE",
+        "url": "https://github.com/sidorares/node-mysql2"
+      },
+      {
+        "type": "WEB",
+        "url": "https://security.snyk.io/vuln/SNYK-JS-MYSQL2-6591300"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "mysql2",
+          "ecosystem": "npm",
+          "purl": "pkg:npm/mysql2"
+        },
+        "ranges": [
+          {
+            "type": "SEMVER",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "3.9.3"
+              }
+            ]
+          }
+        ],
+        "database_specific": {
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2024/04/GHSA-mqr2-w7wj-jjgr/GHSA-mqr2-w7wj-jjgr.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "severity": [
+      {
+        "type": "CVSS_V3",
+        "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:L"
+      },
+      {
+        "type": "CVSS_V4",
+        "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:L/SC:N/SI:N/SA:N"
+      }
+    ],
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "npm/mysql2"
+    }
+  },
+  {
+    "id": "GHSA-m6vm-37g8-gqvh",
+    "summary": "MySQL Connectors takeover vulnerability",
+    "details": "Vulnerability in the MySQL Connectors product of Oracle MySQL (component: Connector/J). Supported versions that are affected are 8.1.0 and prior. Difficult to exploit vulnerability allows unauthenticated attacker with network access via multiple protocols to compromise MySQL Connectors. Successful attacks require human interaction from a person other than the attacker and while the vulnerability is in MySQL Connectors, attacks may significantly impact additional products (scope change). Successful attacks of this vulnerability can result in takeover of MySQL Connectors.",
+    "aliases": [
+      "CVE-2023-22102"
+    ],
+    "modified": "2024-12-05T17:02:29.551280Z",
+    "published": "2023-10-18T00:31:42Z",
+    "database_specific": {
+      "github_reviewed_at": "2024-08-29T18:32:05Z",
+      "github_reviewed": true,
+      "cwe_ids": [],
+      "severity": "HIGH",
+      "nvd_published_at": "2023-10-17T22:15:15Z"
+    },
+    "references": [
+      {
+        "type": "ADVISORY",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-22102"
+      },
+      {
+        "type": "PACKAGE",
+        "url": "https://github.com/mysql/mysql-connector-j"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/mysql/mysql-connector-j/compare/8.1.0...8.2.0"
+      },
+      {
+        "type": "WEB",
+        "url": "https://security.netapp.com/advisory/ntap-20231027-0007"
+      },
+      {
+        "type": "WEB",
+        "url": "https://www.oracle.com/security-alerts/cpuoct2023.html"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "com.mysql:mysql-connector-j",
+          "ecosystem": "Maven",
+          "purl": "pkg:maven/com.mysql/mysql-connector-j"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "8.2.0"
+              }
+            ]
+          }
+        ],
+        "versions": [
+          "8.0.31",
+          "8.0.32",
+          "8.0.33",
+          "8.1.0"
+        ],
+        "database_specific": {
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2023/10/GHSA-m6vm-37g8-gqvh/GHSA-m6vm-37g8-gqvh.json"
+        }
+      },
+      {
+        "package": {
+          "name": "mysql:mysql-connector-java",
+          "ecosystem": "Maven",
+          "purl": "pkg:maven/mysql/mysql-connector-java"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "last_affected": "8.0.33"
+              }
+            ]
+          }
+        ],
+        "versions": [
+          "2.0.14",
+          "3.0.10",
+          "3.0.8",
+          "3.1.11",
+          "3.1.12",
+          "3.1.13",
+          "3.1.14",
+          "5.0.2",
+          "5.0.3",
+          "5.0.4",
+          "5.0.5",
+          "5.0.7",
+          "5.0.8",
+          "5.1.1",
+          "5.1.10",
+          "5.1.11",
+          "5.1.12",
+          "5.1.13",
+          "5.1.14",
+          "5.1.15",
+          "5.1.16",
+          "5.1.17",
+          "5.1.18",
+          "5.1.19",
+          "5.1.2",
+          "5.1.20",
+          "5.1.21",
+          "5.1.22",
+          "5.1.23",
+          "5.1.24",
+          "5.1.25",
+          "5.1.26",
+          "5.1.27",
+          "5.1.28",
+          "5.1.29",
+          "5.1.3",
+          "5.1.30",
+          "5.1.31",
+          "5.1.32",
+          "5.1.33",
+          "5.1.34",
+          "5.1.35",
+          "5.1.36",
+          "5.1.37",
+          "5.1.38",
+          "5.1.39",
+          "5.1.4",
+          "5.1.40",
+          "5.1.41",
+          "5.1.42",
+          "5.1.43",
+          "5.1.44",
+          "5.1.45",
+          "5.1.46",
+          "5.1.47",
+          "5.1.48",
+          "5.1.49",
+          "5.1.5",
+          "5.1.6",
+          "5.1.8",
+          "5.1.9",
+          "6.0.2",
+          "6.0.3",
+          "6.0.4",
+          "6.0.5",
+          "6.0.6",
+          "8.0.11",
+          "8.0.12",
+          "8.0.13",
+          "8.0.14",
+          "8.0.15",
+          "8.0.16",
+          "8.0.17",
+          "8.0.18",
+          "8.0.19",
+          "8.0.20",
+          "8.0.21",
+          "8.0.22",
+          "8.0.23",
+          "8.0.24",
+          "8.0.25",
+          "8.0.26",
+          "8.0.27",
+          "8.0.28",
+          "8.0.29",
+          "8.0.30",
+          "8.0.31",
+          "8.0.32",
+          "8.0.33",
+          "8.0.7-dmr",
+          "8.0.8-dmr",
+          "8.0.9-rc"
+        ],
+        "database_specific": {
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2023/10/GHSA-m6vm-37g8-gqvh/GHSA-m6vm-37g8-gqvh.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "severity": [
+      {
+        "type": "CVSS_V3",
+        "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:H"
+      },
+      {
+        "type": "CVSS_V4",
+        "score": "CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:A/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H"
+      }
+    ],
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "Maven/mysql:mysql-connector-java"
+    }
+  },
+  {
+    "id": "GHSA-w6f2-8wx4-47r5",
+    "summary": "Incorrect Authorization in MySQL Connector Java",
+    "details": "Vulnerability in the MySQL Connectors product of Oracle MySQL (component: Connector/J). Supported versions that are affected are 8.0.26 and prior. Difficult to exploit vulnerability allows high privileged attacker with network access via multiple protocols to compromise MySQL Connectors. Successful attacks of this vulnerability can result in unauthorized access to critical data or complete access to all MySQL Connectors accessible data and unauthorized ability to cause a hang or frequently repeatable crash (complete DOS) of MySQL Connectors. CVSS 3.1 Base Score 5.9 (Confidentiality and Availability impacts). CVSS Vector: (CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:H/I:N/A:H).",
+    "aliases": [
+      "CVE-2021-2471"
+    ],
+    "modified": "2023-11-08T04:05:14.605604Z",
+    "published": "2022-05-24T19:18:20Z",
+    "database_specific": {
+      "github_reviewed_at": "2022-06-22T18:13:52Z",
+      "github_reviewed": true,
+      "cwe_ids": [
+        "CWE-863"
+      ],
+      "severity": "MODERATE",
+      "nvd_published_at": "2021-10-20T11:16:00Z"
+    },
+    "references": [
+      {
+        "type": "ADVISORY",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-2471"
+      },
+      {
+        "type": "WEB",
+        "url": "https://www.oracle.com/security-alerts/cpuapr2022.html"
+      },
+      {
+        "type": "WEB",
+        "url": "https://www.oracle.com/security-alerts/cpuoct2021.html"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "mysql:mysql-connector-java",
+          "ecosystem": "Maven",
+          "purl": "pkg:maven/mysql/mysql-connector-java"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "8.0.0"
+              },
+              {
+                "fixed": "8.0.27"
+              }
+            ]
+          }
+        ],
+        "versions": [
+          "8.0.11",
+          "8.0.12",
+          "8.0.13",
+          "8.0.14",
+          "8.0.15",
+          "8.0.16",
+          "8.0.17",
+          "8.0.18",
+          "8.0.19",
+          "8.0.20",
+          "8.0.21",
+          "8.0.22",
+          "8.0.23",
+          "8.0.24",
+          "8.0.25",
+          "8.0.26",
+          "8.0.7-dmr",
+          "8.0.8-dmr",
+          "8.0.9-rc"
+        ],
+        "database_specific": {
+          "last_known_affected_version_range": "<= 8.0.26",
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2022/05/GHSA-w6f2-8wx4-47r5/GHSA-w6f2-8wx4-47r5.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "severity": [
+      {
+        "type": "CVSS_V3",
+        "score": "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:H/I:N/A:H"
+      }
+    ],
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "Maven/mysql:mysql-connector-java"
+    }
+  },
+  {
+    "id": "GHSA-f982-mxwc-3mrx",
+    "summary": "MySQL for Node.js Unsafe Options",
+    "details": "An issue was discovered in the mysql (aka mysqljs) module 2.17.1 for Node.js. `The LOAD DATA LOCAL INFILE` option is open by default.",
+    "aliases": [
+      "CVE-2019-14939"
+    ],
+    "modified": "2023-11-08T04:01:12.576010Z",
+    "published": "2022-05-24T16:53:05Z",
+    "database_specific": {
+      "github_reviewed_at": "2023-07-17T18:54:11Z",
+      "nvd_published_at": "2019-08-12T01:15:00Z",
+      "github_reviewed": true,
+      "severity": "MODERATE",
+      "cwe_ids": [
+        "CWE-200"
+      ]
+    },
+    "references": [
+      {
+        "type": "ADVISORY",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2019-14939"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/mysqljs/mysql/issues/2471"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/mysqljs/mysql/commit/337e87ae5fcea3667864197c65dc758517fcde06"
+      },
+      {
+        "type": "WEB",
+        "url": "https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=934712&gt"
+      },
+      {
+        "type": "PACKAGE",
+        "url": "https://github.com/mysqljs/mysql"
+      },
+      {
+        "type": "WEB",
+        "url": "https://web.archive.org/web/20190812004403/https://github.com/mysqljs/mysql/issues/2257"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "mysql",
+          "ecosystem": "npm",
+          "purl": "pkg:npm/mysql"
+        },
+        "ranges": [
+          {
+            "type": "SEMVER",
+            "events": [
+              {
+                "introduced": "2.17.1"
+              },
+              {
+                "fixed": "2.18.0"
+              }
+            ]
+          }
+        ],
+        "versions": [
+          "2.17.1"
+        ],
+        "database_specific": {
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2022/05/GHSA-f982-mxwc-3mrx/GHSA-f982-mxwc-3mrx.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "severity": [
+      {
+        "type": "CVSS_V3",
+        "score": "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N"
+      }
+    ],
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "npm/mysql"
+    }
+  },
+  {
+    "id": "GHSA-gc43-g62c-99g2",
+    "summary": "Improper Access Control in MySQL Connectors Java",
+    "details": "Unspecified vulnerability in the MySQL Connectors component in Oracle MySQL 5.1.34 and earlier allows remote authenticated users to affect confidentiality and integrity via unknown vectors related to Connector/J.",
+    "aliases": [
+      "CVE-2015-2575"
+    ],
+    "modified": "2024-12-05T05:42:05.017267Z",
+    "published": "2022-05-17T00:25:07Z",
+    "database_specific": {
+      "github_reviewed_at": "2022-07-06T20:20:54Z",
+      "github_reviewed": true,
+      "cwe_ids": [
+        "CWE-284"
+      ],
+      "severity": "MODERATE",
+      "nvd_published_at": "2015-04-16T17:00:00Z"
+    },
+    "references": [
+      {
+        "type": "ADVISORY",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2015-2575"
+      },
+      {
+        "type": "WEB",
+        "url": "https://security.netapp.com/advisory/ntap-20150417-0003"
+      },
+      {
+        "type": "WEB",
+        "url": "http://lists.opensuse.org/opensuse-security-announce/2015-05/msg00026.html"
+      },
+      {
+        "type": "WEB",
+        "url": "http://lists.opensuse.org/opensuse-updates/2015-05/msg00089.html"
+      },
+      {
+        "type": "WEB",
+        "url": "http://www.debian.org/security/2016/dsa-3621"
+      },
+      {
+        "type": "WEB",
+        "url": "http://www.oracle.com/technetwork/topics/security/cpuapr2015-2365600.html"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "mysql:mysql-connector-java",
+          "ecosystem": "Maven",
+          "purl": "pkg:maven/mysql/mysql-connector-java"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "5.1.35"
+              }
+            ]
+          }
+        ],
+        "versions": [
+          "2.0.14",
+          "3.0.10",
+          "3.0.8",
+          "3.1.11",
+          "3.1.12",
+          "3.1.13",
+          "3.1.14",
+          "5.0.2",
+          "5.0.3",
+          "5.0.4",
+          "5.0.5",
+          "5.0.7",
+          "5.0.8",
+          "5.1.1",
+          "5.1.10",
+          "5.1.11",
+          "5.1.12",
+          "5.1.13",
+          "5.1.14",
+          "5.1.15",
+          "5.1.16",
+          "5.1.17",
+          "5.1.18",
+          "5.1.19",
+          "5.1.2",
+          "5.1.20",
+          "5.1.21",
+          "5.1.22",
+          "5.1.23",
+          "5.1.24",
+          "5.1.25",
+          "5.1.26",
+          "5.1.27",
+          "5.1.28",
+          "5.1.29",
+          "5.1.3",
+          "5.1.30",
+          "5.1.31",
+          "5.1.32",
+          "5.1.33",
+          "5.1.34",
+          "5.1.4",
+          "5.1.5",
+          "5.1.6",
+          "5.1.8",
+          "5.1.9"
+        ],
+        "database_specific": {
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2022/05/GHSA-gc43-g62c-99g2/GHSA-gc43-g62c-99g2.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "Maven/mysql:mysql-connector-java"
+    }
+  },
+  {
+    "id": "GHSA-4vrv-ch96-6h42",
+    "summary": "Improper Privilege Management in MySQL Connectors Java",
+    "details": "Vulnerability in the MySQL Connectors component of Oracle MySQL (subcomponent: Connector/J). Supported versions that are affected are 8.0.12 and prior. Easily exploitable vulnerability allows low privileged attacker with network access via multiple protocols to compromise MySQL Connectors. Successful attacks of this vulnerability can result in takeover of MySQL Connectors. CVSS 3.0 Base Score 8.8 (Confidentiality, Integrity and Availability impacts). CVSS Vector: (CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H).",
+    "aliases": [
+      "CVE-2018-3258"
+    ],
+    "modified": "2024-02-20T05:34:07.091553Z",
+    "published": "2022-05-13T01:52:26Z",
+    "database_specific": {
+      "github_reviewed_at": "2022-06-28T23:45:33Z",
+      "github_reviewed": true,
+      "cwe_ids": [
+        "CWE-269"
+      ],
+      "severity": "HIGH",
+      "nvd_published_at": "2018-10-17T01:31:00Z"
+    },
+    "references": [
+      {
+        "type": "ADVISORY",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2018-3258"
+      },
+      {
+        "type": "WEB",
+        "url": "https://access.redhat.com/errata/RHSA-2019:1545"
+      },
+      {
+        "type": "WEB",
+        "url": "https://security.netapp.com/advisory/ntap-20181018-0002"
+      },
+      {
+        "type": "WEB",
+        "url": "http://www.oracle.com/technetwork/security-advisory/cpuoct2018-4428296.html"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "mysql:mysql-connector-java",
+          "ecosystem": "Maven",
+          "purl": "pkg:maven/mysql/mysql-connector-java"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "8.0.13"
+              }
+            ]
+          }
+        ],
+        "versions": [
+          "2.0.14",
+          "3.0.10",
+          "3.0.8",
+          "3.1.11",
+          "3.1.12",
+          "3.1.13",
+          "3.1.14",
+          "5.0.2",
+          "5.0.3",
+          "5.0.4",
+          "5.0.5",
+          "5.0.7",
+          "5.0.8",
+          "5.1.1",
+          "5.1.10",
+          "5.1.11",
+          "5.1.12",
+          "5.1.13",
+          "5.1.14",
+          "5.1.15",
+          "5.1.16",
+          "5.1.17",
+          "5.1.18",
+          "5.1.19",
+          "5.1.2",
+          "5.1.20",
+          "5.1.21",
+          "5.1.22",
+          "5.1.23",
+          "5.1.24",
+          "5.1.25",
+          "5.1.26",
+          "5.1.27",
+          "5.1.28",
+          "5.1.29",
+          "5.1.3",
+          "5.1.30",
+          "5.1.31",
+          "5.1.32",
+          "5.1.33",
+          "5.1.34",
+          "5.1.35",
+          "5.1.36",
+          "5.1.37",
+          "5.1.38",
+          "5.1.39",
+          "5.1.4",
+          "5.1.40",
+          "5.1.41",
+          "5.1.42",
+          "5.1.43",
+          "5.1.44",
+          "5.1.45",
+          "5.1.46",
+          "5.1.47",
+          "5.1.48",
+          "5.1.49",
+          "5.1.5",
+          "5.1.6",
+          "5.1.8",
+          "5.1.9",
+          "6.0.2",
+          "6.0.3",
+          "6.0.4",
+          "6.0.5",
+          "6.0.6",
+          "8.0.11",
+          "8.0.12",
+          "8.0.7-dmr",
+          "8.0.8-dmr",
+          "8.0.9-rc"
+        ],
+        "database_specific": {
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2022/05/GHSA-4vrv-ch96-6h42/GHSA-4vrv-ch96-6h42.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "severity": [
+      {
+        "type": "CVSS_V3",
+        "score": "CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+      }
+    ],
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "Maven/mysql:mysql-connector-java"
+    }
+  },
+  {
+    "id": "GHSA-2cf3-g243-hhfx",
+    "summary": "MySQL Connectors Privilege Escalation",
+    "details": "Vulnerability in the MySQL Connectors component of Oracle MySQL (subcomponent: Connector/Python). Supported versions that are affected are 2.1.5 and earlier. Easily \"exploitable\" vulnerability allows low privileged attacker with logon to the infrastructure where MySQL Connectors executes to compromise MySQL Connectors. Successful attacks of this vulnerability can result in unauthorized update, insert or delete access to some of MySQL Connectors accessible data. CVSS 3.0 Base Score 3.3 (Integrity impacts). CVSS Vector: (CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N).",
+    "aliases": [
+      "CVE-2017-3590"
+    ],
+    "modified": "2024-12-04T05:40:11.119651Z",
+    "published": "2022-05-13T01:45:43Z",
+    "database_specific": {
+      "severity": "LOW",
+      "github_reviewed_at": "2024-04-22T22:58:16Z",
+      "nvd_published_at": "2017-04-24T19:59:00Z",
+      "github_reviewed": true,
+      "cwe_ids": []
+    },
+    "references": [
+      {
+        "type": "ADVISORY",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2017-3590"
+      },
+      {
+        "type": "PACKAGE",
+        "url": "https://github.com/mysql/mysql-connector-python"
+      },
+      {
+        "type": "WEB",
+        "url": "http://www.oracle.com/technetwork/security-advisory/cpuapr2017-3236618.html"
+      },
+      {
+        "type": "WEB",
+        "url": "http://www.securityfocus.com/bid/97840"
+      },
+      {
+        "type": "WEB",
+        "url": "http://www.securitytracker.com/id/1038287"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "mysql-connector-python",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/mysql-connector-python"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "last_affected": "2.1.5"
+              }
+            ]
+          }
+        ],
+        "versions": [
+          "1.0.10",
+          "1.0.12",
+          "1.0.5",
+          "1.0.5b1",
+          "1.0.6b2",
+          "1.0.7",
+          "1.0.9",
+          "1.1.4",
+          "1.1.5",
+          "1.1.6",
+          "1.2.2",
+          "1.2.3",
+          "2.0.1",
+          "2.0.2",
+          "2.0.3",
+          "2.0.4"
+        ],
+        "database_specific": {
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2022/05/GHSA-2cf3-g243-hhfx/GHSA-2cf3-g243-hhfx.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "severity": [
+      {
+        "type": "CVSS_V3",
+        "score": "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N"
+      }
+    ],
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "PyPI/mysql-connector-python"
+    }
+  },
+  {
+    "id": "GHSA-cjcf-wm2p-59h5",
+    "summary": "Exposure of Sensitive Information to an Unauthorized Actor in Oracle MySQL Connectors Java",
+    "details": "Vulnerability in the MySQL Connectors component of Oracle MySQL (subcomponent: Connector/J). Supported versions that are affected are 5.1.41 and earlier. Easily \"exploitable\" vulnerability allows low privileged attacker with logon to the infrastructure where MySQL Connectors executes to compromise MySQL Connectors. Successful attacks of this vulnerability can result in unauthorized update, insert or delete access to some of MySQL Connectors accessible data. CVSS 3.0 Base Score 3.3 (Integrity impacts). CVSS Vector: (CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N).",
+    "aliases": [
+      "CVE-2017-3589"
+    ],
+    "modified": "2023-11-08T03:59:21.268032Z",
+    "published": "2022-05-13T01:45:42Z",
+    "database_specific": {
+      "github_reviewed_at": "2022-07-01T17:10:39Z",
+      "github_reviewed": true,
+      "cwe_ids": [
+        "CWE-200"
+      ],
+      "severity": "LOW",
+      "nvd_published_at": "2017-04-24T19:59:00Z"
+    },
+    "references": [
+      {
+        "type": "ADVISORY",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2017-3589"
+      },
+      {
+        "type": "WEB",
+        "url": "http://www.debian.org/security/2017/dsa-3857"
+      },
+      {
+        "type": "WEB",
+        "url": "http://www.oracle.com/technetwork/security-advisory/cpuapr2017-3236618.html"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "mysql:mysql-connector-java",
+          "ecosystem": "Maven",
+          "purl": "pkg:maven/mysql/mysql-connector-java"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "5.1.42"
+              }
+            ]
+          }
+        ],
+        "versions": [
+          "2.0.14",
+          "3.0.10",
+          "3.0.8",
+          "3.1.11",
+          "3.1.12",
+          "3.1.13",
+          "3.1.14",
+          "5.0.2",
+          "5.0.3",
+          "5.0.4",
+          "5.0.5",
+          "5.0.7",
+          "5.0.8",
+          "5.1.1",
+          "5.1.10",
+          "5.1.11",
+          "5.1.12",
+          "5.1.13",
+          "5.1.14",
+          "5.1.15",
+          "5.1.16",
+          "5.1.17",
+          "5.1.18",
+          "5.1.19",
+          "5.1.2",
+          "5.1.20",
+          "5.1.21",
+          "5.1.22",
+          "5.1.23",
+          "5.1.24",
+          "5.1.25",
+          "5.1.26",
+          "5.1.27",
+          "5.1.28",
+          "5.1.29",
+          "5.1.3",
+          "5.1.30",
+          "5.1.31",
+          "5.1.32",
+          "5.1.33",
+          "5.1.34",
+          "5.1.35",
+          "5.1.36",
+          "5.1.37",
+          "5.1.38",
+          "5.1.39",
+          "5.1.4",
+          "5.1.40",
+          "5.1.41",
+          "5.1.5",
+          "5.1.6",
+          "5.1.8",
+          "5.1.9"
+        ],
+        "database_specific": {
+          "last_known_affected_version_range": "<= 5.1.41",
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2022/05/GHSA-cjcf-wm2p-59h5/GHSA-cjcf-wm2p-59h5.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "severity": [
+      {
+        "type": "CVSS_V3",
+        "score": "CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N"
+      }
+    ],
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "Maven/mysql:mysql-connector-java"
+    }
+  },
+  {
+    "id": "GHSA-pwh7-92h3-mqr6",
+    "summary": "Exposure of Sensitive Information to an Unauthorized Actor in Oracle MySQL Connectors Java",
+    "details": "Vulnerability in the MySQL Connectors component of Oracle MySQL (subcomponent: Connector/J). Supported versions that are affected are 5.1.41 and earlier. Easily \"exploitable\" vulnerability allows low privileged attacker with network access via multiple protocols to compromise MySQL Connectors. While the vulnerability is in MySQL Connectors, attacks may significantly impact additional products. Successful attacks of this vulnerability can result in unauthorized update, insert or delete access to some of MySQL Connectors accessible data as well as unauthorized read access to a subset of MySQL Connectors accessible data. CVSS 3.0 Base Score 6.4 (Confidentiality and Integrity impacts). CVSS Vector: (CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:N).",
+    "aliases": [
+      "CVE-2017-3586"
+    ],
+    "modified": "2023-11-08T03:59:21.205746Z",
+    "published": "2022-05-13T01:45:42Z",
+    "database_specific": {
+      "github_reviewed_at": "2022-07-01T17:11:02Z",
+      "github_reviewed": true,
+      "cwe_ids": [
+        "CWE-200"
+      ],
+      "severity": "MODERATE",
+      "nvd_published_at": "2017-04-24T19:59:00Z"
+    },
+    "references": [
+      {
+        "type": "ADVISORY",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2017-3586"
+      },
+      {
+        "type": "WEB",
+        "url": "http://www.debian.org/security/2017/dsa-3857"
+      },
+      {
+        "type": "WEB",
+        "url": "http://www.oracle.com/technetwork/security-advisory/cpuapr2017-3236618.html"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "mysql:mysql-connector-java",
+          "ecosystem": "Maven",
+          "purl": "pkg:maven/mysql/mysql-connector-java"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "5.1.42"
+              }
+            ]
+          }
+        ],
+        "versions": [
+          "2.0.14",
+          "3.0.10",
+          "3.0.8",
+          "3.1.11",
+          "3.1.12",
+          "3.1.13",
+          "3.1.14",
+          "5.0.2",
+          "5.0.3",
+          "5.0.4",
+          "5.0.5",
+          "5.0.7",
+          "5.0.8",
+          "5.1.1",
+          "5.1.10",
+          "5.1.11",
+          "5.1.12",
+          "5.1.13",
+          "5.1.14",
+          "5.1.15",
+          "5.1.16",
+          "5.1.17",
+          "5.1.18",
+          "5.1.19",
+          "5.1.2",
+          "5.1.20",
+          "5.1.21",
+          "5.1.22",
+          "5.1.23",
+          "5.1.24",
+          "5.1.25",
+          "5.1.26",
+          "5.1.27",
+          "5.1.28",
+          "5.1.29",
+          "5.1.3",
+          "5.1.30",
+          "5.1.31",
+          "5.1.32",
+          "5.1.33",
+          "5.1.34",
+          "5.1.35",
+          "5.1.36",
+          "5.1.37",
+          "5.1.38",
+          "5.1.39",
+          "5.1.4",
+          "5.1.40",
+          "5.1.41",
+          "5.1.5",
+          "5.1.6",
+          "5.1.8",
+          "5.1.9"
+        ],
+        "database_specific": {
+          "last_known_affected_version_range": "<= 5.1.41",
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2022/05/GHSA-pwh7-92h3-mqr6/GHSA-pwh7-92h3-mqr6.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "severity": [
+      {
+        "type": "CVSS_V3",
+        "score": "CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:N"
+      }
+    ],
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "Maven/mysql:mysql-connector-java"
+    }
+  },
+  {
+    "id": "GHSA-2xxh-f8r3-hvvr",
+    "summary": "Improper Access Control in MySQL Connectors Java",
+    "details": "Vulnerability in the MySQL Connectors component of Oracle MySQL (subcomponent: Connector/J). Supported versions that are affected are 5.1.40 and earlier. Difficult to exploit vulnerability allows low privileged attacker with network access via multiple protocols to compromise MySQL Connectors. While the vulnerability is in MySQL Connectors, attacks may significantly impact additional products. Successful attacks of this vulnerability can result in takeover of MySQL Connectors. CVSS 3.0 Base Score 8.5 (Confidentiality, Integrity and Availability impacts). CVSS Vector: (CVSS:3.0/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:H/A:H).",
+    "aliases": [
+      "CVE-2017-3523"
+    ],
+    "modified": "2023-11-08T03:59:21.145125Z",
+    "published": "2022-05-13T01:45:34Z",
+    "database_specific": {
+      "github_reviewed_at": "2022-07-01T17:12:48Z",
+      "github_reviewed": true,
+      "cwe_ids": [
+        "CWE-284"
+      ],
+      "severity": "HIGH",
+      "nvd_published_at": "2017-04-24T19:59:00Z"
+    },
+    "references": [
+      {
+        "type": "ADVISORY",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2017-3523"
+      },
+      {
+        "type": "WEB",
+        "url": "http://www.debian.org/security/2017/dsa-3840"
+      },
+      {
+        "type": "WEB",
+        "url": "http://www.oracle.com/technetwork/security-advisory/cpuapr2017-3236618.html"
+      },
+      {
+        "type": "WEB",
+        "url": "http://www.securityfocus.com/bid/97982"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "mysql:mysql-connector-java",
+          "ecosystem": "Maven",
+          "purl": "pkg:maven/mysql/mysql-connector-java"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "5.1.41"
+              }
+            ]
+          }
+        ],
+        "versions": [
+          "2.0.14",
+          "3.0.10",
+          "3.0.8",
+          "3.1.11",
+          "3.1.12",
+          "3.1.13",
+          "3.1.14",
+          "5.0.2",
+          "5.0.3",
+          "5.0.4",
+          "5.0.5",
+          "5.0.7",
+          "5.0.8",
+          "5.1.1",
+          "5.1.10",
+          "5.1.11",
+          "5.1.12",
+          "5.1.13",
+          "5.1.14",
+          "5.1.15",
+          "5.1.16",
+          "5.1.17",
+          "5.1.18",
+          "5.1.19",
+          "5.1.2",
+          "5.1.20",
+          "5.1.21",
+          "5.1.22",
+          "5.1.23",
+          "5.1.24",
+          "5.1.25",
+          "5.1.26",
+          "5.1.27",
+          "5.1.28",
+          "5.1.29",
+          "5.1.3",
+          "5.1.30",
+          "5.1.31",
+          "5.1.32",
+          "5.1.33",
+          "5.1.34",
+          "5.1.35",
+          "5.1.36",
+          "5.1.37",
+          "5.1.38",
+          "5.1.39",
+          "5.1.4",
+          "5.1.40",
+          "5.1.5",
+          "5.1.6",
+          "5.1.8",
+          "5.1.9"
+        ],
+        "database_specific": {
+          "last_known_affected_version_range": "<= 5.1.40",
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2022/05/GHSA-2xxh-f8r3-hvvr/GHSA-2xxh-f8r3-hvvr.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "severity": [
+      {
+        "type": "CVSS_V3",
+        "score": "CVSS:3.0/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:H/A:H"
+      }
+    ],
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "Maven/mysql:mysql-connector-java"
+    }
+  },
+  {
+    "id": "GHSA-v5rq-w2xm-7g5f",
+    "summary": "Improper Access Control in MySQL Connector Python",
+    "details": "Vulnerability in the MySQL Connectors component of Oracle MySQL (subcomponent: Connector/Python). Supported versions that are affected are 8.0.13 and prior and 2.1.8 and prior. Easily exploitable vulnerability allows unauthenticated attacker with network access via TLS to compromise MySQL Connectors. Successful attacks require human interaction from a person other than the attacker. Successful attacks of this vulnerability can result in unauthorized creation, deletion or modification access to critical data or all MySQL Connectors accessible data as well as unauthorized access to critical data or complete access to all MySQL Connectors accessible data. ",
+    "aliases": [
+      "CVE-2019-2435"
+    ],
+    "modified": "2024-02-20T05:22:07.435798Z",
+    "published": "2022-05-13T01:22:02Z",
+    "database_specific": {
+      "severity": "HIGH",
+      "github_reviewed_at": "2022-06-27T16:09:55Z",
+      "nvd_published_at": "2019-01-16T19:30:00Z",
+      "github_reviewed": true,
+      "cwe_ids": [
+        "CWE-284"
+      ]
+    },
+    "references": [
+      {
+        "type": "ADVISORY",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2019-2435"
+      },
+      {
+        "type": "PACKAGE",
+        "url": "https://github.com/mysql/mysql-connector-python"
+      },
+      {
+        "type": "WEB",
+        "url": "https://security.netapp.com/advisory/ntap-20190118-0002"
+      },
+      {
+        "type": "WEB",
+        "url": "http://lists.opensuse.org/opensuse-security-announce/2020-03/msg00044.html"
+      },
+      {
+        "type": "WEB",
+        "url": "http://lists.opensuse.org/opensuse-security-announce/2020-03/msg00053.html"
+      },
+      {
+        "type": "WEB",
+        "url": "http://www.oracle.com/technetwork/security-advisory/cpujan2019-5072801.html"
+      },
+      {
+        "type": "WEB",
+        "url": "http://www.securityfocus.com/bid/106616"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "mysql-connector-python",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/mysql-connector-python"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "8.0.0"
+              },
+              {
+                "fixed": "8.0.19"
+              }
+            ]
+          }
+        ],
+        "versions": [
+          "8.0.11",
+          "8.0.12",
+          "8.0.13",
+          "8.0.14",
+          "8.0.15",
+          "8.0.16",
+          "8.0.17",
+          "8.0.18",
+          "8.0.5",
+          "8.0.6"
+        ],
+        "database_specific": {
+          "last_known_affected_version_range": "<= 8.0.13",
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2022/05/GHSA-v5rq-w2xm-7g5f/GHSA-v5rq-w2xm-7g5f.json"
+        }
+      },
+      {
+        "package": {
+          "name": "mysql-connector-python",
+          "ecosystem": "PyPI",
+          "purl": "pkg:pypi/mysql-connector-python"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "2.1.0"
+              },
+              {
+                "last_affected": "2.1.8"
+              }
+            ]
+          }
+        ],
+        "database_specific": {
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2022/05/GHSA-v5rq-w2xm-7g5f/GHSA-v5rq-w2xm-7g5f.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "severity": [
+      {
+        "type": "CVSS_V3",
+        "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N"
+      }
+    ],
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "PyPI/mysql-connector-python"
+    }
+  },
+  {
+    "id": "GHSA-g76j-4cxx-23h9",
+    "summary": "Improper Handling of Insufficient Permissions or Privileges in MySQL Connectors Java",
+    "details": "Vulnerability in the MySQL Connectors product of Oracle MySQL (component: Connector/J). Supported versions that are affected are 8.0.27 and prior. Difficult to exploit vulnerability allows high privileged attacker with network access via multiple protocols to compromise MySQL Connectors. Successful attacks of this vulnerability can result in takeover of MySQL Connectors. CVSS 3.1 Base Score 6.6 (Confidentiality, Integrity and Availability impacts). CVSS Vector: (CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:H/I:H/A:H).",
+    "aliases": [
+      "CVE-2022-21363"
+    ],
+    "modified": "2023-11-08T04:08:05.518768Z",
+    "published": "2022-01-20T00:00:48Z",
+    "database_specific": {
+      "github_reviewed_at": "2022-06-20T22:48:44Z",
+      "github_reviewed": true,
+      "cwe_ids": [
+        "CWE-280"
+      ],
+      "severity": "MODERATE",
+      "nvd_published_at": "2022-01-19T12:15:00Z"
+    },
+    "references": [
+      {
+        "type": "ADVISORY",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2022-21363"
+      },
+      {
+        "type": "WEB",
+        "url": "https://www.oracle.com/security-alerts/cpujan2022.html"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "mysql:mysql-connector-java",
+          "ecosystem": "Maven",
+          "purl": "pkg:maven/mysql/mysql-connector-java"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "8.0.28"
+              }
+            ]
+          }
+        ],
+        "versions": [
+          "2.0.14",
+          "3.0.10",
+          "3.0.8",
+          "3.1.11",
+          "3.1.12",
+          "3.1.13",
+          "3.1.14",
+          "5.0.2",
+          "5.0.3",
+          "5.0.4",
+          "5.0.5",
+          "5.0.7",
+          "5.0.8",
+          "5.1.1",
+          "5.1.10",
+          "5.1.11",
+          "5.1.12",
+          "5.1.13",
+          "5.1.14",
+          "5.1.15",
+          "5.1.16",
+          "5.1.17",
+          "5.1.18",
+          "5.1.19",
+          "5.1.2",
+          "5.1.20",
+          "5.1.21",
+          "5.1.22",
+          "5.1.23",
+          "5.1.24",
+          "5.1.25",
+          "5.1.26",
+          "5.1.27",
+          "5.1.28",
+          "5.1.29",
+          "5.1.3",
+          "5.1.30",
+          "5.1.31",
+          "5.1.32",
+          "5.1.33",
+          "5.1.34",
+          "5.1.35",
+          "5.1.36",
+          "5.1.37",
+          "5.1.38",
+          "5.1.39",
+          "5.1.4",
+          "5.1.40",
+          "5.1.41",
+          "5.1.42",
+          "5.1.43",
+          "5.1.44",
+          "5.1.45",
+          "5.1.46",
+          "5.1.47",
+          "5.1.48",
+          "5.1.49",
+          "5.1.5",
+          "5.1.6",
+          "5.1.8",
+          "5.1.9",
+          "6.0.2",
+          "6.0.3",
+          "6.0.4",
+          "6.0.5",
+          "6.0.6",
+          "8.0.11",
+          "8.0.12",
+          "8.0.13",
+          "8.0.14",
+          "8.0.15",
+          "8.0.16",
+          "8.0.17",
+          "8.0.18",
+          "8.0.19",
+          "8.0.20",
+          "8.0.21",
+          "8.0.22",
+          "8.0.23",
+          "8.0.24",
+          "8.0.25",
+          "8.0.26",
+          "8.0.27",
+          "8.0.7-dmr",
+          "8.0.8-dmr",
+          "8.0.9-rc"
+        ],
+        "database_specific": {
+          "last_known_affected_version_range": "<= 8.0.27",
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2022/01/GHSA-g76j-4cxx-23h9/GHSA-g76j-4cxx-23h9.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "severity": [
+      {
+        "type": "CVSS_V3",
+        "score": "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:H/I:H/A:H"
+      }
+    ],
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "Maven/mysql:mysql-connector-java"
+    }
+  },
+  {
+    "id": "GHSA-fvq6-55gv-jx9f",
+    "summary": "SQL Injection in mysql",
+    "details": "Versions of `mysql` prior to 2.0.0-alpha8 are affected by a SQL Injection vulnerability in the `mysql.escape()` function, which does not properly escape object keys.\n\n\n## Recommendation\n\nUpdate to version 2.0.0-alpha8 or later.",
+    "aliases": [
+      "CVE-2015-9244"
+    ],
+    "modified": "2023-11-08T03:58:04.618107Z",
+    "published": "2020-09-01T15:21:05Z",
+    "database_specific": {
+      "github_reviewed_at": "2020-08-31T18:09:53Z",
+      "nvd_published_at": "2018-05-29T20:29:00Z",
+      "github_reviewed": true,
+      "severity": "MODERATE",
+      "cwe_ids": [
+        "CWE-89"
+      ]
+    },
+    "references": [
+      {
+        "type": "ADVISORY",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2015-9244"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/felixge/node-mysql/issues/342"
+      },
+      {
+        "type": "WEB",
+        "url": "https://www.npmjs.com/advisories/66"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "mysql",
+          "ecosystem": "npm",
+          "purl": "pkg:npm/mysql"
+        },
+        "ranges": [
+          {
+            "type": "SEMVER",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "2.0.0-alpha8"
+              }
+            ]
+          }
+        ],
+        "database_specific": {
+          "last_known_affected_version_range": "<= 2.0.0-alpha7",
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2020/09/GHSA-fvq6-55gv-jx9f/GHSA-fvq6-55gv-jx9f.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "npm/mysql"
+    }
+  },
+  {
+    "id": "GHSA-jcq3-cprp-m333",
+    "summary": "Privilege escalation in mysql-connector-jav",
+    "details": "Vulnerability in the MySQL Connectors component of Oracle MySQL (subcomponent: Connector/J). Supported versions that are affected are 8.0.15 and prior. Difficult to exploit vulnerability allows high privileged attacker with logon to the infrastructure where MySQL Connectors executes to compromise MySQL Connectors. Successful attacks require human interaction from a person other than the attacker. Successful attacks of this vulnerability can result in takeover of MySQL Connectors. CVSS 3.0 Base Score 6.3 (Confidentiality, Integrity and Availability impacts). CVSS Vector: (CVSS:3.0/AV:L/AC:H/PR:H/UI:R/S:U/C:H/I:H/A:H).",
+    "aliases": [
+      "CVE-2019-2692"
+    ],
+    "modified": "2024-02-17T05:24:00.457490Z",
+    "published": "2020-07-01T17:12:20Z",
+    "database_specific": {
+      "github_reviewed_at": "2020-07-01T17:11:19Z",
+      "github_reviewed": true,
+      "cwe_ids": [
+        "CWE-843"
+      ],
+      "severity": "MODERATE",
+      "nvd_published_at": null
+    },
+    "references": [
+      {
+        "type": "ADVISORY",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2019-2692"
+      },
+      {
+        "type": "WEB",
+        "url": "https://security.netapp.com/advisory/ntap-20190423-0002"
+      },
+      {
+        "type": "WEB",
+        "url": "https://snyk.io/vuln/SNYK-JAVA-MYSQL-174574"
+      },
+      {
+        "type": "WEB",
+        "url": "http://www.oracle.com/technetwork/security-advisory/cpuapr2019-5072813.html"
+      },
+      {
+        "type": "WEB",
+        "url": "http://www.securityfocus.com/bid/107925"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "mysql:mysql-connector-java",
+          "ecosystem": "Maven",
+          "purl": "pkg:maven/mysql/mysql-connector-java"
+        },
+        "ranges": [
+          {
+            "type": "ECOSYSTEM",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "8.0.16"
+              }
+            ]
+          }
+        ],
+        "versions": [
+          "2.0.14",
+          "3.0.10",
+          "3.0.8",
+          "3.1.11",
+          "3.1.12",
+          "3.1.13",
+          "3.1.14",
+          "5.0.2",
+          "5.0.3",
+          "5.0.4",
+          "5.0.5",
+          "5.0.7",
+          "5.0.8",
+          "5.1.1",
+          "5.1.10",
+          "5.1.11",
+          "5.1.12",
+          "5.1.13",
+          "5.1.14",
+          "5.1.15",
+          "5.1.16",
+          "5.1.17",
+          "5.1.18",
+          "5.1.19",
+          "5.1.2",
+          "5.1.20",
+          "5.1.21",
+          "5.1.22",
+          "5.1.23",
+          "5.1.24",
+          "5.1.25",
+          "5.1.26",
+          "5.1.27",
+          "5.1.28",
+          "5.1.29",
+          "5.1.3",
+          "5.1.30",
+          "5.1.31",
+          "5.1.32",
+          "5.1.33",
+          "5.1.34",
+          "5.1.35",
+          "5.1.36",
+          "5.1.37",
+          "5.1.38",
+          "5.1.39",
+          "5.1.4",
+          "5.1.40",
+          "5.1.41",
+          "5.1.42",
+          "5.1.43",
+          "5.1.44",
+          "5.1.45",
+          "5.1.46",
+          "5.1.47",
+          "5.1.48",
+          "5.1.49",
+          "5.1.5",
+          "5.1.6",
+          "5.1.8",
+          "5.1.9",
+          "6.0.2",
+          "6.0.3",
+          "6.0.4",
+          "6.0.5",
+          "6.0.6",
+          "8.0.11",
+          "8.0.12",
+          "8.0.13",
+          "8.0.14",
+          "8.0.15",
+          "8.0.7-dmr",
+          "8.0.8-dmr",
+          "8.0.9-rc"
+        ],
+        "database_specific": {
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2020/07/GHSA-jcq3-cprp-m333/GHSA-jcq3-cprp-m333.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "severity": [
+      {
+        "type": "CVSS_V3",
+        "score": "CVSS:3.0/AV:L/AC:H/PR:H/UI:R/S:U/C:H/I:H/A:H"
+      }
+    ],
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "Maven/mysql:mysql-connector-java"
+    }
+  },
+  {
+    "id": "GHSA-5f7m-mmpc-qhh4",
+    "summary": "mysql Node.JS Module Vulnerable to Remote Memory Exposure",
+    "details": "Versions of `mysql` before 2.14.0 are vulnerable to remove memory exposure.\n\nAffected versions of `mysql` package allocate and send an uninitialized memory over the network when a number is provided as a password.\n\nOnly `mysql` running on Node.js versions below 6.0.0 are affected due to a throw added in newer node.js versions.\n\nProof of Concept:\n\n```\nrequire('mysql').createConnection({\n  host: 'localhost',\n  user: 'user',\n  password : USERPROVIDEDINPUT,  // number\n  database : 'my_db'\n}).connect();\n```\n\n\n\n## Recommendation\n\nUpdate to version 2.14.0 or later.",
+    "modified": "2022-08-03T20:30:06Z",
+    "published": "2019-05-23T09:27:00Z",
+    "database_specific": {
+      "github_reviewed_at": "2019-05-23T07:40:10Z",
+      "nvd_published_at": null,
+      "github_reviewed": true,
+      "severity": "MODERATE",
+      "cwe_ids": [
+        "CWE-201"
+      ]
+    },
+    "references": [
+      {
+        "type": "WEB",
+        "url": "https://github.com/mysqljs/mysql/commit/192fe45593ba5768534afb6f2154432ca67a5002"
+      },
+      {
+        "type": "WEB",
+        "url": "https://github.com/mysqljs/mysql/commit/310c6a7d1b2e14b63b572dbfbfa10128f20c6d52"
+      },
+      {
+        "type": "PACKAGE",
+        "url": "https://github.com/mysqljs/mysql"
+      },
+      {
+        "type": "WEB",
+        "url": "https://www.npmjs.com/advisories/602"
+      }
+    ],
+    "affected": [
+      {
+        "package": {
+          "name": "mysql",
+          "ecosystem": "npm",
+          "purl": "pkg:npm/mysql"
+        },
+        "ranges": [
+          {
+            "type": "SEMVER",
+            "events": [
+              {
+                "introduced": "2.0.0-alpha8"
+              },
+              {
+                "fixed": "2.14.0"
+              }
+            ]
+          }
+        ],
+        "database_specific": {
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2019/05/GHSA-5f7m-mmpc-qhh4/GHSA-5f7m-mmpc-qhh4.json"
+        }
+      }
+    ],
+    "schema_version": "1.7.3",
+    "_metadata": {
+      "fetched_at": "2025-11-13T17:27:33.211475+00:00",
+      "source_package": "npm/mysql"
+    }
+  }
+]
