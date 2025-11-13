@@ -184,8 +184,8 @@ const FEEDS = {
   settings: null
 };
 
-/* ------- Generic JSON parsers (auto-detect fields) ------- */
-function extractField(obj, candidates){
+/* ------- OSV-Specific JSON parser ------- */
+function extractOSVFields(obj, candidates){
   if(!obj) return null;
   for(const k of candidates){
     if(k in obj && obj[k] != null) return obj[k];
@@ -197,7 +197,7 @@ function extractField(obj, candidates){
 }
 
 function detectAndNormalize(items, feedKey){
-  // items can be array or object (CISA has top-level vulnerabilities array)
+  // OSV data is already an array of normalized objects from your GitHub Action
   if(!items) return [];
   if(!Array.isArray(items)){
     // try to find array inside object
@@ -206,52 +206,56 @@ function detectAndNormalize(items, feedKey){
     }
     if(!Array.isArray(items)) return [];
   }
+  
   const out = items.map(raw => {
-    // heuristic candidates
-    const id = (extractField(raw, ['cveID','id','CVE','name','cve','vulnerabilityName']) || '').toString();
-    const title = extractField(raw, ['title','summary','vulnerabilityName','name','cve','id']) || id || '';
-    const desc = extractField(raw, ['description','shortDescription','details','summary','bugzilla_description','vulnerability_description','overview']) || '';
-    // date fields
-    const dateStr = extractField(raw, ['datePublished','public_date','published','publishedDate','date','advisoryDate','published_at']) || extractField(raw, ['dateAdded','firstSeen']);
-    const publishedDate = dateStr ? new Date(dateStr) : null;
-    // severity candidates
-    const sev = (extractField(raw, ['severity','threat_severity','urgency','priority','baseSeverity','impact']) || '').toString().toLowerCase();
-    // url candidates
-    const url = extractField(raw, ['url','html_url','resource_url','link','reference','references','advisory_url','cve_url']) || '';
-    // vendor/product
-    const vendorProject = extractField(raw, ['vendorProject','vendor','vendor_name','product','product_name','package']);
-    // cvss
-    const cvss = extractField(raw, ['cvss3','cvss','cvss3_score','cvss3_base_score','cvss_score']);
+    // OSV-specific field mapping
+    const id = extractOSVFields(raw, ['id', 'cveID', 'CVE', 'name']);
+    const title = extractOSVFields(raw, ['title', 'summary', 'name']);
+    const desc = extractOSVFields(raw, ['description', 'details', 'summary']);
+    const source = extractOSVFields(raw, ['source']);
+    const aliases = extractOSVFields(raw, ['aliases']) || [];
+    const affectedPackages = extractOSVFields(raw, ['affected_packages']) || [];
+    
+    // For OSV data, we don't have published dates, so use current date
+    const publishedDate = new Date();
+    
+    // Try to extract severity from ID or description
+    let severity = '';
+    const searchText = (title + ' ' + desc).toLowerCase();
+    if (searchText.includes('critical') || id.includes('CRITICAL')) severity = 'critical';
+    else if (searchText.includes('high') || id.includes('HIGH')) severity = 'high';
+    else if (searchText.includes('medium') || id.includes('MEDIUM')) severity = 'medium';
+    else if (searchText.includes('low') || id.includes('LOW')) severity = 'low';
+    else severity = 'medium'; // default
+    
+    // URL construction for OSV
+    const url = extractOSVFields(raw, ['url']) || (id ? `https://osv.dev/${id}` : '');
+    
     return {
-      raw, id, title, description: (desc||'').toString(), publishedDate, severity: normalizeSeverity(sev), url: computeUrl(url, raw, id, feedKey), vendorProject, cvss
+      raw, 
+      id: id || 'Unknown', 
+      title: title || id || 'Untitled',
+      description: desc || 'No description available',
+      publishedDate,
+      severity,
+      url,
+      source: source || feedKey,
+      aliases,
+      affectedPackages,
+      vendorProject: affectedPackages.length > 0 ? affectedPackages[0] : source
     };
   });
   return out;
 }
 
-function computeUrl(urlCandidate, raw, id, feedKey){
-  if(urlCandidate) return Array.isArray(urlCandidate)? urlCandidate[0] : urlCandidate;
-  // special-cases
-  if(feedKey==='cisa') return `https://nvd.nist.gov/vuln/detail/${id}`;
-  if(feedKey==='redhat') return raw && raw.bugzilla ? raw.bugzilla : '';
-  if(id && id.startsWith('CVE-')) return `https://nvd.nist.gov/vuln/detail/${id}`;
-  return '';
-}
-
 function normalizeSeverity(s){
-  if(!s) return '';
+  if(!s) return 'medium';
   const s2 = s.toString().toLowerCase();
-  if(s2.includes('crit') || s2==='critical') return 'critical';
+  if(s2.includes('crit')) return 'critical';
   if(s2.includes('high')) return 'high';
-  if(s2.includes('important')) return 'high';
-  if(s2.includes('med') || s2==='moderate' || s2==='medium') return 'medium';
+  if(s2.includes('med')) return 'medium';
   if(s2.includes('low')) return 'low';
-  // CVSS numeric
-  const num = parseFloat(s2);
-  if(!isNaN(num)){
-    if(num>=9) return 'critical'; if(num>=7) return 'high'; if(num>=4) return 'medium'; return 'low';
-  }
-  return '';
+  return 'medium';
 }
 
 /* ------- Fetch & render pipeline ------- */
@@ -267,7 +271,7 @@ async function loadSection(section, force=false){
     if(!res.ok){ contentArea.innerHTML = cardHtml('No data','Feed file not found or returned error.'); return; }
     const json = await res.json();
     // store optional metadata
-    state.lastLoadMeta[section] = { loadedAt: new Date().toISOString(), countGuess: Array.isArray(json)?json.length:(json.vulnerabilities?json.vulnerabilities.length:0) };
+    state.lastLoadMeta[section] = { loadedAt: new Date().toISOString(), countGuess: Array.isArray(json)?json.length:0 };
     const items = detectAndNormalize(json, section);
     state.allVulns = items;
     renderSummary(section, json);
@@ -284,7 +288,6 @@ function cardHtml(title, html){ return `<div class="card"><h3>${title}</h3><div 
 function showLoading(){ contentArea.innerHTML = cardHtml('Loading','Fetching feed data...'); summaryArea.innerHTML = ''; }
 
 function renderDashboard(){
-  // quick overview: list all feeds with counts if available
   const cards = [];
   for(const key of Object.keys(FEEDS)){
     if(!FEEDS[key]) continue;
@@ -305,7 +308,6 @@ function renderDashboard(){
   });
 }
 
-/* Render settings */
 function renderSettings(){
   contentArea.innerHTML = `
     <div class="card"><h3>Settings</h3>
@@ -322,19 +324,13 @@ function renderSettings(){
   });
 }
 
-/* Summary bar - shows counts & last updated */
 function renderSummary(section, rawJson){
   const meta = state.lastLoadMeta[section] || {};
   const total = state.allVulns.length;
-  // compute counts by severity
   const counts = state.allVulns.reduce((acc,it)=>{ acc[it.severity]=(acc[it.severity]||0)+1; return acc; },{});
   const last = meta.loadedAt ? new Date(meta.loadedAt).toLocaleString() : 'N/A';
-  let special = '';
-  if(section==='redhat'){
-    // try to compute rich stats if fields present
-    const crit = counts['critical']||0, high=counts['high']||0, med=counts['medium']||0;
-    special = `<div class="muted small">Critical: ${crit} • High: ${high} • Medium: ${med}</div>`;
-  }
+  const crit = counts['critical']||0, high=counts['high']||0, med=counts['medium']||0, low=counts['low']||0;
+  const special = `<div class="muted small">Critical: ${crit} • High: ${high} • Medium: ${med} • Low: ${low}</div>`;
   summaryArea.innerHTML = `<div class="card"><h3>${section.toUpperCase()}</h3><div class="meta muted">Records: <strong>${total}</strong> • Last load: <strong>${last}</strong></div>${special}</div>`;
 }
 
@@ -375,7 +371,9 @@ function renderCVE(v){
   const sev = v.severity || 'medium';
   const sevClass = sev==='critical'?'sev-critical':(sev==='high'?'sev-high':(sev==='medium'?'sev-medium':'sev-low'));
   const summary = (v.description||'').replace(/\n/g,' ').slice(0,260);
-  const url = v.url || (v.id && v.id.startsWith('CVE-')?`https://nvd.nist.gov/vuln/detail/${v.id}`:'#');
+  const url = v.url || '#';
+  const source = v.source || 'OSV';
+  
   return `<div class="cve">
     <div class="left">
       <div class="id">${v.id||'—'}</div>
@@ -385,15 +383,15 @@ function renderCVE(v){
     <div class="right">
       <div class="title"><a href="${url}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${escapeHtml(v.title||v.id||'Untitled')}</a></div>
       <div class="summary">${escapeHtml(summary)}${(v.description||'').length>260?'…':''}</div>
-      <div class="meta"><div class="muted small">Source: ${v.source||'—'}</div>${v.cvss?`<div class="muted small">CVSS: ${v.cvss}</div>`:''}</div>
+      <div class="meta">
+        <div class="muted small">Source: ${source}</div>
+        ${v.affectedPackages && v.affectedPackages.length > 0 ? `<div class="muted small">Packages: ${v.affectedPackages.slice(0,2).join(', ')}${v.affectedPackages.length > 2 ? '...' : ''}</div>` : ''}
+      </div>
     </div>
   </div>`;
 }
 
 function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-/* ------- Utilities ------- */
-function cardHtml(title, html){ return `<div class="card"><h3>${title}</h3><div class="desc">${html}</div></div>`; }
 
 /* ------- Boot: load initial dashboard ------- */
 loadSection('dashboard');
