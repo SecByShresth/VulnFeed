@@ -46,7 +46,7 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid var(--text, 0.1);
+    border-right: 1px solid rgba(0,0,0,0.1);
   }
   #sidebar h2 {
     margin-top: 0;
@@ -114,7 +114,7 @@
     flex: 1;
     min-width: 200px;
     padding: 0.8rem;
-    border: 1px solid var(--text, 0.2);
+    border: 1px solid rgba(0,0,0,0.2);
     border-radius: var(--border-radius);
     background: var(--card-bg);
     color: var(--text);
@@ -192,7 +192,7 @@
   }
   .vuln-details {
     font-size: 0.9rem;
-    color: var(--text, 0.7);
+    color: rgba(0,0,0,0.7);
     margin-bottom: 0.5rem;
   }
   .vuln-link {
@@ -206,7 +206,7 @@
     transition: var(--transition);
   }
   .vuln-link:hover {
-    background: var(--accent, 0.8);
+    background: rgba(108, 99, 255, 0.8);
     transform: translateY(-1px);
   }
 
@@ -288,7 +288,7 @@
 
 <script>
 const feeds = {
-  "Red Hat": "data/redhat.json",
+  "Red Hat": "data/redhat-cves.json",
   "AlmaLinux": "data/almalinux.json",
   "Rocky Linux": "data/rocky.json",
   "Debian": "data/debian.json",
@@ -297,7 +297,10 @@ const feeds = {
   "MySQL": "data/mysql.json",
   "PostgreSQL": "data/postgresql.json",
   "Redis": "data/redis.json"
+  // Uncomment to add CISA (but update normalizeVuln for its structure): "CISA KEV": "data/cisa-kev.json"
 };
+
+const baseUrl = "https://secbyshresth.github.io/VulnFeed/";
 
 let currentData = [];
 let filteredData = [];
@@ -306,11 +309,11 @@ const itemsPerPage = 10;
 
 function normalizeVuln(v, feedKey) {
   const id = v.id || v.GUID || v.vulnId || v.CVE || "Unknown ID";
-  const title = v.summary || v.title || v.name || (v.details?.split("\n")[0]) || "No title available";
-  const description = v.details || v.description || v.overview || "No description provided";
-  const published = v.published || v.modified || "Unknown date";
-  const aliases = v.aliases || [];
-  const affectedPackages = v.affected?.map(a => a.package?.name).join(", ") || "N/A";
+  const title = v.summary || v.title || v.name || v.bugzilla?.summary || (v.details?.split("\n")[0]) || "No title available";
+  const description = v.details || v.description || v.overview || v.bugzilla?.description || "No description provided";
+  const published = v.published || v.public_date || v.modified || "Unknown date";
+  const aliases = v.aliases || (v.CVE ? [v.CVE] : []);
+  const affectedPackages = v.affected?.map(a => a.package?.name).join(", ") || v.package_name || "N/A";
 
   let sev = (Array.isArray(v.severity) ? v.severity[0] : v.severity) ||
             v.database_specific?.severity ||
@@ -319,7 +322,6 @@ function normalizeVuln(v, feedKey) {
             v.threat_severity ||
             "UNKNOWN";
 
-  // Normalize severity to uppercase
   sev = sev.toUpperCase();
 
   let url = v.references?.[0]?.url ||
@@ -336,15 +338,16 @@ function normalizeVuln(v, feedKey) {
 
 async function loadFeed(feedKey, filePath) {
   document.getElementById("content").innerHTML = '<div class="spinner"></div><h1>Loading...</h1>';
+  const fullUrl = baseUrl + filePath;
   try {
-    const res = await fetch(filePath);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const res = await fetch(fullUrl);
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}. URL: ${fullUrl}. Check if file exists and GitHub Pages is enabled.`);
     const data = await res.json();
     currentData = data.map(v => normalizeVuln(v, feedKey));
     filteredData = [...currentData];
     renderFeed(feedKey);
   } catch (e) {
-    document.getElementById("content").innerHTML = `<h3>Error loading ${feedKey}: ${e.message}</h3>`;
+    document.getElementById("content").innerHTML = `<h3>Error loading ${feedKey}: ${e.message}</h3><p>Try refreshing or check repo Actions.</p>`;
   }
 }
 
@@ -360,13 +363,8 @@ function renderFeed(feedKey) {
     <div id="pagination"></div>
   `;
 
-  // Initialize filters
   initFilters();
-
-  // Render vulnerabilities
   renderVulns();
-
-  // Event listeners
   document.getElementById("search").addEventListener("input", debounce(filterVulns, 300));
 }
 
@@ -419,65 +417,4 @@ function renderVulns() {
       <div class="vuln-details">
         <strong>Published:</strong> ${new Date(v.published).toLocaleDateString()} |
         <strong>Affected:</strong> ${v.affectedPackages} |
-        <strong>Aliases:</strong> ${v.aliases.join(", ") || "None"}
-      </div>
-      <a class="vuln-link" href="${v.url}" target="_blank">🔗 View Report</a>
-    </div>
-  `).join("");
-
-  renderPagination();
-}
-
-function renderPagination() {
-  const pagination = document.getElementById("pagination");
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  pagination.innerHTML = "";
-
-  for (let i = 1; i <= totalPages; i++) {
-    const btn = document.createElement("button");
-    btn.className = "page-btn" + (i === currentPage ? " active" : "");
-    btn.textContent = i;
-    btn.onclick = () => {
-      currentPage = i;
-      renderVulns();
-    };
-    pagination.appendChild(btn);
-  }
-}
-
-function debounce(func, delay) {
-  let timeout;
-  return function(...args) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(this, args), delay);
-  };
-}
-
-function initTabs() {
-  const tabs = document.getElementById("tabs");
-  Object.keys(feeds).forEach((key, i) => {
-    const div = document.createElement("div");
-    div.className = "tab" + (i === 0 ? " active" : "");
-    div.textContent = key;
-    div.onclick = () => {
-      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-      div.classList.add("active");
-      loadFeed(key, feeds[key]);
-    };
-    tabs.appendChild(div);
-  });
-  // Load first feed
-  loadFeed(Object.keys(feeds)[0], Object.values(feeds)[0]);
-}
-
-document.getElementById("themeToggle").onclick = () => {
-  const body = document.body;
-  const isDark = body.getAttribute("data-theme") === "dark";
-  body.setAttribute("data-theme", isDark ? "light" : "dark");
-  document.getElementById("themeToggle").textContent = isDark ? "🌙 Dark Mode" : "☀️ Light Mode";
-};
-
-initTabs();
-</script>
-</body>
-</html>
+        <strong>Aliases:</strong> ${v.aliases.join(", ")
