@@ -5,11 +5,12 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   update-feeds:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write # Explicitly grant write access for GITHUB_TOKEN
 
     steps:
       - name: Checkout Repository
@@ -176,7 +177,7 @@ jobs:
                   continue
 
           print(f"\n📊 DATABASE Processing complete:")
-          print(f"    📝 Total DATABASE vulnerabilities: {len(all_vulnerabilities)}")
+          print(f"   📝 Total DATABASE vulnerabilities: {len(all_vulnerabilities)}")
           
           # Step 2: Group by source and save to files
           if not os.path.exists("data"):
@@ -192,7 +193,7 @@ jobs:
           # Print breakdown before saving
           print(f"\n📈 DATABASE Vulnerability Breakdown:")
           for source in sorted(grouped_data.keys()):
-              print(f"    {source.upper()}: {len(grouped_data[source])} entries")
+              print(f"   {source.upper()}: {len(grouped_data[source])} entries")
 
           # Only save database files
           database_files = ["mysql", "postgresql", "redis"]
@@ -212,7 +213,7 @@ jobs:
                   if grouped_data[source]:
                       sample = grouped_data[source][0]
                       published_date = sample.get('published_date', 'Unknown')
-                      print(f"    {source.upper()}: {sample['id']} - Published: {published_date[:10]} - {sample['title'][:50]}...")
+                      print(f"   {source.upper()}: {sample['id']} - Published: {published_date[:10]} - {sample['title'][:50]}...")
           
           print("🎉 DATABASE vulnerability feed update completed!")
           EOF
@@ -230,20 +231,28 @@ jobs:
             fi
           done
 
-      - name: Commit and Push Database Changes
+      - name: Commit and push changes
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           
-          # Add only database files
+          # Get the latest changes to avoid conflicts - SAME AS RED HAT WORKFLOW
+          git fetch origin
+          git reset --hard origin/main
+          
+          # Add only the specific database files we want to track
           git add data/mysql.json data/postgresql.json data/redis.json
           
-          # Check if there are changes to commit
-          if ! git diff --staged --quiet; then
-            # Commit and push directly
-            git commit -m "Auto-update: Database vulnerability feeds $(date +'%Y-%m-%d')"
-            git push
-            echo "Database changes committed and pushed."
+          # Check if there are changes after adding
+          if git diff --staged --quiet; then
+            echo "ℹ️ No changes to Database vulnerability data"
           else
-            echo "No database changes to commit."
+            MYSQL_COUNT=$(jq '. | length' data/mysql.json)
+            POSTGRES_COUNT=$(jq '. | length' data/postgresql.json)
+            REDIS_COUNT=$(jq '. | length' data/redis.json)
+            TOTAL_COUNT=$((MYSQL_COUNT + POSTGRES_COUNT + REDIS_COUNT))
+            
+            git commit -m "🔄 Update Database vulnerability feeds - $TOTAL_COUNT vulnerabilities (MySQL: $MYSQL_COUNT, PostgreSQL: $POSTGRES_COUNT, Redis: $REDIS_COUNT) - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            git push origin main
+            echo "✅ Successfully pushed Database vulnerability data to repository"
           fi
