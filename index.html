@@ -23,8 +23,37 @@
 
   html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui, -apple-system,"Segoe UI",Roboto, "Helvetica Neue", Arial;color:var(--text);background:linear-gradient(180deg,var(--bg),var(--bg));-webkit-font-smoothing:antialiased}
   .app{display:flex;gap:24px;padding:26px;box-sizing:border-box;min-height:100vh}
+  
+  /* HEADER */
+  .header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg);
+    padding: 20px 26px;
+    z-index: 100;
+    border-bottom: 1px solid var(--shadow-bottom);
+  }
+  .header h1 {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin: 0;
+    background: linear-gradient(135deg, var(--accent), #7b61ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 2px 10px rgba(155, 124, 255, 0.2);
+  }
+  .header .tagline {
+    font-size: 1rem;
+    color: var(--muted);
+    margin: 4px 0 0 0;
+    font-weight: 600;
+  }
+  
   /* SIDEBAR */
-  .sidebar{width:var(--sidebar-w);min-width:72px;display:flex;flex-direction:column;gap:14px;transition:width var(--transition)}
+  .sidebar{width:var(--sidebar-w);min-width:72px;display:flex;flex-direction:column;gap:14px;transition:width var(--transition); margin-top: 100px;}
   .sidebar.collapsed{width:84px}
   .brand{display:flex;gap:12px;align-items:center;padding:12px;border-radius:12px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.02));box-shadow:6px 6px 16px var(--shadow-bottom),-6px -6px 16px var(--shadow-top)}
   .logo{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--accent-weak);color:var(--accent)}
@@ -38,7 +67,7 @@
   .btn{border:none;cursor:pointer;padding:10px;border-radius:10px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.02));box-shadow:6px 6px 16px var(--shadow-bottom),-6px -6px 16px var(--shadow-top);color:var(--text);font-weight:700}
 
   /* MAIN */
-  .main{flex:1;display:flex;flex-direction:column;gap:16px;min-height:calc(100vh - 52px)}
+  .main{flex:1;display:flex;flex-direction:column;gap:16px;min-height:calc(100vh - 52px); margin-top: 100px;}
   .topbar{display:flex;align-items:center;gap:12px}
   .search{flex:1;display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.02));box-shadow:6px 6px 18px var(--shadow-bottom),-6px -6px 18px var(--shadow-top)}
   .search input{background:transparent;border:none;outline:none;color:var(--text);font-size:15px;width:100%}
@@ -66,11 +95,30 @@
   .title{font-weight:800;color:var(--text)}
   .summary{color:var(--muted);font-size:13px}
 
+  /* Dashboard specific */
+  .dashboard-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .stat-card { padding: 20px; border-radius: 12px; background: linear-gradient(180deg, var(--panel), rgba(255,255,255,0.02)); box-shadow: 10px 10px 24px var(--shadow-bottom), -8px -8px 24px var(--shadow-top); text-align: center; }
+  .stat-number { font-size: 2.5rem; font-weight: 900; margin: 0; background: linear-gradient(135deg, var(--accent), #7b61ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .stat-label { color: var(--muted); font-size: 0.9rem; margin: 8px 0 0 0; font-weight: 600; }
+
   /* responsive */
-  @media (max-width:920px){.app{padding:12px}.sidebar{display:none}.sidebar.collapsed{display:none}}
+  @media (max-width:920px){
+    .app{padding:12px}
+    .sidebar{display:none}
+    .sidebar.collapsed{display:none}
+    .header { padding: 15px 12px; }
+    .header h1 { font-size: 2rem; }
+    .main { margin-top: 80px; }
+    .sidebar { margin-top: 80px; }
+  }
 </style>
 </head>
 <body>
+<div class="header">
+  <h1>VulnFeed</h1>
+  <div class="tagline">Centralized Vulnerability Intelligence Dashboard</div>
+</div>
+
 <div class="app" id="appRoot">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
@@ -85,7 +133,6 @@
       <a href="#" data-section="dashboard" class="active"><span class="ico"><i class="fas fa-chart-pie"></i></span><span class="label">Dashboard</span></a>
       <a href="#" data-section="cisa"><span class="ico"><i class="fas fa-shield-virus"></i></span><span class="label">CISA KEV</span></a>
       <a href="#" data-section="redhat"><span class="ico"><i class="fab fa-redhat"></i></span><span class="label">Red Hat</span></a>
-      <a href="#" data-section="exploitdb"><span class="ico"><i class="fas fa-bug"></i></span><span class="label">Exploit-DB</span></a>
       <a href="#" data-section="mysql"><span class="ico"><i class="fas fa-database"></i></span><span class="label">MySQL</span></a>
       <a href="#" data-section="postgresql"><span class="ico"><i class="fas fa-server"></i></span><span class="label">PostgreSQL</span></a>
       <a href="#" data-section="redis"><span class="ico"><i class="fas fa-bolt"></i></span><span class="label">Redis</span></a>
@@ -131,7 +178,8 @@ const state = {
   sidebarCollapsed: false,
   activeSection: 'dashboard',
   allVulns: [], // loaded for active section
-  lastLoadMeta: {} // store per-file metadata
+  lastLoadMeta: {}, // store per-file metadata
+  feedStats: {} // store feed statistics for dashboard
 };
 
 /* ------- Helpers & Theme ------- */
@@ -177,7 +225,6 @@ const FEEDS = {
   dashboard: null,
   cisa: 'data/cisa-kev.json',
   redhat: 'data/redhat-cves.json',
-  exploitdb: 'data/exploitdb.json',
   mysql: 'data/mysql.json',
   postgresql: 'data/postgresql.json',
   redis: 'data/redis.json',
@@ -208,7 +255,7 @@ function detectAndNormalize(items, feedKey){
   }
   
   // Special handling for different feed types
-  if (['mysql', 'postgresql', 'redis', 'exploitdb'].includes(feedKey)) {
+  if (['mysql', 'postgresql', 'redis'].includes(feedKey)) {
     // OSV format from GitHub Action
     return items.map(raw => {
       const id = extractField(raw, ['id', 'cveID', 'CVE', 'name']) || '';
@@ -311,7 +358,9 @@ async function loadSection(section, force=false){
     if(!res.ok){ contentArea.innerHTML = cardHtml('No data','Feed file not found or returned error.'); return; }
     const json = await res.json();
     // store optional metadata
-    state.lastLoadMeta[section] = { loadedAt: new Date().toISOString(), countGuess: Array.isArray(json)?json.length:(json.vulnerabilities?json.vulnerabilities.length:0) };
+    const itemCount = Array.isArray(json)?json.length:(json.vulnerabilities?json.vulnerabilities.length:0);
+    state.lastLoadMeta[section] = { loadedAt: new Date().toISOString(), countGuess: itemCount };
+    state.feedStats[section] = itemCount; // Store for dashboard
     const items = detectAndNormalize(json, section);
     state.allVulns = items;
     renderSummary(section, json);
@@ -327,29 +376,87 @@ function cardHtml(title, html){ return `<div class="card"><h3>${title}</h3><div 
 
 function showLoading(){ contentArea.innerHTML = cardHtml('Loading','Fetching feed data...'); summaryArea.innerHTML = ''; }
 
-function renderDashboard(){
-  // quick overview: list all feeds with counts if available
-  const cards = [];
+async function renderDashboard(){
+  // Load all feeds to get statistics
+  const stats = {};
+  const feedPromises = [];
+  
   for(const key of Object.keys(FEEDS)){
     if(!FEEDS[key]) continue;
-    const meta = state.lastLoadMeta[key] || {};
-    const countDisplay = meta.countGuess != null ? `${meta.countGuess} records` : '—';
-    const last = meta.loadedAt ? new Date(meta.loadedAt).toLocaleString() : 'Not loaded';
-    cards.push({title: key.toUpperCase(), html: `<div class="meta muted">Records: <strong>${countDisplay}</strong></div><div class="muted small">Last: ${last}</div><div style="margin-top:8px" class="muted">Click to open</div>`});
+    
+    feedPromises.push(
+      fetch(FEEDS[key])
+        .then(res => res.ok ? res.json() : null)
+        .then(json => {
+          if(json) {
+            const count = Array.isArray(json) ? json.length : (json.vulnerabilities ? json.vulnerabilities.length : 0);
+            stats[key] = count;
+            state.feedStats[key] = count;
+          }
+        })
+        .catch(() => { stats[key] = 0; })
+    );
   }
-  contentArea.innerHTML = cards.map(c=>`<div class="card"><h3>${c.title}</h3><div class="desc">${c.html}</div></div>`).join('');
-  // clicking card opens section
-  document.querySelectorAll('.card').forEach((el, idx) => {
-    el.style.cursor='pointer';
-    el.addEventListener('click', () => {
-      const key = Object.keys(FEEDS).filter(k=>FEEDS[k])[idx];
-      const link = document.querySelector(`nav.nav a[data-section="${key}"]`);
+  
+  // Show loading while fetching stats
+  contentArea.innerHTML = cardHtml('Dashboard', 'Loading vulnerability statistics...');
+  
+  // Wait for all feeds to load
+  await Promise.allSettled(feedPromises);
+  
+  // Calculate total vulnerabilities
+  const totalVulns = Object.values(stats).reduce((sum, count) => sum + count, 0);
+  
+  // Render dashboard with statistics
+  const dashboardHtml = `
+    <div class="card">
+      <h3>📊 Vulnerability Overview</h3>
+      <div class="desc muted">Real-time summary of all vulnerability feeds</div>
+      
+      <div class="dashboard-stats">
+        <div class="stat-card">
+          <div class="stat-number">${totalVulns}</div>
+          <div class="stat-label">Total Vulnerabilities</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${stats.cisa || 0}</div>
+          <div class="stat-label">CISA KEV</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${stats.redhat || 0}</div>
+          <div class="stat-label">Red Hat CVEs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${(stats.mysql || 0) + (stats.postgresql || 0) + (stats.redis || 0)}</div>
+          <div class="stat-label">Database Vulns</div>
+        </div>
+      </div>
+      
+      <h4 style="margin-top: 24px; margin-bottom: 16px;">🔍 Quick Access</h4>
+      <div class="grid">
+        ${Object.keys(FEEDS).filter(k => FEEDS[k]).map(feed => `
+          <div class="card" style="cursor:pointer" data-feed="${feed}">
+            <h3>${feed.toUpperCase()}</h3>
+            <div class="meta muted">Records: <strong>${stats[feed] || 0}</strong></div>
+            <div class="desc muted">Click to view ${feed} vulnerabilities</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  
+  contentArea.innerHTML = dashboardHtml;
+  
+  // Add click handlers to feed cards
+  document.querySelectorAll('.card[data-feed]').forEach(card => {
+    card.addEventListener('click', () => {
+      const feed = card.dataset.feed;
+      const link = document.querySelector(`nav.nav a[data-section="${feed}"]`);
       if(link) link.click();
     });
   });
 }
 
-/* Render settings */
 function renderSettings(){
   contentArea.innerHTML = `
     <div class="card"><h3>Settings</h3>
@@ -366,7 +473,6 @@ function renderSettings(){
   });
 }
 
-/* Summary bar - shows counts & last updated */
 function renderSummary(section, rawJson){
   const meta = state.lastLoadMeta[section] || {};
   const total = state.allVulns.length;
