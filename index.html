@@ -11,6 +11,8 @@
     --text: #222;
     --accent: #6c63ff;
     --shadow: 5px 5px 10px #c5c7ca, -5px -5px 10px #ffffff;
+    --border-radius: 12px;
+    --transition: all 0.3s ease;
   }
   [data-theme="dark"] {
     --bg: #1a1b1f;
@@ -18,6 +20,10 @@
     --text: #f1f1f1;
     --accent: #8b80ff;
     --shadow: 5px 5px 15px #111, -5px -5px 15px #2a2b30;
+  }
+
+  * {
+    box-sizing: border-box;
   }
 
   body {
@@ -28,87 +34,238 @@
     display: flex;
     height: 100vh;
     overflow: hidden;
-    transition: background 0.4s, color 0.4s;
+    transition: var(--transition);
   }
 
   /* Sidebar */
   #sidebar {
-    width: 250px;
+    width: 280px;
     background: var(--bg);
     box-shadow: var(--shadow);
-    padding: 1rem;
+    padding: 1.5rem;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+    border-right: 1px solid var(--text, 0.1);
   }
   #sidebar h2 {
     margin-top: 0;
     text-align: center;
+    font-size: 1.5rem;
   }
   .tab {
     cursor: pointer;
     margin: 0.5rem 0;
-    padding: 0.6rem 0.8rem;
-    border-radius: 10px;
+    padding: 0.8rem 1rem;
+    border-radius: var(--border-radius);
     background: var(--card-bg);
     box-shadow: var(--shadow);
     text-align: center;
     font-weight: 600;
-    transition: all 0.2s;
+    transition: var(--transition);
   }
   .tab.active {
     background: var(--accent);
     color: white;
     transform: scale(1.02);
   }
+  .tab:hover {
+    transform: translateY(-2px);
+  }
 
   #themeToggle {
     margin-top: auto;
     background: var(--card-bg);
     border: none;
-    padding: 0.6rem;
-    border-radius: 12px;
+    padding: 0.8rem;
+    border-radius: var(--border-radius);
     cursor: pointer;
     box-shadow: var(--shadow);
     font-weight: 600;
+    transition: var(--transition);
+  }
+  #themeToggle:hover {
+    transform: translateY(-2px);
   }
 
   /* Content */
   #content {
     flex: 1;
-    padding: 1rem 2rem;
+    padding: 1.5rem 2rem;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
   }
 
+  #content h1 {
+    margin-bottom: 1rem;
+    font-size: 1.8rem;
+  }
+
+  /* Search and Filters */
+  #controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+  }
+  #search {
+    flex: 1;
+    min-width: 200px;
+    padding: 0.8rem;
+    border: 1px solid var(--text, 0.2);
+    border-radius: var(--border-radius);
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+  #search:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 5px var(--accent);
+  }
+  .filter-btn {
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: var(--border-radius);
+    background: var(--card-bg);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+  }
+  .filter-btn.active {
+    background: var(--accent);
+    color: white;
+  }
+  .filter-btn:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Vulnerability Cards */
   .vuln-card {
     background: var(--card-bg);
     box-shadow: var(--shadow);
-    border-radius: 15px;
-    padding: 1rem 1.2rem;
+    border-radius: var(--border-radius);
+    padding: 1.2rem 1.5rem;
     margin-bottom: 1rem;
-    transition: all 0.2s;
+    transition: var(--transition);
+    border-left: 5px solid var(--accent);
   }
   .vuln-card:hover {
-    transform: scale(1.01);
+    transform: translateY(-3px);
+    box-shadow: 5px 10px 20px rgba(0,0,0,0.1);
+  }
+  .vuln-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
   }
   .vuln-id {
     color: var(--accent);
     font-weight: 700;
+    font-size: 1.1rem;
   }
   .vuln-severity {
     font-weight: bold;
-    float: right;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+  }
+  .vuln-severity.CRITICAL { background: #ff4757; color: white; }
+  .vuln-severity.HIGH { background: #ffa502; color: white; }
+  .vuln-severity.MODERATE { background: #ffdd59; color: black; }
+  .vuln-severity.LOW { background: #7bed9f; color: black; }
+  .vuln-severity.UNKNOWN { background: #a4b0be; color: black; }
+  .vuln-title {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
   }
   .vuln-desc {
-    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
     font-size: 0.95rem;
+    line-height: 1.4;
+  }
+  .vuln-details {
+    font-size: 0.9rem;
+    color: var(--text, 0.7);
+    margin-bottom: 0.5rem;
   }
   .vuln-link {
     display: inline-block;
-    margin-top: 0.5rem;
-    color: var(--accent);
+    padding: 0.5rem 1rem;
+    background: var(--accent);
+    color: white;
     text-decoration: none;
+    border-radius: 6px;
     font-weight: 600;
+    transition: var(--transition);
+  }
+  .vuln-link:hover {
+    background: var(--accent, 0.8);
+    transform: translateY(-1px);
+  }
+
+  /* Pagination */
+  #pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  .page-btn {
+    padding: 0.5rem 0.8rem;
+    border: none;
+    border-radius: var(--border-radius);
+    background: var(--card-bg);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .page-btn.active {
+    background: var(--accent);
+    color: white;
+  }
+  .page-btn:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Loading Spinner */
+  .spinner {
+    border: 4px solid var(--bg);
+    border-top: 4px solid var(--accent);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 2rem auto;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    #sidebar {
+      width: 100%;
+      height: auto;
+      position: static;
+    }
+    body {
+      flex-direction: column;
+    }
+    #content {
+      padding: 1rem;
+    }
+    .vuln-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
   }
 </style>
 </head>
@@ -121,6 +278,12 @@
 
   <div id="content">
     <h1>Loading Vulnerabilities...</h1>
+    <div id="controls" style="display: none;">
+      <input type="text" id="search" placeholder="Search by ID, title, or description...">
+      <div id="filters"></div>
+    </div>
+    <div id="vuln-list"></div>
+    <div id="pagination"></div>
   </div>
 
 <script>
@@ -136,61 +299,158 @@ const feeds = {
   "Redis": "data/redis.json"
 };
 
+let currentData = [];
+let filteredData = [];
+let currentPage = 1;
+const itemsPerPage = 10;
+
 function normalizeVuln(v, feedKey) {
-  const id = v.id || v.GUID || v.vulnId || "Unknown ID";
-  const title =
-    v.summary || v.title || v.name || (v.details?.split("\n")[0]) || "No title available";
-  const description =
-    v.details || v.description || v.overview || "No description provided";
+  const id = v.id || v.GUID || v.vulnId || v.CVE || "Unknown ID";
+  const title = v.summary || v.title || v.name || (v.details?.split("\n")[0]) || "No title available";
+  const description = v.details || v.description || v.overview || "No description provided";
+  const published = v.published || v.modified || "Unknown date";
+  const aliases = v.aliases || [];
+  const affectedPackages = v.affected?.map(a => a.package?.name).join(", ") || "N/A";
 
-  const sev =
-    (Array.isArray(v.severity) ? v.severity[0] : v.severity) ||
-    v.database_specific?.severity ||
-    v.CVSS3_Score ||
-    v.impact ||
-    "UNKNOWN";
+  let sev = (Array.isArray(v.severity) ? v.severity[0] : v.severity) ||
+            v.database_specific?.severity ||
+            v.CVSS3_Score ||
+            v.impact ||
+            v.threat_severity ||
+            "UNKNOWN";
 
-  let url =
-    v.references?.[0]?.url ||
-    v.source ||
-    (v.id && v.id.startsWith("CVE-") ? `https://nvd.nist.gov/vuln/detail/${v.id}` : null) ||
-    `https://osv.dev/vulnerability/${v.id}`;
+  // Normalize severity to uppercase
+  sev = sev.toUpperCase();
+
+  let url = v.references?.[0]?.url ||
+            v.source ||
+            (id.startsWith("CVE-") ? `https://nvd.nist.gov/vuln/detail/${id}` : null) ||
+            `https://osv.dev/vulnerability/${id}`;
 
   if (feedKey.toLowerCase().includes("redhat") && !url.includes("access.redhat.com")) {
     url = `https://access.redhat.com/errata/${id}`;
   }
 
-  return { id, title, description, severity: sev.toUpperCase(), url };
+  return { id, title, description, severity: sev, url, published, aliases, affectedPackages };
 }
 
 async function loadFeed(feedKey, filePath) {
+  document.getElementById("content").innerHTML = '<div class="spinner"></div><h1>Loading...</h1>';
   try {
     const res = await fetch(filePath);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    const normalized = data.map(v => normalizeVuln(v, feedKey));
-    renderFeed(feedKey, normalized);
+    currentData = data.map(v => normalizeVuln(v, feedKey));
+    filteredData = [...currentData];
+    renderFeed(feedKey);
   } catch (e) {
-    document.getElementById("content").innerHTML = `<h3>Error loading ${feedKey}: ${e}</h3>`;
+    document.getElementById("content").innerHTML = `<h3>Error loading ${feedKey}: ${e.message}</h3>`;
   }
 }
 
-function renderFeed(feedKey, data) {
+function renderFeed(feedKey) {
   const content = document.getElementById("content");
-  content.innerHTML = `<h1>${feedKey} Vulnerabilities (${data.length})</h1>`;
-  data.forEach(v => {
-    const div = document.createElement("div");
-    div.className = "vuln-card";
-    div.innerHTML = `
-      <div>
-        <span class="vuln-id">${v.id}</span>
-        <span class="vuln-severity">${v.severity}</span>
-      </div>
-      <div class="vuln-title"><strong>${v.title}</strong></div>
-      <div class="vuln-desc">${v.description}</div>
-      <a class="vuln-link" href="${v.url}" target="_blank">🔗 View Report</a>
-    `;
-    content.appendChild(div);
+  content.innerHTML = `
+    <h1>${feedKey} Vulnerabilities (${filteredData.length})</h1>
+    <div id="controls">
+      <input type="text" id="search" placeholder="Search by ID, title, or description...">
+      <div id="filters"></div>
+    </div>
+    <div id="vuln-list"></div>
+    <div id="pagination"></div>
+  `;
+
+  // Initialize filters
+  initFilters();
+
+  // Render vulnerabilities
+  renderVulns();
+
+  // Event listeners
+  document.getElementById("search").addEventListener("input", debounce(filterVulns, 300));
+}
+
+function initFilters() {
+  const severities = ["ALL", "CRITICAL", "HIGH", "MODERATE", "LOW", "UNKNOWN"];
+  const filtersDiv = document.getElementById("filters");
+  severities.forEach(sev => {
+    const btn = document.createElement("button");
+    btn.className = "filter-btn" + (sev === "ALL" ? " active" : "");
+    btn.textContent = sev;
+    btn.onclick = () => {
+      document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      filterVulns();
+    };
+    filtersDiv.appendChild(btn);
   });
+}
+
+function filterVulns() {
+  const searchTerm = document.getElementById("search").value.toLowerCase();
+  const activeFilter = document.querySelector(".filter-btn.active").textContent;
+
+  filteredData = currentData.filter(v => {
+    const matchesSearch = v.id.toLowerCase().includes(searchTerm) ||
+                          v.title.toLowerCase().includes(searchTerm) ||
+                          v.description.toLowerCase().includes(searchTerm);
+    const matchesSeverity = activeFilter === "ALL" || v.severity === activeFilter;
+    return matchesSearch && matchesSeverity;
+  });
+
+  currentPage = 1;
+  renderVulns();
+}
+
+function renderVulns() {
+  const vulnList = document.getElementById("vuln-list");
+  const start = (currentPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  const pageData = filteredData.slice(start, end);
+
+  vulnList.innerHTML = pageData.map(v => `
+    <div class="vuln-card">
+      <div class="vuln-header">
+        <span class="vuln-id">${v.id}</span>
+        <span class="vuln-severity ${v.severity}">${v.severity}</span>
+      </div>
+      <div class="vuln-title">${v.title}</div>
+      <div class="vuln-desc">${v.description}</div>
+      <div class="vuln-details">
+        <strong>Published:</strong> ${new Date(v.published).toLocaleDateString()} |
+        <strong>Affected:</strong> ${v.affectedPackages} |
+        <strong>Aliases:</strong> ${v.aliases.join(", ") || "None"}
+      </div>
+      <a class="vuln-link" href="${v.url}" target="_blank">🔗 View Report</a>
+    </div>
+  `).join("");
+
+  renderPagination();
+}
+
+function renderPagination() {
+  const pagination = document.getElementById("pagination");
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  pagination.innerHTML = "";
+
+  for (let i = 1; i <= totalPages; i++) {
+    const btn = document.createElement("button");
+    btn.className = "page-btn" + (i === currentPage ? " active" : "");
+    btn.textContent = i;
+    btn.onclick = () => {
+      currentPage = i;
+      renderVulns();
+    };
+    pagination.appendChild(btn);
+  }
+}
+
+function debounce(func, delay) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), delay);
+  };
 }
 
 function initTabs() {
@@ -198,7 +458,7 @@ function initTabs() {
   Object.keys(feeds).forEach((key, i) => {
     const div = document.createElement("div");
     div.className = "tab" + (i === 0 ? " active" : "");
-    div.innerText = key;
+    div.textContent = key;
     div.onclick = () => {
       document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
       div.classList.add("active");
@@ -214,7 +474,7 @@ document.getElementById("themeToggle").onclick = () => {
   const body = document.body;
   const isDark = body.getAttribute("data-theme") === "dark";
   body.setAttribute("data-theme", isDark ? "light" : "dark");
-  document.getElementById("themeToggle").innerText = isDark ? "🌙 Dark Mode" : "☀️ Light Mode";
+  document.getElementById("themeToggle").textContent = isDark ? "🌙 Dark Mode" : "☀️ Light Mode";
 };
 
 initTabs();
