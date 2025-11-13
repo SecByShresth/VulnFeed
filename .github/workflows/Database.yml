@@ -132,7 +132,7 @@ jobs:
                       "id": vuln_id,
                       "title": summary or f"Vulnerability {vuln_id}",
                       "description": details or summary or "No description available",
-                      "published_date": published_date.isoformat(),
+                      "published_date": published_date.isoformat(),  # FIXED: Include published_date in JSON
                       "url": f"https://osv.dev/{vuln_id}",
                       "source": source,
                       "aliases": aliases,
@@ -230,13 +230,22 @@ jobs:
               echo "$(basename "$file"): $count entries"
             fi
           done
+          echo ""
+          echo "=== Sample with Published Dates ==="
+          for file in data/mysql.json data/postgresql.json data/redis.json; do
+            if [ -f "$file" ]; then
+              echo "$(basename "$file"):"
+              jq -r '.[0] | "  ID: \(.id)\n  Published: \(.published_date)\n  Title: \(.title)\n"' "$file" 2>/dev/null || echo "  No entries or invalid JSON"
+              echo ""
+            fi
+          done
 
       - name: Commit and push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           
-          # Get the latest changes to avoid conflicts - SAME AS RED HAT WORKFLOW
+          # Get the latest changes to avoid conflicts
           git fetch origin
           git reset --hard origin/main
           
