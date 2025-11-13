@@ -8,69 +8,28 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
   :root { --sidebar-w:260px; --radius:12px; --gap:16px; --transition:220ms cubic-bezier(.2,.9,.2,1); --accent:#9b7cff; --muted:#7b8696; --card-pad:16px; --max-list-height:64vh; }
-  :root[data-theme="light"]{
-    --bg:#eef1f6; --panel:#e7ebf0; --text:#0f1724; --muted:#667085;
-    --shadow-top: rgba(255,255,255,0.9); --shadow-bottom: rgba(168,175,191,0.35);
-    --accent-weak: rgba(155,124,255,0.08);
-  }
-  :root[data-theme="dark"]{
-    --bg:#0f1418; --panel:#11151a; --text:#e9eef6; --muted:#98a4b2;
-    --shadow-top: rgba(255,255,255,0.03); --shadow-bottom: rgba(0,0,0,0.7);
-    --accent-weak: rgba(155,124,255,0.06);
-  }
-
-  html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui, -apple-system,"Segoe UI",Roboto, "Helvetica Neue", Arial;color:var(--text);background:linear-gradient(180deg,var(--bg),var(--bg));-webkit-font-smoothing:antialiased}
+  :root[data-theme="light"]{ --bg:#eef1f6; --panel:#e7ebf0; --text:#0f1724; --muted:#667085; --shadow-top: rgba(255,255,255,0.9); --shadow-bottom: rgba(168,175,191,0.35); --accent-weak: rgba(155,124,255,0.08);}
+  :root[data-theme="dark"]{ --bg:#0f1418; --panel:#11151a; --text:#e9eef6; --muted:#98a4b2; --shadow-top: rgba(255,255,255,0.03); --shadow-bottom: rgba(0,0,0,0.7); --accent-weak: rgba(155,124,255,0.06);}
+  html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
   .app{display:flex;gap:24px;padding:26px;box-sizing:border-box;min-height:100vh}
-
-  .header {
-    position: fixed; top: 0; left: 0; right: 0; background: var(--bg);
-    padding: 20px 26px; z-index: 100; border-bottom: 1px solid var(--shadow-bottom);
-  }
-  .header h1 { font-size: 2rem; font-weight: 900; margin: 0; background: linear-gradient(135deg, var(--accent), #7b61ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .header .tagline { font-size: 0.9rem; color: var(--muted); margin-top: 6px; font-weight: 600; }
-
-  .sidebar{width:var(--sidebar-w);display:flex;flex-direction:column;gap:14px;margin-top: 100px;}
+  .header {position:fixed;top:0;left:0;right:0;background:var(--bg);padding:20px 26px;z-index:100;border-bottom:1px solid var(--shadow-bottom);}
+  .header h1 {font-size:2rem;font-weight:900;margin:0;background:linear-gradient(135deg,var(--accent),#7b61ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .header .tagline {font-size:0.9rem;color:var(--muted);margin-top:6px;font-weight:600;}
+  .sidebar{width:var(--sidebar-w);display:flex;flex-direction:column;gap:14px;margin-top:100px;}
   .brand{display:flex;gap:12px;align-items:center;padding:12px;border-radius:12px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.02));box-shadow:6px 6px 16px var(--shadow-bottom),-6px -6px 16px var(--shadow-top)}
   .logo{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--accent-weak);color:var(--accent)}
   nav.nav{display:flex;flex-direction:column;gap:10px;padding:6px;max-height:70vh;overflow-y:auto;}
   nav a{display:flex;gap:12px;align-items:center;padding:10px;border-radius:10px;color:var(--text);text-decoration:none;font-weight:700;transition:transform var(--transition),background var(--transition)}
   nav a .ico{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--panel);box-shadow:4px 4px 12px var(--shadow-bottom),-4px -4px 12px var(--shadow-top);color:var(--muted)}
-  nav a:hover{transform:translateX(6px)} nav a.active{background:linear-gradient(180deg,var(--accent-weak),transparent);color:var(--accent)}
+  nav a:hover{transform:translateX(6px)}
+  nav a.active{background:linear-gradient(180deg,var(--accent-weak),transparent);color:var(--accent)}
   .sidebar-footer{display:flex;gap:8px;align-items:center;justify-content:center;padding:8px}
   .btn{border:none;cursor:pointer;padding:10px;border-radius:10px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.02));box-shadow:6px 6px 16px var(--shadow-bottom),-6px -6px 16px var(--shadow-top);color:var(--text);font-weight:700}
-
-  .main{flex:1;display:flex;flex-direction:column;gap:16px;min-height:calc(100vh - 52px); margin-top: 100px;}
-  .topbar{display:flex;align-items:center;gap:12px}
-  .search{flex:1;display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.02));box-shadow:6px 6px 18px var(--shadow-bottom),-6px -6px 18px var(--shadow-top)}
-  .search input{background:transparent;border:none;outline:none;color:var(--text);font-size:15px;width:100%}
-  .controls{display:flex;gap:10px;align-items:center}
-  .pill{padding:8px 12px;border-radius:999px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.02));box-shadow:6px 6px 16px var(--shadow-bottom),-6px -6px 16px var(--shadow-top);color:var(--muted);font-weight:700}
-  .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
-  .card{padding:var(--card-pad);border-radius:12px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.02));box-shadow:10px 10px 24px var(--shadow-bottom),-8px -8px 24px var(--shadow-top);transition:transform var(--transition)}
-  .card h3{margin:0 0 8px 0}
-  .meta{display:flex;gap:12px;color:var(--muted);font-size:13px;margin-bottom:10px}
-  .desc{color:var(--muted);line-height:1.45}
-
-  .cve-list{display:flex;flex-direction:column;gap:12px;max-height:var(--max-list-height);overflow:auto;padding-right:6px}
-  .cve{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(0,0,0,0.01),rgba(255,255,255,0.01))}
-  .left{width:120px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
-  .id{font-weight:800;color:var(--accent);font-size:13px}
-  .muted{color:var(--muted);font-size:13px}
-  .sev{font-size:12px;padding:6px 8px;border-radius:8px;font-weight:800}
-  .sev-critical{background:linear-gradient(90deg,#ff6b6b,#ff4757);color:#fff}
-  .sev-high{background:linear-gradient(90deg,#ff9f43,#ff6b6b);color:#fff}
-  .sev-medium{background:linear-gradient(90deg,#ffd66b,#ffb84d);color:#111}
-  .sev-low{background:linear-gradient(90deg,#7ef3a6,#26de81);color:#062214}
-  .right{flex:1;display:flex;flex-direction:column;gap:8px}
-  .title{font-weight:800;color:var(--text)}
-  .summary{color:var(--muted);font-size:13px}
-
-  .dashboard-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
-  .stat-card { padding: 20px; border-radius: 12px; background: linear-gradient(180deg, var(--panel), rgba(255,255,255,0.02)); box-shadow: 10px 10px 24px var(--shadow-bottom), -8px -8px 24px var(--shadow-top); text-align: center; }
-  .stat-number { font-size: 2.5rem; font-weight: 900; margin: 0; background: linear-gradient(135deg, var(--accent), #7b61ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-  .stat-label { color: var(--muted); font-size: 0.9rem; margin: 8px 0 0 0; font-weight: 600; }
-
-  @media (max-width:920px){ .app{padding:12px} .sidebar{display:none} .header { padding: 15px 12px; } .main { margin-top: 80px; } .sidebar { margin-top: 80px; } }
+  .main{flex:1;display:flex;flex-direction:column;gap:16px;min-height:calc(100vh - 52px);margin-top:100px;}
+  .grid{display:flex;flex-direction:column;gap:12px;max-height:70vh;overflow:auto;}
+  .cve{padding:14px;border-radius:12px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.02));box-shadow:inset 3px 3px 6px var(--shadow-bottom),inset -3px -3px 6px var(--shadow-top);}
+  .id{font-weight:800;color:var(--accent);}
+  .sev-critical{color:#ff4d4d}.sev-high{color:#ff884d}.sev-medium{color:#facc15}.sev-low{color:#4ade80}
 </style>
 </head>
 <body>
@@ -79,527 +38,68 @@
   <div class="tagline">Centralized Vulnerability Intelligence Dashboard</div>
 </div>
 
-<div class="app" id="appRoot">
-  <aside class="sidebar" id="sidebar">
-    <div class="brand">
-      <div class="logo">🛡️</div>
-      <div style="min-width:0">
-        <h1>VulnFeed</h1>
-        <div class="muted" style="font-size:12px">Security Intelligence</div>
-      </div>
-    </div>
-
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">🛡️</div><div><h1>VulnFeed</h1><div class="muted" style="font-size:12px">Security Intelligence</div></div></div>
     <nav class="nav" id="nav">
-      <a href="#" data-section="dashboard" class="active"><span class="ico"><i class="fas fa-chart-pie"></i></span><span class="label">Dashboard</span></a>
-      <a href="#" data-section="cisa"><span class="ico"><i class="fas fa-shield-virus"></i></span><span class="label">CISA KEV</span></a>
-      <a href="#" data-section="redhat"><span class="ico"><i class="fab fa-redhat"></i></span><span class="label">Red Hat</span></a>
-
-      <!-- Database -->
-      <a href="#" data-section="mysql"><span class="ico"><i class="fas fa-database"></i></span><span class="label">MySQL</span></a>
-      <a href="#" data-section="postgresql"><span class="ico"><i class="fas fa-server"></i></span><span class="label">PostgreSQL</span></a>
-      <a href="#" data-section="redis"><span class="ico"><i class="fas fa-bolt"></i></span><span class="label">Redis</span></a>
-
-      <!-- Linux -->
-      <a href="#" data-section="almalinux"><span class="ico"><i class="fab fa-linux"></i></span><span class="label">AlmaLinux</span></a>
-      <a href="#" data-section="rockylinux"><span class="ico"><i class="fab fa-linux"></i></span><span class="label">Rocky Linux</span></a>
-      <a href="#" data-section="suse"><span class="ico"><i class="fab fa-suse"></i></span><span class="label">SUSE</span></a>
-      <a href="#" data-section="debian"><span class="ico"><i class="fab fa-linux"></i></span><span class="label">Debian</span></a>
-      <a href="#" data-section="ubuntu"><span class="ico"><i class="fab fa-ubuntu"></i></span><span class="label">Ubuntu</span></a>
-
-      <a href="#" data-section="settings"><span class="ico"><i class="fas fa-cog"></i></span><span class="label">Settings</span></a>
+      <a href="#" data-section="dashboard" class="active"><span class="ico"><i class="fas fa-chart-pie"></i></span>Dashboard</a>
+      <a href="#" data-section="mysql"><span class="ico"><i class="fas fa-database"></i></span>MySQL</a>
+      <a href="#" data-section="postgresql"><span class="ico"><i class="fas fa-server"></i></span>PostgreSQL</a>
+      <a href="#" data-section="redis"><span class="ico"><i class="fas fa-bolt"></i></span>Redis</a>
+      <a href="#" data-section="almalinux"><span class="ico"><i class="fab fa-linux"></i></span>AlmaLinux</a>
+      <a href="#" data-section="rockylinux"><span class="ico"><i class="fab fa-linux"></i></span>Rocky Linux</a>
+      <a href="#" data-section="suse"><span class="ico"><i class="fab fa-suse"></i></span>SUSE</a>
+      <a href="#" data-section="debian"><span class="ico"><i class="fab fa-linux"></i></span>Debian</a>
+      <a href="#" data-section="ubuntu"><span class="ico"><i class="fab fa-ubuntu"></i></span>Ubuntu</a>
     </nav>
-
-    <div class="sidebar-footer">
-      <button class="btn" id="themeBtn" title="Toggle theme"><i class="fas fa-moon"></i></button>
-    </div>
+    <div class="sidebar-footer"><button class="btn" id="themeBtn"><i class="fas fa-moon"></i></button></div>
   </aside>
 
   <main class="main">
-    <div class="topbar">
-      <div class="search">
-        <i class="fas fa-search muted"></i>
-        <input id="searchInput" placeholder="Search CVE, keyword or ID (e.g. CVE-2024-xxxx)" />
-      </div>
-      <div class="controls">
-        <div class="pill"><select id="severitySelect" style="background:transparent;border:none;color:var(--muted);font-weight:800">
-          <option value="all">All severities</option>
-          <option value="critical">Critical</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
-        </select></div>
-        <div class="pill"><select id="timeSelect" style="background:transparent;border:none;color:var(--muted);font-weight:800">
-          <option value="30">Last 30 days</option><option value="7">Last 7 days</option><option value="90">Last 90 days</option><option value="365">Last year</option><option value="all">All time</option>
-        </select></div>
-        <div class="pill"><select id="sortSelect" style="background:transparent;border:none;color:var(--muted);font-weight:800">
-          <option value="date">Sort: Newest</option><option value="severity">Sort: Severity</option><option value="source">Sort: Source</option>
-        </select></div>
-        <button class="btn" id="refreshBtn" title="Refresh feed"><i class="fas fa-sync-alt"></i></button>
-      </div>
-    </div>
-
-    <section id="summaryArea"></section>
     <section id="contentArea" class="grid"></section>
   </main>
 </div>
 
-<!-- Modal -->
-<div id="detailsModal" style="display:none; position:fixed; left:0; top:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:200;">
-  <div style="background:var(--panel); color:var(--text); max-width:900px; margin:5% auto; padding:20px; border-radius:12px; position:relative;">
-    <button id="closeModal" style="position:absolute; right:12px; top:12px;">✕</button>
-    <h2 id="modalTitle"></h2>
-    <div id="modalMeta" class="muted" style="margin-bottom:10px"></div>
-    <div id="modalBody" style="white-space:pre-wrap; background:transparent;"></div>
-  </div>
-</div>
-
 <script>
-/* ----------- Configuration & feeds ---------- */
-const FEEDS = {
-  dashboard: null,
-  cisa: { files: ['cisa-kev.json'], name: 'CISA KEV' },
-  redhat: { files: ['redhat-cves.json', 'redhat-cves-list.json', 'redhat-cves-summary.json', 'redhat-cves-metadata.json'], name: 'Red Hat' },
-  mysql: { files: ['mysql.json'], name: 'MySQL' },
-  postgresql: { files: ['postgresql.json'], name: 'PostgreSQL' },
-  redis: { files: ['redis.json'], name: 'Redis' },
-  almalinux: { files: ['almalinux.json'], name: 'AlmaLinux' },
-  rockylinux: { files: ['rocky.json'], name: 'Rocky Linux' },
-  suse: { files: ['suse.json'], name: 'SUSE' },
-  debian: { files: ['debian.json'], name: 'Debian' },
-  ubuntu: { files: ['ubuntu.json'], name: 'Ubuntu' },
-  settings: null
+const FEEDS={
+  dashboard:{files:['data/mysql.json','data/postgresql.json','data/redis.json']},
+  mysql:{files:['data/mysql.json']},
+  postgresql:{files:['data/postgresql.json']},
+  redis:{files:['data/redis.json']},
+  almalinux:{files:['data/almalinux.json']},
+  rockylinux:{files:['data/rocky.json']},
+  suse:{files:['data/suse.json']},
+  debian:{files:['data/debian.json']},
+  ubuntu:{files:['data/ubuntu.json']}
 };
+const state={theme:localStorage.getItem('vf_theme')||'light',activeSection:'dashboard',feedsData:{}};
+document.documentElement.setAttribute('data-theme',state.theme);
+document.getElementById('themeBtn').onclick=()=>{state.theme=state.theme==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',state.theme);localStorage.setItem('vf_theme',state.theme);};
+document.querySelectorAll('nav.nav a').forEach(a=>a.onclick=e=>{e.preventDefault();document.querySelectorAll('nav.nav a').forEach(n=>n.classList.remove('active'));a.classList.add('active');state.activeSection=a.dataset.section;loadSection(a.dataset.section);});
 
-/* state */
-const state = {
-  theme: localStorage.getItem('vf_theme') || 'light',
-  activeSection: 'dashboard',
-  feedsData: {},     // feedKey -> array of normalized items
-  rawDataCache: {},  // feedKey -> raw arrays (merged from files)
-  lastLoadedAt: {}
-};
+async function fetchJson(file){try{const r=await fetch(file+`?t=${Date.now()}`);if(!r.ok)throw new Error(r.statusText);return r.json();}catch(e){console.warn('❌',file,e);return[];}}
+function normalizeSeverity(s){if(!s)return'';s=s.toLowerCase();if(s.includes('crit'))return'critical';if(s.includes('high'))return'high';if(s.includes('med'))return'medium';if(s.includes('low'))return'low';return'';}
+function normalize(item){const id=item.id||item.CVE||item.cve_id||'';return{id,title:item.summary||item.title||id,description:item.details||item.description||'',severity:normalizeSeverity(item.severity||item.database_specific?.severity||''),published:item.published||item.date||item.modified||''};}
 
-/* set theme */
-document.documentElement.setAttribute('data-theme', state.theme);
-document.getElementById('themeBtn').addEventListener('click', () => {
-  state.theme = state.theme === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', state.theme);
-  localStorage.setItem('vf_theme', state.theme);
-});
-
-const navLinks = document.querySelectorAll('nav.nav a');
-navLinks.forEach(a => a.addEventListener('click', ev => {
-  ev.preventDefault();
-  navLinks.forEach(n => n.classList.remove('active'));
-  a.classList.add('active');
-  state.activeSection = a.dataset.section;
-  loadSection(state.activeSection);
-}));
-
-document.getElementById('refreshBtn').addEventListener('click', () => loadSection(state.activeSection, true));
-document.getElementById('searchInput').addEventListener('input', () => renderList());
-document.getElementById('severitySelect').addEventListener('change', () => renderList());
-document.getElementById('timeSelect').addEventListener('change', () => renderList());
-document.getElementById('sortSelect').addEventListener('change', () => renderList());
-
-/* Utility: safe fetch for relative data/ paths (no leading slash) */
-async function fetchJsonRel(path) {
-  const url = `data/${path}`; // IMPORTANT: relative path for GitHub Pages branch under repo path
-  const res = await fetch(url + `?t=${Date.now()}`);
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText} - ${url}`);
-  return res.json();
-}
-
-/* ---------- Normalizers ---------- */
-function toDateOrNull(input) {
-  if (!input) return null;
-  try {
-    // OSV publishes like "2025-11-05T00:00:00Z"
-    const d = new Date(input);
-    if (isNaN(d.getTime())) return null;
-    return d;
-  } catch { return null; }
-}
-
-function normalizeSeverityGeneric(input) {
-  if (!input && typeof input !== 'number') return '';
-  // handle CVSS vector strings or words
-  const s = ('' + input).toUpperCase();
-  if (s.includes('CRIT') || s.includes('9.') || s.includes('10.')) return 'critical';
-  if (s.includes('HIGH') || s.includes('7.') || s.includes('8.')) return 'high';
-  if (s.includes('MED') || s.includes('MODERATE') || s.includes('4.') || s.includes('6.')) return 'medium';
-  if (s.includes('LOW') || s.includes('1.') || s.includes('3.')) return 'low';
-  // try numeric
-  const n = parseFloat(s);
-  if (!isNaN(n)) {
-    if (n >= 9) return 'critical';
-    if (n >= 7) return 'high';
-    if (n >= 4) return 'medium';
-    return 'low';
-  }
-  return ''; // unknown
-}
-
-/* Detect fields across different feed formats and normalize into common shape:
-   { id, title, description, publishedDate (Date), modifiedDate (Date), severity, source, url, aliases, affectedPackages, raw }
-*/
-function normalizeItemGeneric(raw, feedKey) {
-  // OSV-like (database + linux) detection
-  if (raw && (raw.published || raw.modified || raw.summary || raw.details || raw.affected)) {
-    const id = raw.id || (Array.isArray(raw.aliases) && raw.aliases.find(a => a.startsWith('CVE-'))) || (raw.upstream && raw.upstream[0]) || '';
-    const title = raw.title || raw.summary || (raw.details ? (raw.details.split('\n')[0]) : '') || id;
-    const description = raw.details || raw.description || raw.summary || '';
-    const publishedDate = toDateOrNull(raw.published) || toDateOrNull(raw.database_specific?.nvd_published_at) || toDateOrNull(raw.modified);
-    const modifiedDate = toDateOrNull(raw.modified) || toDateOrNull(raw.database_specific?.github_reviewed_at);
-    // severity: try database_specific.severity (string), then severity array, then database_specific.nvd etc.
-    let severity = '';
-    if (raw.database_specific && raw.database_specific.severity) severity = normalizeSeverityGeneric(raw.database_specific.severity);
-    else if (raw.severity && Array.isArray(raw.severity) && raw.severity.length > 0) severity = normalizeSeverityGeneric(raw.severity[0].score || raw.severity[0]);
-    else if (raw.severity && typeof raw.severity === 'string') severity = normalizeSeverityGeneric(raw.severity);
-    else severity = ''; // unknown
-    const url = raw.url || (id && id.startsWith('CVE-') ? `https://nvd.nist.gov/vuln/detail/${id}` : (raw.references && raw.references[0] && raw.references[0].url) || '');
-    const aliases = raw.aliases || raw.upstream || [];
-    // affected packages
-    let affected = [];
-    if (raw.affected && Array.isArray(raw.affected)) {
-      affected = raw.affected.map(a => (a.package && (a.package.name || a.package.purl)) ? (a.package.name || a.package.purl) : (a.package || a.name || '')).filter(Boolean);
-    } else if (raw.affected_packages) {
-      affected = raw.affected_packages;
-    }
-    return {
-      id: id || '',
-      title: title || id || 'Untitled',
-      description: description || '',
-      publishedDate,
-      modifiedDate,
-      severity: severity || '',
-      source: feedKey,
-      url,
-      aliases,
-      affectedPackages: affected,
-      raw
-    };
-  }
-
-  // CISA KEV format detection (different fields)
-  if (raw && (raw.cveID || raw.vulnerabilityName || raw.dateAdded)) {
-    const id = raw.cveID || raw.vulnerabilityName || '';
-    const title = raw.vulnerabilityName || raw.title || id;
-    const description = raw.shortDescription || raw.description || '';
-    const publishedDate = toDateOrNull(raw.dateAdded);
-    // CISA KEV is actively exploited, treat as critical by default
-    return {
-      id,
-      title,
-      description,
-      publishedDate,
-      modifiedDate: null,
-      severity: 'critical',
-      source: 'cisa',
-      url: raw.notes || '',
-      aliases: [],
-      affectedPackages: [],
-      raw
-    };
-  }
-
-  // RedHat format detection (bugzilla, CVE, resource_url)
-  if (raw && (raw.CVE || raw.bugzilla)) {
-    const id = raw.CVE || raw.id || '';
-    const desc = raw.bugzilla_description || raw.summary || raw.description || '';
-    const publishedDate = toDateOrNull(raw.public_date) || toDateOrNull(raw.date);
-    const sev = normalizeSeverityGeneric(raw.severity || '');
-    const url = raw.resource_url || raw.bugzilla || (id && id.startsWith('CVE-') ? `https://nvd.nist.gov/vuln/detail/${id}` : '');
-    return {
-      id,
-      title: id,
-      description: desc,
-      publishedDate,
-      modifiedDate: null,
-      severity: sev,
-      source: 'redhat',
-      url,
-      aliases: raw.aliases || [],
-      affectedPackages: [],
-      raw
-    };
-  }
-
-  // fallback: stringify raw minimally
-  return {
-    id: raw.id || raw.name || '',
-    title: raw.title || raw.summary || raw.name || '',
-    description: raw.details || raw.description || '',
-    publishedDate: toDateOrNull(raw.published) || null,
-    modifiedDate: toDateOrNull(raw.modified) || null,
-    severity: normalizeSeverityGeneric(raw.severity || ''),
-    source: feedKey,
-    url: raw.url || '',
-    aliases: raw.aliases || [],
-    affectedPackages: [],
-    raw
-  };
-}
-
-/* ---------- Fetch & prepare feeds ---------- */
-async function loadAllFeeds() {
-  // For each feed, fetch and merge files, then normalize and sort
-  const entries = Object.entries(FEEDS).filter(([k,v]) => v && v.files && Array.isArray(v.files));
-  await Promise.all(entries.map(async ([key, info]) => {
-    const files = info.files;
-    const aggregate = [];
-    for (const f of files) {
-      try {
-        const data = await fetchJsonRel(f);
-        // many files contain arrays directly, some are objects with .vulnerabilities
-        if (Array.isArray(data)) {
-          aggregate.push(...data);
-        } else if (data && Array.isArray(data.vulnerabilities)) {
-          aggregate.push(...data.vulnerabilities);
-        } else if (data && Array.isArray(data.items)) {
-          aggregate.push(...data.items);
-        } else {
-          // if it's an object with multiple keys, try to find arrays inside and merge
-          const arraysFound = Object.keys(data).filter(k => Array.isArray(data[k]));
-          if (arraysFound.length) {
-            arraysFound.forEach(k => aggregate.push(...data[k]));
-          } else {
-            // as last resort push the object itself
-            aggregate.push(data);
-          }
-        }
-      } catch (err) {
-        console.warn(`Failed to load ${f}:`, err.message);
-      }
-    }
-    // store raw merged
-    state.rawDataCache[key] = aggregate;
-    // normalize
-    const normalized = aggregate.map(item => normalizeItemGeneric(item, key));
-    // sort by publishedDate desc (put null dates last)
-    normalized.sort((a,b) => {
-      const ta = a.publishedDate ? a.publishedDate.getTime() : 0;
-      const tb = b.publishedDate ? b.publishedDate.getTime() : 0;
-      return tb - ta;
-    });
-    state.feedsData[key] = normalized;
-    state.lastLoadedAt[key] = new Date().toISOString();
-  }));
-}
-
-/* ---------- Rendering ---------- */
-function renderDashboard() {
-  const summaryArea = document.getElementById('summaryArea');
-  summaryArea.innerHTML = '';
-  const container = document.createElement('div');
-  container.className = 'card';
-  let total = 0;
-  const stats = {};
-  Object.keys(FEEDS).forEach(k => {
-    if (!FEEDS[k] || !FEEDS[k].name) return;
-    const count = (state.feedsData[k] || []).length;
-    stats[k] = count;
-    total += count;
-  });
-
-  const html = `
-    <h3>📊 Vulnerability Overview</h3>
-    <div class="meta muted">Real-time summary of all vulnerability feeds</div>
-    <div class="dashboard-stats" style="margin-top:12px">
-      <div class="stat-card"><div class="stat-number">${total}</div><div class="stat-label">Total Vulnerabilities</div></div>
-      <div class="stat-card"><div class="stat-number">${stats.cisa || 0}</div><div class="stat-label">CISA KEV</div></div>
-      <div class="stat-card"><div class="stat-number">${stats.redhat || 0}</div><div class="stat-label">Red Hat CVEs</div></div>
-      <div class="stat-card"><div class="stat-number">${(stats.ubuntu||0) + (stats.debian||0) + (stats.almalinux||0) + (stats.rockylinux||0) + (stats.suse||0)}</div><div class="stat-label">Linux Distributions</div></div>
+async function loadSection(section){
+  const area=document.getElementById('contentArea');
+  area.innerHTML='<div class="card">Loading…</div>';
+  const cfg=FEEDS[section];if(!cfg)return;
+  let all=[];
+  for(const file of cfg.files){const data=await fetchJson(file);if(Array.isArray(data))all.push(...data.map(normalize));}
+  if(!all.length){area.innerHTML='<div class="card">No data found</div>';return;}
+  const html=all.map(x=>`
+    <div class="cve">
+      <div class="id">${x.id}</div>
+      <div class="title">${x.title}</div>
+      <div class="sev-${x.severity}">${x.severity.toUpperCase()}</div>
+      <div class="muted">${x.published}</div>
+      <div>${x.description||''}</div>
     </div>
-    <h4 style="margin-top:16px">Quick Access</h4>
-    <div class="grid" style="margin-top:12px">
-      ${Object.keys(FEEDS).filter(k => FEEDS[k]).map(k => `<div class="card" style="cursor:pointer" data-feed="${k}"><h3>${FEEDS[k].name}</h3><div class="meta muted">Records: <strong>${stats[k]||0}</strong></div><div class="desc muted">Click to view</div></div>`).join('')}
-    </div>
-  `;
-  container.innerHTML = html;
-  summaryArea.appendChild(container);
-
-  // wire quick-access cards
-  document.querySelectorAll('.card[data-feed]').forEach(c => {
-    c.addEventListener('click', () => {
-      const feed = c.dataset.feed;
-      // activate nav
-      document.querySelectorAll('nav.nav a').forEach(n => n.classList.remove('active'));
-      const link = document.querySelector(`nav.nav a[data-section="${feed}"]`);
-      if (link) link.classList.add('active');
-      state.activeSection = feed;
-      loadSection(feed);
-    });
-  });
+  `).join('');
+  area.innerHTML=html;
 }
-
-/* render list for active section */
-function prepareAndRenderList() {
-  const contentArea = document.getElementById('contentArea');
-  contentArea.innerHTML = '';
-  const items = state.feedsData[state.activeSection] || [];
-  // store for rendering and filter
-  state.currentItems = items;
-  renderList();
-}
-
-function loadSection(section, force=false) {
-  const contentArea = document.getElementById('contentArea');
-  contentArea.innerHTML = '<div class="card"><h3>Loading</h3><div class="desc">Fetching and preparing feed...</div></div>';
-  if (section === 'dashboard') {
-    renderDashboard();
-    contentArea.innerHTML = ''; // remove content area cards
-    return;
-  }
-  if (!FEEDS[section]) {
-    contentArea.innerHTML = `<div class="card"><h3>No feed</h3><div class="desc">This section is not configured.</div></div>`;
-    return;
-  }
-  // If data already loaded and not forced, just render
-  if (state.feedsData[section] && !force) {
-    // show list
-    state.activeSection = section;
-    prepareAndRenderList();
-    showSummaryHeader(section);
-    return;
-  }
-  // otherwise load everything again (cheap for now)
-  (async () => {
-    try {
-      await loadAllFeeds();
-      state.activeSection = section;
-      prepareAndRenderList();
-      showSummaryHeader(section);
-    } catch (err) {
-      console.error('Load error', err);
-      contentArea.innerHTML = `<div class="card"><h3>Error</h3><div class="desc">${err.message}</div></div>`;
-    }
-  })();
-}
-
-function showSummaryHeader(section) {
-  const summaryArea = document.getElementById('summaryArea');
-  const meta = state.lastLoadedAt[section] ? new Date(state.lastLoadedAt[section]).toLocaleString() : 'N/A';
-  summaryArea.innerHTML = `<div class="card"><h3>${FEEDS[section].name}</h3><div class="meta muted">Records: <strong>${(state.feedsData[section]||[]).length}</strong> • Last load: <strong>${meta}</strong></div></div>`;
-}
-
-/* filtering and rendering */
-function renderList() {
-  const items = state.currentItems || [];
-  const q = (document.getElementById('searchInput').value || '').toLowerCase();
-  const sev = document.getElementById('severitySelect').value;
-  const days = document.getElementById('timeSelect').value;
-
-  let filtered = items.slice();
-
-  if (sev !== 'all') {
-    filtered = filtered.filter(i => (i.severity || '').toLowerCase() === sev);
-  }
-
-  if (q) {
-    filtered = filtered.filter(i => {
-      const hay = (i.id + ' ' + i.title + ' ' + (i.description || '') + ' ' + (i.aliases||[]).join(' ')).toLowerCase();
-      return hay.includes(q);
-    });
-  }
-
-  if (days !== 'all') {
-    const cutoff = Date.now() - (parseInt(days, 10) * 24 * 60 * 60 * 1000);
-    filtered = filtered.filter(i => (i.publishedDate && i.publishedDate.getTime && i.publishedDate.getTime() >= cutoff));
-  }
-
-  // sort
-  const sort = document.getElementById('sortSelect').value;
-  filtered.sort((a,b) => {
-    if (sort === 'date') return (b.publishedDate ? b.publishedDate.getTime() : 0) - (a.publishedDate ? a.publishedDate.getTime() : 0);
-    if (sort === 'severity') {
-      const order = { critical: 0, high:1, medium:2, low:3, '': 4 };
-      return (order[a.severity]||9) - (order[b.severity]||9);
-    }
-    if (sort === 'source') return (a.source||'').localeCompare(b.source||'');
-    return 0;
-  });
-
-  // render
-  const contentArea = document.getElementById('contentArea');
-  if (!filtered.length) {
-    contentArea.innerHTML = `<div class="card"><h3>No results</h3><div class="desc">No vulnerabilities match your filters.</div></div>`;
-    return;
-  }
-  const listHtml = document.createElement('div');
-  listHtml.className = 'card';
-  listHtml.innerHTML = `<h3>${FEEDS[state.activeSection].name} — ${filtered.length} items</h3><div class="cve-list" id="cveList"></div>`;
-  contentArea.innerHTML = '';
-  contentArea.appendChild(listHtml);
-  const cveList = document.getElementById('cveList');
-
-  filtered.forEach(v => {
-    const date = v.publishedDate ? new Date(v.publishedDate).toLocaleDateString() : 'N/A';
-    const sev = v.severity || 'medium';
-    const sevClass = sev === 'critical' ? 'sev-critical' : (sev === 'high' ? 'sev-high' : (sev === 'medium' ? 'sev-medium' : 'sev-low'));
-    const summary = (v.description || '').replace(/\n/g, ' ').slice(0, 260);
-
-    const div = document.createElement('div');
-    div.className = 'cve';
-    div.innerHTML = `
-      <div class="left">
-        <div class="id">${escapeHtml(v.id || '—')}</div>
-        <div class="muted">${escapeHtml(date)}</div>
-        <div class="sev ${sevClass}">${(v.severity||'').toUpperCase() || 'N/A'}</div>
-      </div>
-      <div class="right">
-        <div class="title"><a href="${escapeHtml(v.url || '#')}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${escapeHtml(v.title || v.id || 'Untitled')}</a></div>
-        <div class="summary">${escapeHtml(summary)}${(v.description||'').length > 260 ? '…' : ''}</div>
-        <div class="meta">
-          <div class="muted small">Source: ${escapeHtml(v.source || '')}</div>
-          ${v.affectedPackages && v.affectedPackages.length ? `<div class="muted small">Packages: ${escapeHtml(v.affectedPackages.slice(0,2).join(', '))}${v.affectedPackages.length>2?'...':''}</div>` : ''}
-        </div>
-      </div>
-    `;
-    div.addEventListener('click', () => openModal(v));
-    cveList.appendChild(div);
-  });
-}
-
-/* modal */
-function openModal(v) {
-  const modal = document.getElementById('detailsModal');
-  document.getElementById('modalTitle').textContent = v.id || v.title;
-  document.getElementById('modalMeta').textContent = `${v.source || ''} • ${v.publishedDate ? new Date(v.publishedDate).toLocaleString() : 'N/A'}`;
-  document.getElementById('modalBody').innerHTML = `
-    <div style="margin-bottom:8px;"><strong>Title:</strong> ${escapeHtml(v.title)}</div>
-    <div style="margin-bottom:8px;"><strong>Severity:</strong> ${(v.severity||'').toUpperCase()}</div>
-    <div style="margin-bottom:8px;"><strong>Published:</strong> ${v.publishedDate ? new Date(v.publishedDate).toLocaleString() : 'N/A'}</div>
-    <div style="margin-bottom:8px;"><strong>URL:</strong> <a href="${escapeHtml(v.url||'#')}" target="_blank">${escapeHtml(v.url||'—')}</a></div>
-    <div style="margin-top:12px;"><strong>Description:</strong><div style="margin-top:6px;white-space:pre-wrap;">${escapeHtml(v.description)}</div></div>
-    <details style="margin-top:12px;">
-      <summary style="cursor:pointer">Raw JSON</summary>
-      <pre style="max-height:300px;overflow:auto;background:var(--panel);padding:8px;border-radius:8px;margin-top:8px;color:var(--text)">${escapeHtml(JSON.stringify(v.raw, null, 2))}</pre>
-    </details>
-  `;
-  modal.style.display = 'block';
-}
-document.getElementById('closeModal').addEventListener('click', () => {
-  document.getElementById('detailsModal').style.display = 'none';
-});
-window.addEventListener('click', (ev) => {
-  if (ev.target.id === 'detailsModal') document.getElementById('detailsModal').style.display = 'none';
-});
-
-/* escape */
-function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-/* ---------- bootstrap ---------- */
-(async function boot(){
-  // Load minimal feeds (dashboard)
-  try {
-    await loadAllFeeds(); // preload everything once
-    renderDashboard();
-    // default: show dashboard in content area
-    document.getElementById('contentArea').innerHTML = '';
-  } catch (err) {
-    console.error('Boot error', err);
-    document.getElementById('contentArea').innerHTML = `<div class="card"><h3>Error loading feeds</h3><div class="desc">${escapeHtml(err.message)}</div></div>`;
-  }
-})();
-
+loadSection('dashboard');
 </script>
 </body>
 </html>
