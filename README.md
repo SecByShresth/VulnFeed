@@ -1,165 +1,134 @@
-# 🛡️ VulnFeed  
-### CISA Known Exploited Vulnerabilities & Red Hat Security Dashboard  
+# 🛡️ VulnFeed
+### Centralized Vulnerability Intelligence Dashboard
 
-A **real-time vulnerability tracker** that monitors actively exploited CVEs from **CISA's Known Exploited Vulnerabilities (KEV)** Catalog and **Red Hat Security Advisories**.
+A **comprehensive vulnerability intelligence platform** that aggregates security advisories from **CISA KEV, Red Hat, major Linux distributions, and popular databases** into a single, unified dashboard.
 
 ---
 
 ## 🎯 What is VulnFeed?
 
-**VulnFeed** is a client-side web application that aggregates and displays actively exploited vulnerabilities tracked by the **U.S. Cybersecurity and Infrastructure Security Agency (CISA)** and critical security advisories from **Red Hat**.  
-
-Unlike traditional CVE databases that list every vulnerability, VulnFeed focuses exclusively on vulnerabilities that are **actively exploited in the wild** and **critical Red Hat security updates**.
+**VulnFeed** is a client-side web application that provides **centralized vulnerability intelligence** by aggregating security data from multiple authoritative sources. Unlike traditional CVE databases that list every vulnerability, VulnFeed focuses on **actively exploited vulnerabilities** and **critical security updates** across enterprise systems.
 
 ---
 
-## 🧭 Why Focus on CISA KEV & Red Hat?
+## 🌟 Why VulnFeed?
 
-- 🎯 **High-Signal, Low-Noise:** Only shows vulnerabilities confirmed to be actively exploited  
-- 🚨 **Critical Threat Intelligence:** These are the vulnerabilities attackers are using today  
-- 🔒 **Ransomware Tracking:** Identifies which vulnerabilities are used in ransomware campaigns  
-- ⏰ **Action-Oriented:** Shows remediation deadlines set by CISA for federal agencies  
-- 🔴 **Enterprise Focus:** Red Hat CVEs curated for enterprise environments  
-- 🆓 **No API Keys:** Completely free and open access  
+* 🎯 **Multi-Source Intelligence:** Combines CISA KEV, Red Hat, Linux distributions, and databases
+* 🚨 **Action-Oriented:** Focuses on actively exploited and critical vulnerabilities
+* 🔒 **Enterprise Focus:** Curated for Red Hat, Ubuntu, Debian, SUSE, and database environments
+* ⏰ **Real-Time Updates:** Automated daily data collection from **OSV.dev**
+* 🆓 **No API Keys:** Completely free and open access
+* 💻 **Client-Side Only:** No backend, no data collection, **100% private**
 
 ---
 
 ## ✨ Key Features
 
-### 🔍 Smart Filtering
-- **Vendor/Product Search:** Filter by Microsoft, Cisco, Apache, Red Hat, etc.  
-- **Ransomware Filter:** Isolate vulnerabilities used in ransomware attacks  
-- **Time Range:** View vulnerabilities added in the last 7, 30, or 90 days  
-- **Red Hat Filter:** Focus specifically on Red Hat security advisories  
-- **Real-Time Filtering:** Results update instantly as you type  
+### 🔍 Comprehensive Coverage
+
+* **CISA KEV:** Actively exploited vulnerabilities tracked by U.S. Cybersecurity Agency
+* **Red Hat Security:** Enterprise security advisories for RHEL and related products
+* **Linux Distributions:** AlmaLinux, Rocky Linux, Amazon Linux, Arch Linux, Canonical, Debian, Ubuntu, Fedora, Oracle Linux, SUSE
+* **Databases:** MySQL, PostgreSQL, Redis vulnerabilities
+
+### 🎨 Smart Dashboard
+
+* **Live Statistics:** Real-time vulnerability counts across all sources
+* **Interactive Filtering:** Search by CVE, keyword, severity, or time range
+* **Severity Indicators:** Color-coded badges for quick threat assessment
+* **Source Tracking:** Clear identification of vulnerability origins
+* **Responsive Design:** Works seamlessly on desktop, tablet, and mobile
+
+### ⚡ Advanced Filtering
+
+* **Severity Levels:** Critical, High, Medium, Low
+* **Time Ranges:** Last 7, 30, 90 days, or all time
+* **Search:** Real-time filtering across CVE IDs, titles, and descriptions
+* **Sorting:** By date, severity, or source
 
 ---
 
-## 📊 Interactive Dashboard
+## 📊 Supported Data Sources
 
-- **Live Statistics:** Track total exploited vulnerabilities, ransomware-related CVEs, Red Hat advisories, and deadlines  
-- **Severity Indicators:** Color-coded badges for quick threat assessment  
-- **Exploit Status:** Clear “Exploited in the Wild” badges on every vulnerability  
-- **Ransomware Tags:** Identify ransomware-linked vulnerabilities  
-- **Red Hat Tags:** Highlight Red Hat security advisories  
+### 🔴 Enterprise Linux
 
----
+* **Red Hat Enterprise Linux** - Enterprise security advisories
+* **Ubuntu** - Canonical security updates
+* **Debian** - Stable and testing security
+* **SUSE Linux** - Enterprise and openSUSE
+* **Fedora** - Community-driven updates
+* **Oracle Linux** - Enterprise compatibility
+* **AlmaLinux** - RHEL-compatible
+* **Rocky Linux** - Enterprise-grade alternative
+* **Amazon Linux** - AWS-optimized
+* **Arch Linux** - Rolling release security
 
-## 📅 Deadline Tracking
+### 🗄️ Databases
 
-- **Due Date Warnings:** Highlights vulnerabilities with deadlines within 7 days  
-- **Sort by Due Date:** Prioritize based on CISA’s remediation timeline  
-- **Required Actions:** Shows CISA’s recommended remediation steps  
+* **MySQL** - World's most popular open-source database
+* **PostgreSQL** - Advanced open-source database
+* **Redis** - In-memory data structure store
 
----
+### 🇺🇸 Government Sources
 
-## 🔴 Red Hat Security Integration
-
-- **Enterprise Focus:** Red Hat CVEs relevant to enterprise environments  
-- **Security Advisories:** Direct links to Red Hat advisories and fixes  
-- **Impact Assessment:** Severity ratings and detailed impact analysis  
-- **Patch Information:** Version-specific fix details  
-
----
-
-## 🎨 User Experience
-
-- 💻 **Responsive Design:** Works seamlessly on desktop, tablet, and mobile  
-- ✨ **Hover Effects:** Smooth interactive cards  
-- 🔗 **Direct CVE Links:** View full details on NVD  
-- 🧩 **Red Hat Advisory Links:** Quick access to official remediation pages  
-
----
-
-## 🔄 Automatic Updates
-
-- ⚙️ **GitHub Actions:** Data refreshes every 6 hours  
-- 🙌 **No Manual Intervention:** Always up-to-date  
-- 🕒 **Version Tracking:** Displays catalog version and last update time  
+* **CISA KEV** - Known Exploited Vulnerabilities catalog
 
 ---
 
 ## 🚀 How It Works
 
-### 📈 Data Flow
+### 📈 Data Flow Architecture
 
-- **Automated Fetching:** Every 6 hours via GitHub Actions  
-- **Local Caching:** JSON data stored in repo  
-- **Client-Side Rendering:** Fast, browser-only filtering  
-- **No Backend:** 100% static and secure  
+> OSV.dev Database $\rightarrow$ GitHub Actions $\rightarrow$ JSON Files $\rightarrow$ Client Dashboard
+>
+> $\downarrow$ $\quad\quad\quad\downarrow$ $\quad\quad\quad\downarrow$ $\quad\quad\quad\downarrow$
+>
+> Multiple Sources $\quad$ Daily Fetch $\quad$ Local Storage $\quad$ Real-time Filtering
 
----
+### 🔄 Update Process
 
-## 📋 Use Cases
-
-### 👩‍💻 For Security Teams
-- Threat prioritization  
-- Incident response  
-- Patch management  
-- Threat intelligence tracking  
-
-### 🏢 For Red Hat Enterprise Users
-- RHEL, OpenShift, Middleware, Cloud security tracking  
-
-### 🧠 For Security Researchers
-- Trend analysis  
-- Ransomware correlation  
-- Threat landscape visualization  
-
-### 🧑‍💻 For IT Administrators
-- Vendor risk monitoring  
-- Compliance (CISA BOD 22-01)  
-- Enterprise patch prioritization  
-
----
-
-## 🎓 What You’ll See
-
-### 🪪 Vulnerability Cards
-- **CVE ID:** Linked to NVD  
-- **Description:** Summary of impact  
-- **Exploited Badge:** Confirms active exploitation  
-- **Ransomware/Red Hat Badges:** Special tags  
-- **Vendor/Product:** Affected software  
-- **Due Date & Action:** CISA remediation info  
-
-### 📊 Statistics Dashboard
-- Total exploited vulnerabilities  
-- Ransomware-related CVEs  
-- Red Hat advisories tracked  
-- Urgent vulnerabilities (due <7 days)  
+* **Automated Collection:** GitHub Actions fetches data daily from **OSV.dev**
+* **Intelligent Processing:** Vulnerabilities categorized by keywords and affected packages
+* **JSON Storage:** Structured data stored in repository
+* **Client Rendering:** Browser loads and filters data instantly
 
 ---
 
 ## 🛠️ Technology Stack
 
 | Component | Technology |
-|------------|-------------|
-| Frontend | HTML5, CSS3, Vanilla JS |
-| Styling | CSS Grid, Flexbox |
-| Automation | GitHub Actions |
+| :--- | :--- |
+| Frontend | HTML5, CSS3, Vanilla JavaScript |
+| Styling | CSS Grid, Flexbox, Neumorphic Design |
+| Automation | GitHub Actions, Python |
+| Data Processing | Python with requests, zipfile |
 | Hosting | GitHub Pages |
-| Data Storage | GitHub JSON cache |
-| Data Sources | CISA KEV, Red Hat Security API |
+| Data Sources | OSV.dev, CISA KEV, Red Hat Security |
 
 ---
 
-## 📊 Data Sources
+## 📋 Use Cases
 
-### **CISA KEV Catalog**
-- **Authoritative:** U.S. DHS-maintained  
-- **Actionable:** Only confirmed exploits  
-- **Updated Frequently:** Multiple times daily  
-- **Mandatory Reference:** Federal compliance (BOD 22-01)  
+### 👩‍💻 Security Teams
+* Threat Prioritization
+* Patch Management
+* Incident Response
+* Compliance (**CISA BOD 22-01**)
 
-### **Red Hat Security Advisories**
-- **Enterprise Focus:** RHEL, OpenShift, JBoss  
-- **Detailed Advisories:** With patch/fix info  
-- **Severity Ratings:** Clear and standardized  
+### 🏢 Enterprise IT
+* Red Hat Environments
+* Multi-OS Environments
+* Database Security
 
-📎 **Official Sources:**
-- [CISA KEV Catalog](https://www.cisa.gov/known-exploited-vulnerabilities-catalog)  
-- [Red Hat Security Updates](https://access.redhat.com/security/security-updates)
+### 🧠 Security Researchers
+* Trend Analysis
+* Threat Intelligence
+* Vulnerability Research
+
+### 🧑‍💻 System Administrators
+* Patch Prioritization
+* Vendor Monitoring
+* Compliance Reporting
 
 ---
 
@@ -168,122 +137,136 @@ Unlike traditional CVE databases that list every vulnerability, VulnFeed focuses
 ### 🔗 Live Dashboard
 👉 [https://secbyshresth.github.io/VulnFeed/](https://secbyshresth.github.io/VulnFeed/)
 
-No installation. No API keys. No config.
+**No installation required.** Just open the link and start exploring vulnerabilities.
 
-### 🧰 Deploy Your Own
-1. **Fork** this repo  
-2. **Enable GitHub Actions**  
-   - Settings → Actions → General → “Read & write permissions”  
-3. **Enable GitHub Pages**  
-   - Settings → Pages → Source → “main” branch  
-4. **Trigger First Fetch**  
-   - Actions → “Fetch CISA KEV Daily” → “Run workflow”  
-5. **Access Dashboard**  
-   - `https://yourusername.github.io/VulnFeed/`
+### 🧰 Self-Hosted Deployment
+
+1.  **Fork** this repository
+2.  **Enable GitHub Actions**
+    * `Settings` $\rightarrow$ `Actions` $\rightarrow$ `General` $\rightarrow$ **"Read & write permissions"**
+3.  **Enable GitHub Pages**
+    * `Settings` $\rightarrow$ `Pages` $\rightarrow$ `Source` $\rightarrow$ **"GitHub Actions"**
+4.  **Trigger Initial Data Fetch**
+    * `Actions` $\rightarrow$ **“VulnFeed - OSV.dev Centralized Feed”** $\rightarrow$ **“Run workflow”**
+5.  **Access Your Dashboard**
+    * `https://yourusername.github.io/VulnFeed/`
 
 ---
 
 ## 🔄 Update Frequency
 
-- ⏰ Every 6 hours via GitHub Actions  
-- 🔁 Manual trigger anytime  
-- ⚡ Data usually <6 hours old  
+* ⏰ **Daily Updates:** Automatic data refresh every **24 hours**
+* 🔁 **Manual Triggers:** On-demand updates via `workflow_dispatch`
+* ⚡ **Near Real-Time:** Data typically less than 24 hours old
 
-**Why 6 hours?**  
-CISA updates KEV multiple times a day; Red Hat publishes frequent advisories.  
-A 6-hour cycle ensures freshness while keeping within GitHub limits.
+> **Why Daily Updates?**
+> OSV.dev provides daily vulnerability exports. This frequency balances freshness with GitHub Actions limits, ensuring comprehensive coverage without rate limiting.
 
 ---
 
 ## 📖 How to Use
 
-### Basic Filters
-- Search by vendor: “Microsoft”, “Red Hat”, etc.  
-- Filter by ransomware use  
-- Show only Red Hat advisories  
-- Select time ranges: 7, 30, 90 days  
+### 🎯 Navigation
 
-### Sorting
-- **Date Added (default)**  
-- **Vendor Name**  
-- **Due Date**
+* **Dashboard:** Overview with statistics and quick access
+* **CISA KEV:** Actively exploited vulnerabilities
+* **Red Hat:** Enterprise security advisories
+* **Linux Distributions:** Individual OS security updates
+* **Databases:** MySQL, PostgreSQL, Redis vulnerabilities
+* **Settings:** Theme and refresh controls
 
-### Advanced Tips
-- Combine filters for deep insights  
-- Use “Due in 7 Days” to find urgent threats  
-- Track trends by adjusting time window  
-- Mobile-friendly: bookmark for quick access  
+### 🔍 Search & Filter
+
+* **Text Search:** Search across CVE IDs, titles, and descriptions
+* **Severity Filter:** Focus on Critical, High, Medium, or Low severity
+* **Time Filter:** Show vulnerabilities from specific time periods
+* **Sort Options:** Order by date, severity, or source
+
+### 💡 Pro Tips
+
+* Use the search box for specific **CVE IDs** or **keywords**
+* Combine **severity** and **time filters** for focused results
+* Click any vulnerability card to view details on official sources
+* Use dark/light theme toggle for comfortable viewing
 
 ---
 
 ## 🔒 Privacy & Security
 
-- 🔐 No data collection  
-- 🧠 100% client-side filtering  
-- 🚫 No cookies or analytics  
-- 🧩 Fully open-source & auditable  
-- ☁️ Static hosting via GitHub Pages  
+* 🔐 **No Data Collection:** Everything runs client-side
+* 🧠 **Local Processing:** All filtering happens in your browser
+* 🚫 **No Tracking:** No cookies, analytics, or external requests
+* ☁️ **Static Hosting:** GitHub Pages ensures security and reliability
+* 📜 **Open Source:** Fully auditable code and data processing
 
 ---
 
 ## 🤝 Contributing
 
 ### 🪲 Report Issues
-- Found a bug? Open an issue  
-- Have a feature idea? Share it!  
 
-### 🧑‍💻 Submit PRs
-- Improve UI/UX  
-- Add new filters or visuals  
-- Add more data sources  
-- Optimize performance  
+* Found a bug? [Open an issue](https://github.com/SecByShresth/VulnFeed/issues)
+* Have a feature idea? Share your suggestions!
 
-### ⭐ Spread the Word
-- Star ⭐ the repo  
-- Share with your security team  
-- Mention it in blogs or talks  
+### 🧑‍💻 Code Contributions
+
+* Improve UI/UX design
+* Add new data sources or filters
+* Optimize performance
+* Enhance mobile experience
+
+### ⭐ Community Support
+
+* Star ⭐ the repository
+* Share with your security team
+* Mention in blogs or security discussions
 
 ---
 
 ## 📄 License
 
-Licensed under the **Apache 2.0 License** — see [`LICENSE`](./LICENSE).  
+Licensed under the **Apache 2.0 License** — see [`LICENSE`](./LICENSE) file.
 
 ### Data Usage
-- **CISA KEV:** Public domain (U.S. Government data)  
-- **Red Hat Data:** Used under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) license  
+
+* **CISA KEV:** Public domain (U.S. Government data)
+* **Red Hat Data:** Used under appropriate licenses
+* **OSV.dev Data:** Open Source Vulnerabilities database
+* **Linux Distribution Data:** Respective distribution security feeds
 
 ---
 
 ## 🙏 Acknowledgments
 
-- **CISA:** Maintainers of the KEV catalog  
-- **Red Hat:** Enterprise security advisories  
-- **NVD (NIST):** CVE details  
-- **GitHub:** For Pages & Actions  
-- **Security Community:** For contributions & feedback  
+* **CISA:** For maintaining the Known Exploited Vulnerabilities catalog
+* **Red Hat:** For enterprise security advisories and transparency
+* **OSV.dev:** For comprehensive open source vulnerability data
+* **Linux Distributions:** For their security teams and public advisories
+* **GitHub:** For Pages and Actions infrastructure
+* **Security Community:** For contributions and feedback
 
 ---
 
 ## 📞 Contact & Support
 
-**Author:** Shresth  
-**GitHub:** [@SecByShresth](https://github.com/SecByShresth)  
-**Project:** [VulnFeed](https://github.com/SecByShresth/VulnFeed)  
-**Issues:** [Report a Bug](https://github.com/SecByShresth/VulnFeed/issues)
+**Author:** Shresth\
+**GitHub:** [@SecByShresth](https://github.com/SecByShresth)\
+**Project:** [VulnFeed](https://github.com/SecByShresth/VulnFeed)\
+**Issues:** [Report a Bug](https://github.com/SecByShresth/VulnFeed/issues)\
+**Discussions:** [Join the Conversation](https://github.com/SecByShresth/VulnFeed/discussions)
 
 ---
 
-## ⭐ Star History
+## ⭐ Support the Project
 
-If you find **VulnFeed** useful — please ⭐ it!  
-It helps others discover the project.
-
----
-
-### Built with ❤️ for the Security Community  
-Helping professionals stay ahead of threats — with a focus on **enterprise Red Hat environments**.
+If you find **VulnFeed** useful for your security workflow, please give it a ⭐!
+Your support helps others discover the project and contributes to its development.
 
 ---
 
-[**Report Bug**](https://github.com/SecByShresth/VulnFeed/issues) • [**Request Feature**](https://github.com/SecByShresth/VulnFeed/issues/new) • [**Live Demo**](https://secbyshresth.github.io/VulnFeed/)
+### Built with ❤️ for the Security Community
+Helping professionals stay ahead of threats across enterprise environments, Linux distributions, and critical infrastructure.
+
+---
+
+[**Live Demo**](https://secbyshresth.github.io/VulnFeed/) • [**Report Bug**](https://github.com/SecByShresth/VulnFeed/issues) • [**Request Feature**](https://github.com/SecByShresth/VulnFeed/issues/new) • [**View Source**](https://github.com/SecByShresth/VulnFeed)
