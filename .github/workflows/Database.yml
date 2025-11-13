@@ -29,132 +29,56 @@ jobs:
           python3 << 'EOF'
           import requests
           import json
-          import csv
-          import io
           import os
-          import time
+          import gzip
+          import io
           
           print("🚀 Starting OSV.dev vulnerability feed update...")
           
-          # Configuration
-          MODIFIED_IDS_URL = "https://storage.googleapis.com/osv-vulnerabilities/modified_id.csv"
-          VULN_BASE_URL = "https://api.osv.dev/v1/vulns/"
+          # Configuration - Using OSV export endpoints
+          OSV_EXPORT_URL = "https://osv-vulnerabilities.storage.googleapis.com"
+          ECOSYSTEMS = ["Go", "PyPI", "npm", "Maven", "NuGet", "RubyGems", "Packagist", "Crates.io"]
           
           # Enhanced keyword matching
           TARGET_KEYWORDS = {
               "mysql": ["mysql", "mariadb", "percona"],
               "postgresql": ["postgres", "postgresql", "pgsql"],
-              "redis": ["redis"],
-              "exploitdb": ["exploit", "edb-id", "exploit-db"] 
+              "redis": ["redis", "redis-server"],
+              "exploitdb": ["exploit", "edb-id"] 
           }
           
           all_vulnerabilities = []
 
-          # Step 1: Download the modified IDs list
-          print("📥 Downloading modified_id.csv...")
-          try:
-              response = requests.get(MODIFIED_IDS_URL, timeout=30)
-              response.raise_for_status()
-              print(f"✅ Downloaded modified_id.csv ({len(response.text)} bytes)")
-          except requests.RequestException as e:
-              print(f"❌ Failed to download modified_id.csv: {e}")
-              exit(1)
+          # Step 1: Download and process each ecosystem
+          for ecosystem in ECOSYSTEMS:
+              print(f"📥 Processing {ecosystem} ecosystem...")
               
-          # Step 2: Process CSV and extract OSV IDs
-          csv_data = io.StringIO(response.text)
-          reader = csv.reader(csv_data)
-          
-          osv_ids_to_fetch = []
-          for row in reader:
-              if row and row[0].strip():
-                  osv_id = row[0].strip()
-                  # Include all types of vulnerabilities
-                  osv_ids_to_fetch.append(osv_id)
-          
-          print(f"📋 Found {len(osv_ids_to_fetch)} IDs to process")
-          
-          # Step 3: Fetch details for each vulnerability
-          session = requests.Session()
-          fetched_count = 0
-          error_count = 0
-          
-          for i, osv_id in enumerate(osv_ids_to_fetch):
-              if i % 50 == 0:
-                  print(f"⏳ Progress: {i}/{len(osv_ids_to_fetch)}...")
+              url = f"{OSV_EXPORT_URL}/{ecosystem}/all.zip"
               
               try:
-                  # Add small delay to be respectful to the API
-                  time.sleep(0.1)
+                  response = requests.get(url, timeout=60)
+                  response.raise_for_status()
                   
-                  vuln_response = session.get(f"{VULN_BASE_URL}{osv_id}", timeout=30)
-                  vuln_response.raise_for_status()
-                  vuln_data = vuln_response.json()
+                  # The response is actually a gzipped file with one JSON per line
+                  with gzip.open(io.BytesIO(response.content), 'rt', encoding='utf-8') as f:
+                      for line in f:
+                          if line.strip():
+                              try:
+                                  vuln_data = json.loads(line)
+                                  process_vulnerability(vuln_data, all_vulnerabilities)
+                              except json.JSONDecodeError:
+                                  continue
                   
-                  # Extract relevant information
-                  summary = vuln_data.get('summary', '')
-                  details = vuln_data.get('details', '')
-                  aliases = vuln_data.get('aliases', [])
-                  
-                  # Get affected package names
-                  affected_names = []
-                  for affected in vuln_data.get('affected', []):
-                      if affected.get('package'):
-                          pkg_name = affected['package'].get('name', '').lower()
-                          if pkg_name:
-                              affected_names.append(pkg_name)
-                  
-                  # Combine all text for keyword searching
-                  search_text = f"{summary} {details} {' '.join(affected_names)}".lower()
-                  
-                  # Determine which feed this belongs to
-                  source = "osv-general"
-                  
-                  # Check for ExploitDB first (via aliases)
-                  if any(alias.upper().startswith('EDB-') for alias in aliases):
-                      source = "exploitdb"
-                  # Check MySQL keywords
-                  elif any(keyword in search_text for keyword in TARGET_KEYWORDS["mysql"]):
-                      source = "mysql"
-                  # Check PostgreSQL keywords  
-                  elif any(keyword in search_text for keyword in TARGET_KEYWORDS["postgresql"]):
-                      source = "postgresql"
-                  # Check Redis keywords
-                  elif any(keyword in search_text for keyword in TARGET_KEYWORDS["redis"]):
-                      source = "redis"
-                  # Check ExploitDB in text as fallback
-                  elif any(keyword in search_text for keyword in TARGET_KEYWORDS["exploitdb"]):
-                      source = "exploitdb"
-                  
-                  # Only include if it matches one of our target categories
-                  if source != "osv-general":
-                      normalized_entry = {
-                          "id": osv_id,
-                          "title": summary or f"Vulnerability {osv_id}",
-                          "description": details or summary or "No description available",
-                          "url": f"https://osv.dev/{osv_id}",
-                          "source": source,
-                          "aliases": aliases,
-                          "affected_packages": affected_names
-                      }
-                      
-                      all_vulnerabilities.append(normalized_entry)
-                      fetched_count += 1
+                  print(f"✅ Processed {ecosystem}")
                   
               except requests.RequestException as e:
-                  print(f"⚠️ Failed to fetch {osv_id}: {e}")
-                  error_count += 1
-                  continue
-              except json.JSONDecodeError as e:
-                  print(f"⚠️ Failed to parse JSON for {osv_id}: {e}")
-                  error_count += 1
+                  print(f"⚠️ Failed to download {ecosystem}: {e}")
                   continue
 
           print(f"\n📊 Processing complete:")
-          print(f"   ✅ Successfully processed: {fetched_count}")
-          print(f"   ❌ Errors encountered: {error_count}")
           print(f"   📝 Total matching vulnerabilities: {len(all_vulnerabilities)}")
           
-          # Step 4: Group by source and save to files
+          # Step 2: Group by source and save to files
           if not os.path.exists("data"):
               os.makedirs("data")
 
@@ -183,6 +107,58 @@ jobs:
                       print(f"   {source.upper()}: {sample['id']} - {sample['title'][:60]}...")
           
           print("🎉 Vulnerability feed update completed!")
+
+          def process_vulnerability(vuln_data, all_vulnerabilities):
+              """Process a single vulnerability and add to results if it matches our criteria"""
+              
+              vuln_id = vuln_data.get('id', '')
+              summary = vuln_data.get('summary', '')
+              details = vuln_data.get('details', '')
+              aliases = vuln_data.get('aliases', [])
+              
+              # Get affected package names
+              affected_names = []
+              for affected in vuln_data.get('affected', []):
+                  if affected.get('package'):
+                      pkg_name = affected['package'].get('name', '').lower()
+                      if pkg_name:
+                          affected_names.append(pkg_name)
+              
+              # Combine all text for keyword searching
+              search_text = f"{summary} {details} {' '.join(affected_names)}".lower()
+              
+              # Determine which feed this belongs to
+              source = None
+              
+              # Check for ExploitDB first (via aliases)
+              if any('edb-' in alias.lower() for alias in aliases):
+                  source = "exploitdb"
+              # Check MySQL keywords
+              elif any(keyword in search_text for keyword in TARGET_KEYWORDS["mysql"]):
+                  source = "mysql"
+              # Check PostgreSQL keywords  
+              elif any(keyword in search_text for keyword in TARGET_KEYWORDS["postgresql"]):
+                  source = "postgresql"
+              # Check Redis keywords
+              elif any(keyword in search_text for keyword in TARGET_KEYWORDS["redis"]):
+                  source = "redis"
+              # Check ExploitDB in text as fallback
+              elif any(keyword in search_text for keyword in TARGET_KEYWORDS["exploitdb"]):
+                  source = "exploitdb"
+              
+              # Only include if it matches one of our target categories
+              if source:
+                  normalized_entry = {
+                      "id": vuln_id,
+                      "title": summary or f"Vulnerability {vuln_id}",
+                      "description": details or summary or "No description available",
+                      "url": f"https://osv.dev/{vuln_id}",
+                      "source": source,
+                      "aliases": aliases,
+                      "affected_packages": affected_names
+                  }
+                  
+                  all_vulnerabilities.append(normalized_entry)
           EOF
 
       - name: 📊 Display Results
