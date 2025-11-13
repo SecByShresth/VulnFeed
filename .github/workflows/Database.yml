@@ -2,7 +2,7 @@ name: VulnFeed - OSV.dev Centralized Feed
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Every day at 00:00 UTC
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 jobs:
@@ -12,6 +12,9 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        # Need to fetch history to push later
+        with:
+          fetch-depth: 0 
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -45,7 +48,6 @@ jobs:
               "exploitdb": ["exploit-db", "edb"] 
           }
           
-          # Initialize data storage
           all_vulnerabilities = []
 
           # 2. Download the modified IDs list
@@ -140,11 +142,17 @@ jobs:
               
           EOF
 
-      - name: Commit and Push Changes
-        uses: stefanprodan/git-tools@v1
-        with:
-          action: commit
-          branch: ${{ github.ref_name }}
-          files: data/*.json
-          message: "Auto-update feeds from OSV.dev"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit and Push Changes (Standard Git CLI)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add data/*.json
+          
+          # Check if there are any changes to commit before trying to commit
+          if git status --porcelain | grep -q data/; then
+              git commit -m "Auto-update feeds from OSV.dev"
+              git push
+          else
+              echo "No changes in data files to commit."
+          fi
