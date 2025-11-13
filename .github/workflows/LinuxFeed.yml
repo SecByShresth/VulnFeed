@@ -34,8 +34,7 @@ jobs:
           # Create data directory
           os.makedirs("data", exist_ok=True)
           
-          # Linux distributions with their OSV ecosystem names and sample packages
-          # Using common packages to get broad vulnerability coverage
+          # ✅ Supported Linux distributions only
           distributions = {
               "almalinux": {
                   "ecosystem": "AlmaLinux",
@@ -45,14 +44,6 @@ jobs:
                   "ecosystem": "Rocky Linux",
                   "packages": ["kernel", "glibc", "openssl", "curl", "python3", "nginx", "docker", "systemd"]
               },
-              "amazon": {
-                  "ecosystem": "Amazon Linux",
-                  "packages": ["kernel", "glibc", "openssl", "curl", "python3", "nginx", "docker", "systemd"]
-              },
-              "arch": {
-                  "ecosystem": "Arch Linux",
-                  "packages": ["linux", "glibc", "openssl", "curl", "python", "nginx", "docker", "systemd"]
-              },
               "debian": {
                   "ecosystem": "Debian",
                   "packages": ["linux", "libc6", "openssl", "curl", "python3", "nginx", "docker.io", "systemd"]
@@ -60,14 +51,6 @@ jobs:
               "ubuntu": {
                   "ecosystem": "Ubuntu",
                   "packages": ["linux", "libc6", "openssl", "curl", "python3", "nginx", "docker.io", "systemd"]
-              },
-              "fedora": {
-                  "ecosystem": "Fedora",
-                  "packages": ["kernel", "glibc", "openssl", "curl", "python3", "nginx", "docker", "systemd"]
-              },
-              "oracle": {
-                  "ecosystem": "Oracle Linux",
-                  "packages": ["kernel", "glibc", "openssl", "curl", "python3", "nginx", "docker", "systemd"]
               },
               "suse": {
                   "ecosystem": "SUSE",
@@ -94,7 +77,6 @@ jobs:
                   print(f"\n🔍 Searching: {ecosystem}/{package}")
                   
                   try:
-                      # Correct OSV.dev API query format for Linux distributions
                       payload = {
                           "package": {
                               "ecosystem": ecosystem,
@@ -111,23 +93,18 @@ jobs:
                       response.raise_for_status()
                       data = response.json()
                       
-                      # Extract vulnerabilities from response
                       vulns = data.get("vulns", [])
                       
-                      # Deduplicate and add metadata
                       new_count = 0
                       for vuln in vulns:
                           vuln_id = vuln.get("id")
                           if vuln_id and vuln_id not in seen_ids:
                               seen_ids.add(vuln_id)
-                              
-                              # Add metadata WITHOUT modifying original dates
                               vuln["_metadata"] = {
                                   "fetched_at": fetch_timestamp,
                                   "source_package": f"{ecosystem}/{package}",
                                   "distribution": distro_name
                               }
-                              
                               all_vulns.append(vuln)
                               new_count += 1
                       
@@ -144,7 +121,6 @@ jobs:
                   except Exception as e:
                       print(f"   ✗ Unexpected error: {e}")
                   
-                  # Rate limiting - be nice to OSV API
                   time.sleep(1)
               
               return all_vulns
@@ -152,7 +128,6 @@ jobs:
           def sort_by_published_date(vulns):
               """Sort vulnerabilities by published date (newest first)"""
               def get_sort_key(vuln):
-                  # Try published date first, fallback to modified, then empty string
                   date_str = vuln.get("published") or vuln.get("modified") or ""
                   return date_str
               
@@ -162,24 +137,17 @@ jobs:
                   print(f"   ⚠️ Sorting warning: {e}")
                   return vulns
           
-          # Process each distribution
           for distro_name, distro_config in distributions.items():
               vulnerabilities = fetch_vulnerabilities(distro_name, distro_config)
-              
-              # Sort by original published date
               vulnerabilities = sort_by_published_date(vulnerabilities)
-              
-              # Limit to latest 100
               vulnerabilities = vulnerabilities[:100]
               
-              # Save to file
               output_file = f"data/{distro_name}.json"
               with open(output_file, "w", encoding="utf-8") as f:
                   json.dump(vulnerabilities, f, indent=2, ensure_ascii=False)
               
               print(f"\n💾 Saved {len(vulnerabilities)} vulnerabilities to {output_file}")
               
-              # Show date range for verification
               if vulnerabilities:
                   first_date = vulnerabilities[0].get("published", "N/A")
                   last_date = vulnerabilities[-1].get("published", "N/A")
@@ -198,7 +166,6 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add data/
           
-          # Only commit if there are changes
           if ! git diff-index --quiet HEAD; then
             git commit -m "🔄 Update Linux VulnFeed data - $(date -u +'%Y-%m-%d %H:%M UTC')"
             git push
