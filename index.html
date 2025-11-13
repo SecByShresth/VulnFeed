@@ -1,878 +1,605 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VulnFeed Dashboard</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <style>
-        /*
-        ==================================================
-        CSS: Minimalist Design & Theming
-        ==================================================
-        */
-        :root {
-            /* Light Theme Variables */
-            --bg-color: #f7f9fc; /* Lightest background */
-            --surface-color: #ffffff; /* Card/Modal surface */
-            --primary-color: #3f51b5; /* Blue accent */
-            --text-color: #333333;
-            --sub-text-color: #666666;
-            --border-color: #e0e0e0;
-            --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.08);
-            --border-radius: 6px;
-        }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>VulnFeed — Neumorphic Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  :root { --sidebar-w:260px; --radius:12px; --gap:16px; --transition:220ms cubic-bezier(.2,.9,.2,1); --accent:#9b7cff; --muted:#7b8696; --card-pad:16px; --max-list-height:64vh; }
+  :root[data-theme="light"]{
+    --bg:#eef1f6; --panel:#e7ebf0; --text:#0f1724; --muted:#667085;
+    --shadow-top: rgba(255,255,255,0.9); --shadow-bottom: rgba(168,175,191,0.35);
+    --accent-weak: rgba(155,124,255,0.08);
+  }
+  :root[data-theme="dark"]{
+    --bg:#0f1418; --panel:#11151a; --text:#e9eef6; --muted:#98a4b2;
+    --shadow-top: rgba(255,255,255,0.03); --shadow-bottom: rgba(0,0,0,0.7);
+    --accent-weak: rgba(155,124,255,0.06);
+  }
 
-        [data-theme='dark'] {
-            /* Dark Theme Variables */
-            --bg-color: #1a1a2e; /* Deep blue/black background */
-            --surface-color: #2c2c4b;
-            --primary-color: #8aa9ff;
-            --text-color: #f0f0f0;
-            --sub-text-color: #b0b0b0;
-            --border-color: #444466;
-            --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.3);
-        }
+  html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui, -apple-system,"Segoe UI",Roboto, "Helvetica Neue", Arial;color:var(--text);background:linear-gradient(180deg,var(--bg),var(--bg));-webkit-font-smoothing:antialiased}
+  .app{display:flex;gap:24px;padding:26px;box-sizing:border-box;min-height:100vh}
 
-        /* Severity Colors (consistent, high-contrast) */
-        .severity-CRITICAL { background-color: #dc3545; color: white; } /* Red */
-        .severity-HIGH { background-color: #ffc107; color: #333; } /* Yellow/Amber */
-        .severity-MEDIUM { background-color: #17a2b8; color: white; } /* Teal */
-        .severity-LOW { background-color: #28a745; color: white; } /* Green */
-        .severity-IMPORTANT { background-color: #3f51b5; color: white; }
-        .severity-MODERATE { background-color: #007bff; color: white; }
-        .severity-LOWEST { background-color: #6c757d; color: white; }
-        .severity-NONE { background-color: #f8f9fa; color: #333; border: 1px solid #e9ecef; }
+  .header {
+    position: fixed; top: 0; left: 0; right: 0; background: var(--bg);
+    padding: 20px 26px; z-index: 100; border-bottom: 1px solid var(--shadow-bottom);
+  }
+  .header h1 { font-size: 2rem; font-weight: 900; margin: 0; background: linear-gradient(135deg, var(--accent), #7b61ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .header .tagline { font-size: 0.9rem; color: var(--muted); margin-top: 6px; font-weight: 600; }
 
-        /* Base Styles */
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            transition: background-color 0.3s, color 0.3s;
-            line-height: 1.6;
-        }
+  .sidebar{width:var(--sidebar-w);display:flex;flex-direction:column;gap:14px;margin-top: 100px;}
+  .brand{display:flex;gap:12px;align-items:center;padding:12px;border-radius:12px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.02));box-shadow:6px 6px 16px var(--shadow-bottom),-6px -6px 16px var(--shadow-top)}
+  .logo{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--accent-weak);color:var(--accent)}
+  nav.nav{display:flex;flex-direction:column;gap:10px;padding:6px;max-height:70vh;overflow-y:auto;}
+  nav a{display:flex;gap:12px;align-items:center;padding:10px;border-radius:10px;color:var(--text);text-decoration:none;font-weight:700;transition:transform var(--transition),background var(--transition)}
+  nav a .ico{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--panel);box-shadow:4px 4px 12px var(--shadow-bottom),-4px -4px 12px var(--shadow-top);color:var(--muted)}
+  nav a:hover{transform:translateX(6px)} nav a.active{background:linear-gradient(180deg,var(--accent-weak),transparent);color:var(--accent)}
+  .sidebar-footer{display:flex;gap:8px;align-items:center;justify-content:center;padding:8px}
+  .btn{border:none;cursor:pointer;padding:10px;border-radius:10px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.02));box-shadow:6px 6px 16px var(--shadow-bottom),-6px -6px 16px var(--shadow-top);color:var(--text);font-weight:700}
 
-        a {
-            color: var(--primary-color);
-            text-decoration: none;
-        }
+  .main{flex:1;display:flex;flex-direction:column;gap:16px;min-height:calc(100vh - 52px); margin-top: 100px;}
+  .topbar{display:flex;align-items:center;gap:12px}
+  .search{flex:1;display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.02));box-shadow:6px 6px 18px var(--shadow-bottom),-6px -6px 18px var(--shadow-top)}
+  .search input{background:transparent;border:none;outline:none;color:var(--text);font-size:15px;width:100%}
+  .controls{display:flex;gap:10px;align-items:center}
+  .pill{padding:8px 12px;border-radius:999px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.02));box-shadow:6px 6px 16px var(--shadow-bottom),-6px -6px 16px var(--shadow-top);color:var(--muted);font-weight:700}
+  .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+  .card{padding:var(--card-pad);border-radius:12px;background:linear-gradient(180deg,var(--panel),rgba(255,255,255,0.02));box-shadow:10px 10px 24px var(--shadow-bottom),-8px -8px 24px var(--shadow-top);transition:transform var(--transition)}
+  .card h3{margin:0 0 8px 0}
+  .meta{display:flex;gap:12px;color:var(--muted);font-size:13px;margin-bottom:10px}
+  .desc{color:var(--muted);line-height:1.45}
 
-        a:hover {
-            text-decoration: underline;
-        }
+  .cve-list{display:flex;flex-direction:column;gap:12px;max-height:var(--max-list-height);overflow:auto;padding-right:6px}
+  .cve{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(0,0,0,0.01),rgba(255,255,255,0.01))}
+  .left{width:120px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+  .id{font-weight:800;color:var(--accent);font-size:13px}
+  .muted{color:var(--muted);font-size:13px}
+  .sev{font-size:12px;padding:6px 8px;border-radius:8px;font-weight:800}
+  .sev-critical{background:linear-gradient(90deg,#ff6b6b,#ff4757);color:#fff}
+  .sev-high{background:linear-gradient(90deg,#ff9f43,#ff6b6b);color:#fff}
+  .sev-medium{background:linear-gradient(90deg,#ffd66b,#ffb84d);color:#111}
+  .sev-low{background:linear-gradient(90deg,#7ef3a6,#26de81);color:#062214}
+  .right{flex:1;display:flex;flex-direction:column;gap:8px}
+  .title{font-weight:800;color:var(--text)}
+  .summary{color:var(--muted);font-size:13px}
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
+  .dashboard-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .stat-card { padding: 20px; border-radius: 12px; background: linear-gradient(180deg, var(--panel), rgba(255,255,255,0.02)); box-shadow: 10px 10px 24px var(--shadow-bottom), -8px -8px 24px var(--shadow-top); text-align: center; }
+  .stat-number { font-size: 2.5rem; font-weight: 900; margin: 0; background: linear-gradient(135deg, var(--accent), #7b61ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .stat-label { color: var(--muted); font-size: 0.9rem; margin: 8px 0 0 0; font-weight: 600; }
 
-        /* Header and Controls */
-        #header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        #header h1 {
-            color: var(--primary-color);
-            margin: 0;
-            font-size: 1.8em;
-            font-weight: 300;
-        }
-        
-        #header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        #controls {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .control-button {
-            background: var(--surface-color);
-            border: 1px solid var(--border-color);
-            color: var(--sub-text-color);
-            border-radius: var(--border-radius);
-            padding: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: var(--shadow-subtle);
-            font-size: 0.9em;
-            display: flex;
-            align-items: center;
-        }
-        
-        .control-button i.material-icons {
-            font-size: 18px;
-            margin-right: 5px;
-        }
-
-        .control-button:hover {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-        
-        #back-to-dashboard-btn {
-            background: var(--surface-color);
-            border: 1px solid var(--border-color);
-            color: var(--sub-text-color);
-            padding: 8px 12px;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: var(--shadow-subtle);
-            font-size: 0.9em;
-            display: none; /* Hidden by default */
-        }
-        
-        #back-to-dashboard-btn:hover {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        #search-container {
-            display: flex;
-            align-items: center;
-            background: var(--surface-color);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-subtle);
-            padding: 0 10px;
-        }
-
-        #search-input {
-            border: none;
-            padding: 8px 10px;
-            font-size: 1em;
-            color: var(--text-color);
-            width: 250px;
-            outline: none;
-            background: transparent;
-        }
-
-        /* Summary Dashboard */
-        #summary-dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .summary-box {
-            background: var(--surface-color);
-            padding: 20px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-subtle);
-            text-align: center;
-            border-left: 5px solid var(--primary-color);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .summary-box.total { border-left-color: #28a745; }
-        .summary-box.cisa { border-left-color: #dc3545; }
-        .summary-box.redhat { border-left-color: #ffc107; }
-
-        .summary-box:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .summary-box h3 {
-            margin: 0 0 10px 0;
-            font-size: 1.1em;
-            font-weight: 600;
-            color: var(--sub-text-color);
-        }
-
-        .summary-box .count {
-            font-size: 2.2em;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .summary-box .meta {
-            font-size: 0.75em;
-            color: var(--sub-text-color);
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px dashed var(--border-color);
-        }
-
-        /* Tab Controls & Filters */
-        .tab-controls {
-            display: flex;
-            flex-wrap: wrap;
-            border-bottom: 2px solid var(--border-color);
-            margin-bottom: 20px;
-        }
-
-        .tab-button {
-            padding: 10px 15px;
-            cursor: pointer;
-            border: none;
-            background: transparent;
-            color: var(--sub-text-color);
-            font-weight: 500;
-            transition: all 0.2s;
-            position: relative;
-            margin-right: 5px;
-            border-radius: var(--border-radius) var(--border-radius) 0 0;
-        }
-
-        .tab-button.active {
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--primary-color);
-            background: var(--surface-color);
-            margin-bottom: -2px; /* Pull the active tab border down */
-        }
-
-        .count-badge {
-            margin-left: 5px;
-            padding: 2px 6px;
-            background: var(--primary-color);
-            color: white;
-            border-radius: 4px;
-            font-size: 0.7em;
-            font-weight: bold;
-        }
-        
-        #filter-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 20px;
-        }
-
-        #severity-filter {
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            background: var(--surface-color);
-            color: var(--text-color);
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            box-shadow: var(--shadow-subtle);
-        }
-
-        /* Vulnerability Card */
-        .tab-content {
-            display: none;
-            padding-top: 10px;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
-        }
-
-        .tab-content.active {
-            display: grid;
-        }
-
-        .vuln-card {
-            background: var(--surface-color);
-            padding: 15px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-subtle);
-            border-left: 4px solid var(--primary-color);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .vuln-card:hover {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-            transform: translateY(-2px);
-            border-left-color: #dc3545; /* Highlight on hover */
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .card-id {
-            font-size: 1em;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .card-severity {
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.75em;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .card-title {
-            font-size: 0.95em;
-            margin: 0;
-            color: var(--text-color);
-            font-weight: 500;
-            height: 3.2em; /* Ensure consistent card height (approx 2 lines) */
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-
-        .card-meta {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.7em;
-            color: var(--sub-text-color);
-            border-top: 1px dashed var(--border-color);
-            padding-top: 8px;
-            margin-top: 10px;
-        }
-
-        /* Modal */
-        .modal {
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: none;
-            backdrop-filter: blur(4px);
-            overflow-y: auto;
-        }
-
-        .modal-content {
-            background-color: var(--surface-color);
-            margin: 5% auto;
-            padding: 30px;
-            width: 90%;
-            max-width: 800px;
-            border-radius: var(--border-radius);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-            animation: fadeIn 0.3s;
-        }
-
-        .close-button {
-            color: var(--sub-text-color);
-            float: right;
-            font-size: 28px;
-            font-weight: 300;
-            cursor: pointer;
-        }
-
-        .modal-header {
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-            color: var(--primary-color);
-            font-size: 1.5em;
-            font-weight: 400;
-        }
-
-        .modal-body p { margin: 10px 0; }
-        .modal-body strong { color: var(--text-color); display: inline-block; min-width: 100px; }
-        
-        .modal-body .full-description {
-            white-space: pre-wrap;
-            background-color: var(--bg-color);
-            padding: 15px;
-            border-radius: var(--border-radius);
-            margin-top: 10px;
-            border: 1px solid var(--border-color);
-        }
-
-        /* Loading Indicator */
-        #loading-indicator {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 15px 30px;
-            font-size: 1.1em;
-            color: white;
-            background-color: var(--primary-color);
-            border-radius: var(--border-radius);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            display: none;
-            z-index: 1001;
-        }
-
-    </style>
+  @media (max-width:920px){ .app{padding:12px} .sidebar{display:none} .header { padding: 15px 12px; } .main { margin-top: 80px; } .sidebar { margin-top: 80px; } }
+</style>
 </head>
 <body>
+<div class="header">
+  <h1>VulnFeed</h1>
+  <div class="tagline">Centralized Vulnerability Intelligence Dashboard</div>
+</div>
 
-    <div id="loading-indicator">Loading data...</div>
-
-    <div class="container">
-        <header id="header">
-            <div id="header-left">
-                <h1>VulnFeed Dashboard 🛡️</h1>
-                <button id="back-to-dashboard-btn" class="control-button" onclick="showDashboardView()">
-                    <i class="material-icons">home</i> Back to Dashboard
-                </button>
-            </div>
-            
-            <div id="controls">
-                <div id="search-container">
-                    <i class="material-icons" style="font-size: 20px; color: var(--sub-text-color);">search</i>
-                    <input type="text" id="search-input" placeholder="Search by ID or Title..." oninput="handleFilterChange()">
-                </div>
-                <button id="theme-toggle" class="control-button" onclick="toggleTheme()">
-                    <i class="material-icons">brightness_4</i>
-                </button>
-            </div>
-        </header>
-
-        <main>
-            <section id="summary-dashboard">
-                </section>
-            
-            <section id="details-view" style="display: none;">
-                <nav class="tab-controls" id="tab-nav">
-                    </nav>
-
-                <section id="filter-container">
-                    <label for="severity-filter" class="filter-label" style="color: var(--sub-text-color);">Filter by Severity:</label>
-                    <select id="severity-filter" onchange="handleFilterChange()">
-                        <option value="">All Severities</option>
-                        <option value="CRITICAL">Critical</option>
-                        <option value="HIGH">High</option>
-                        <option value="MEDIUM">Medium</option>
-                        <option value="LOW">Low</option>
-                        <option value="IMPORTANT">Important</option>
-                        <option value="MODERATE">Moderate</option>
-                        <option value="LOWEST">Lowest</option>
-                        <option value="NONE">None</option>
-                    </select>
-                </section>
-
-                <div id="content-area">
-                    </div>
-            </section>
-        </main>
+<div class="app" id="appRoot">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo">🛡️</div>
+      <div style="min-width:0">
+        <h1>VulnFeed</h1>
+        <div class="muted" style="font-size:12px">Security Intelligence</div>
+      </div>
     </div>
 
-    <div id="details-modal" class="modal" onclick="if(event.target.id === 'details-modal') closeModal()">
-        <div class="modal-content">
-            <span class="close-button" onclick="closeModal()">&times;</span>
-            <div class="modal-header">
-                <h2 id="modal-id"></h2>
-                <span id="modal-severity" class="card-severity"></span>
-            </div>
-            <div id="modal-body" class="modal-body">
-                </div>
+    <nav class="nav" id="nav">
+      <a href="#" data-section="dashboard" class="active"><span class="ico"><i class="fas fa-chart-pie"></i></span><span class="label">Dashboard</span></a>
+      <a href="#" data-section="cisa"><span class="ico"><i class="fas fa-shield-virus"></i></span><span class="label">CISA KEV</span></a>
+      <a href="#" data-section="redhat"><span class="ico"><i class="fab fa-redhat"></i></span><span class="label">Red Hat</span></a>
+
+      <!-- Database -->
+      <a href="#" data-section="mysql"><span class="ico"><i class="fas fa-database"></i></span><span class="label">MySQL</span></a>
+      <a href="#" data-section="postgresql"><span class="ico"><i class="fas fa-server"></i></span><span class="label">PostgreSQL</span></a>
+      <a href="#" data-section="redis"><span class="ico"><i class="fas fa-bolt"></i></span><span class="label">Redis</span></a>
+
+      <!-- Linux -->
+      <a href="#" data-section="almalinux"><span class="ico"><i class="fab fa-linux"></i></span><span class="label">AlmaLinux</span></a>
+      <a href="#" data-section="rockylinux"><span class="ico"><i class="fab fa-linux"></i></span><span class="label">Rocky Linux</span></a>
+      <a href="#" data-section="suse"><span class="ico"><i class="fab fa-suse"></i></span><span class="label">SUSE</span></a>
+      <a href="#" data-section="debian"><span class="ico"><i class="fab fa-linux"></i></span><span class="label">Debian</span></a>
+      <a href="#" data-section="ubuntu"><span class="ico"><i class="fab fa-ubuntu"></i></span><span class="label">Ubuntu</span></a>
+
+      <a href="#" data-section="settings"><span class="ico"><i class="fas fa-cog"></i></span><span class="label">Settings</span></a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn" id="themeBtn" title="Toggle theme"><i class="fas fa-moon"></i></button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="search">
+        <i class="fas fa-search muted"></i>
+        <input id="searchInput" placeholder="Search CVE, keyword or ID (e.g. CVE-2024-xxxx)" />
+      </div>
+      <div class="controls">
+        <div class="pill"><select id="severitySelect" style="background:transparent;border:none;color:var(--muted);font-weight:800">
+          <option value="all">All severities</option>
+          <option value="critical">Critical</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
+        </select></div>
+        <div class="pill"><select id="timeSelect" style="background:transparent;border:none;color:var(--muted);font-weight:800">
+          <option value="30">Last 30 days</option><option value="7">Last 7 days</option><option value="90">Last 90 days</option><option value="365">Last year</option><option value="all">All time</option>
+        </select></div>
+        <div class="pill"><select id="sortSelect" style="background:transparent;border:none;color:var(--muted);font-weight:800">
+          <option value="date">Sort: Newest</option><option value="severity">Sort: Severity</option><option value="source">Sort: Source</option>
+        </select></div>
+        <button class="btn" id="refreshBtn" title="Refresh feed"><i class="fas fa-sync-alt"></i></button>
+      </div>
+    </div>
+
+    <section id="summaryArea"></section>
+    <section id="contentArea" class="grid"></section>
+  </main>
+</div>
+
+<!-- Modal -->
+<div id="detailsModal" style="display:none; position:fixed; left:0; top:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:200;">
+  <div style="background:var(--panel); color:var(--text); max-width:900px; margin:5% auto; padding:20px; border-radius:12px; position:relative;">
+    <button id="closeModal" style="position:absolute; right:12px; top:12px;">✕</button>
+    <h2 id="modalTitle"></h2>
+    <div id="modalMeta" class="muted" style="margin-bottom:10px"></div>
+    <div id="modalBody" style="white-space:pre-wrap; background:transparent;"></div>
+  </div>
+</div>
+
+<script>
+/* ----------- Configuration & feeds ---------- */
+const FEEDS = {
+  dashboard: null,
+  cisa: { files: ['cisa-kev.json'], name: 'CISA KEV' },
+  redhat: { files: ['redhat-cves.json', 'redhat-cves-list.json', 'redhat-cves-summary.json', 'redhat-cves-metadata.json'], name: 'Red Hat' },
+  mysql: { files: ['mysql.json'], name: 'MySQL' },
+  postgresql: { files: ['postgresql.json'], name: 'PostgreSQL' },
+  redis: { files: ['redis.json'], name: 'Redis' },
+  almalinux: { files: ['almalinux.json'], name: 'AlmaLinux' },
+  rockylinux: { files: ['rocky.json'], name: 'Rocky Linux' },
+  suse: { files: ['suse.json'], name: 'SUSE' },
+  debian: { files: ['debian.json'], name: 'Debian' },
+  ubuntu: { files: ['ubuntu.json'], name: 'Ubuntu' },
+  settings: null
+};
+
+/* state */
+const state = {
+  theme: localStorage.getItem('vf_theme') || 'light',
+  activeSection: 'dashboard',
+  feedsData: {},     // feedKey -> array of normalized items
+  rawDataCache: {},  // feedKey -> raw arrays (merged from files)
+  lastLoadedAt: {}
+};
+
+/* set theme */
+document.documentElement.setAttribute('data-theme', state.theme);
+document.getElementById('themeBtn').addEventListener('click', () => {
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', state.theme);
+  localStorage.setItem('vf_theme', state.theme);
+});
+
+const navLinks = document.querySelectorAll('nav.nav a');
+navLinks.forEach(a => a.addEventListener('click', ev => {
+  ev.preventDefault();
+  navLinks.forEach(n => n.classList.remove('active'));
+  a.classList.add('active');
+  state.activeSection = a.dataset.section;
+  loadSection(state.activeSection);
+}));
+
+document.getElementById('refreshBtn').addEventListener('click', () => loadSection(state.activeSection, true));
+document.getElementById('searchInput').addEventListener('input', () => renderList());
+document.getElementById('severitySelect').addEventListener('change', () => renderList());
+document.getElementById('timeSelect').addEventListener('change', () => renderList());
+document.getElementById('sortSelect').addEventListener('change', () => renderList());
+
+/* Utility: safe fetch for relative data/ paths (no leading slash) */
+async function fetchJsonRel(path) {
+  const url = `data/${path}`; // IMPORTANT: relative path for GitHub Pages branch under repo path
+  const res = await fetch(url + `?t=${Date.now()}`);
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText} - ${url}`);
+  return res.json();
+}
+
+/* ---------- Normalizers ---------- */
+function toDateOrNull(input) {
+  if (!input) return null;
+  try {
+    // OSV publishes like "2025-11-05T00:00:00Z"
+    const d = new Date(input);
+    if (isNaN(d.getTime())) return null;
+    return d;
+  } catch { return null; }
+}
+
+function normalizeSeverityGeneric(input) {
+  if (!input && typeof input !== 'number') return '';
+  // handle CVSS vector strings or words
+  const s = ('' + input).toUpperCase();
+  if (s.includes('CRIT') || s.includes('9.') || s.includes('10.')) return 'critical';
+  if (s.includes('HIGH') || s.includes('7.') || s.includes('8.')) return 'high';
+  if (s.includes('MED') || s.includes('MODERATE') || s.includes('4.') || s.includes('6.')) return 'medium';
+  if (s.includes('LOW') || s.includes('1.') || s.includes('3.')) return 'low';
+  // try numeric
+  const n = parseFloat(s);
+  if (!isNaN(n)) {
+    if (n >= 9) return 'critical';
+    if (n >= 7) return 'high';
+    if (n >= 4) return 'medium';
+    return 'low';
+  }
+  return ''; // unknown
+}
+
+/* Detect fields across different feed formats and normalize into common shape:
+   { id, title, description, publishedDate (Date), modifiedDate (Date), severity, source, url, aliases, affectedPackages, raw }
+*/
+function normalizeItemGeneric(raw, feedKey) {
+  // OSV-like (database + linux) detection
+  if (raw && (raw.published || raw.modified || raw.summary || raw.details || raw.affected)) {
+    const id = raw.id || (Array.isArray(raw.aliases) && raw.aliases.find(a => a.startsWith('CVE-'))) || (raw.upstream && raw.upstream[0]) || '';
+    const title = raw.title || raw.summary || (raw.details ? (raw.details.split('\n')[0]) : '') || id;
+    const description = raw.details || raw.description || raw.summary || '';
+    const publishedDate = toDateOrNull(raw.published) || toDateOrNull(raw.database_specific?.nvd_published_at) || toDateOrNull(raw.modified);
+    const modifiedDate = toDateOrNull(raw.modified) || toDateOrNull(raw.database_specific?.github_reviewed_at);
+    // severity: try database_specific.severity (string), then severity array, then database_specific.nvd etc.
+    let severity = '';
+    if (raw.database_specific && raw.database_specific.severity) severity = normalizeSeverityGeneric(raw.database_specific.severity);
+    else if (raw.severity && Array.isArray(raw.severity) && raw.severity.length > 0) severity = normalizeSeverityGeneric(raw.severity[0].score || raw.severity[0]);
+    else if (raw.severity && typeof raw.severity === 'string') severity = normalizeSeverityGeneric(raw.severity);
+    else severity = ''; // unknown
+    const url = raw.url || (id && id.startsWith('CVE-') ? `https://nvd.nist.gov/vuln/detail/${id}` : (raw.references && raw.references[0] && raw.references[0].url) || '');
+    const aliases = raw.aliases || raw.upstream || [];
+    // affected packages
+    let affected = [];
+    if (raw.affected && Array.isArray(raw.affected)) {
+      affected = raw.affected.map(a => (a.package && (a.package.name || a.package.purl)) ? (a.package.name || a.package.purl) : (a.package || a.name || '')).filter(Boolean);
+    } else if (raw.affected_packages) {
+      affected = raw.affected_packages;
+    }
+    return {
+      id: id || '',
+      title: title || id || 'Untitled',
+      description: description || '',
+      publishedDate,
+      modifiedDate,
+      severity: severity || '',
+      source: feedKey,
+      url,
+      aliases,
+      affectedPackages: affected,
+      raw
+    };
+  }
+
+  // CISA KEV format detection (different fields)
+  if (raw && (raw.cveID || raw.vulnerabilityName || raw.dateAdded)) {
+    const id = raw.cveID || raw.vulnerabilityName || '';
+    const title = raw.vulnerabilityName || raw.title || id;
+    const description = raw.shortDescription || raw.description || '';
+    const publishedDate = toDateOrNull(raw.dateAdded);
+    // CISA KEV is actively exploited, treat as critical by default
+    return {
+      id,
+      title,
+      description,
+      publishedDate,
+      modifiedDate: null,
+      severity: 'critical',
+      source: 'cisa',
+      url: raw.notes || '',
+      aliases: [],
+      affectedPackages: [],
+      raw
+    };
+  }
+
+  // RedHat format detection (bugzilla, CVE, resource_url)
+  if (raw && (raw.CVE || raw.bugzilla)) {
+    const id = raw.CVE || raw.id || '';
+    const desc = raw.bugzilla_description || raw.summary || raw.description || '';
+    const publishedDate = toDateOrNull(raw.public_date) || toDateOrNull(raw.date);
+    const sev = normalizeSeverityGeneric(raw.severity || '');
+    const url = raw.resource_url || raw.bugzilla || (id && id.startsWith('CVE-') ? `https://nvd.nist.gov/vuln/detail/${id}` : '');
+    return {
+      id,
+      title: id,
+      description: desc,
+      publishedDate,
+      modifiedDate: null,
+      severity: sev,
+      source: 'redhat',
+      url,
+      aliases: raw.aliases || [],
+      affectedPackages: [],
+      raw
+    };
+  }
+
+  // fallback: stringify raw minimally
+  return {
+    id: raw.id || raw.name || '',
+    title: raw.title || raw.summary || raw.name || '',
+    description: raw.details || raw.description || '',
+    publishedDate: toDateOrNull(raw.published) || null,
+    modifiedDate: toDateOrNull(raw.modified) || null,
+    severity: normalizeSeverityGeneric(raw.severity || ''),
+    source: feedKey,
+    url: raw.url || '',
+    aliases: raw.aliases || [],
+    affectedPackages: [],
+    raw
+  };
+}
+
+/* ---------- Fetch & prepare feeds ---------- */
+async function loadAllFeeds() {
+  // For each feed, fetch and merge files, then normalize and sort
+  const entries = Object.entries(FEEDS).filter(([k,v]) => v && v.files && Array.isArray(v.files));
+  await Promise.all(entries.map(async ([key, info]) => {
+    const files = info.files;
+    const aggregate = [];
+    for (const f of files) {
+      try {
+        const data = await fetchJsonRel(f);
+        // many files contain arrays directly, some are objects with .vulnerabilities
+        if (Array.isArray(data)) {
+          aggregate.push(...data);
+        } else if (data && Array.isArray(data.vulnerabilities)) {
+          aggregate.push(...data.vulnerabilities);
+        } else if (data && Array.isArray(data.items)) {
+          aggregate.push(...data.items);
+        } else {
+          // if it's an object with multiple keys, try to find arrays inside and merge
+          const arraysFound = Object.keys(data).filter(k => Array.isArray(data[k]));
+          if (arraysFound.length) {
+            arraysFound.forEach(k => aggregate.push(...data[k]));
+          } else {
+            // as last resort push the object itself
+            aggregate.push(data);
+          }
+        }
+      } catch (err) {
+        console.warn(`Failed to load ${f}:`, err.message);
+      }
+    }
+    // store raw merged
+    state.rawDataCache[key] = aggregate;
+    // normalize
+    const normalized = aggregate.map(item => normalizeItemGeneric(item, key));
+    // sort by publishedDate desc (put null dates last)
+    normalized.sort((a,b) => {
+      const ta = a.publishedDate ? a.publishedDate.getTime() : 0;
+      const tb = b.publishedDate ? b.publishedDate.getTime() : 0;
+      return tb - ta;
+    });
+    state.feedsData[key] = normalized;
+    state.lastLoadedAt[key] = new Date().toISOString();
+  }));
+}
+
+/* ---------- Rendering ---------- */
+function renderDashboard() {
+  const summaryArea = document.getElementById('summaryArea');
+  summaryArea.innerHTML = '';
+  const container = document.createElement('div');
+  container.className = 'card';
+  let total = 0;
+  const stats = {};
+  Object.keys(FEEDS).forEach(k => {
+    if (!FEEDS[k] || !FEEDS[k].name) return;
+    const count = (state.feedsData[k] || []).length;
+    stats[k] = count;
+    total += count;
+  });
+
+  const html = `
+    <h3>📊 Vulnerability Overview</h3>
+    <div class="meta muted">Real-time summary of all vulnerability feeds</div>
+    <div class="dashboard-stats" style="margin-top:12px">
+      <div class="stat-card"><div class="stat-number">${total}</div><div class="stat-label">Total Vulnerabilities</div></div>
+      <div class="stat-card"><div class="stat-number">${stats.cisa || 0}</div><div class="stat-label">CISA KEV</div></div>
+      <div class="stat-card"><div class="stat-number">${stats.redhat || 0}</div><div class="stat-label">Red Hat CVEs</div></div>
+      <div class="stat-card"><div class="stat-number">${(stats.ubuntu||0) + (stats.debian||0) + (stats.almalinux||0) + (stats.rockylinux||0) + (stats.suse||0)}</div><div class="stat-label">Linux Distributions</div></div>
+    </div>
+    <h4 style="margin-top:16px">Quick Access</h4>
+    <div class="grid" style="margin-top:12px">
+      ${Object.keys(FEEDS).filter(k => FEEDS[k]).map(k => `<div class="card" style="cursor:pointer" data-feed="${k}"><h3>${FEEDS[k].name}</h3><div class="meta muted">Records: <strong>${stats[k]||0}</strong></div><div class="desc muted">Click to view</div></div>`).join('')}
+    </div>
+  `;
+  container.innerHTML = html;
+  summaryArea.appendChild(container);
+
+  // wire quick-access cards
+  document.querySelectorAll('.card[data-feed]').forEach(c => {
+    c.addEventListener('click', () => {
+      const feed = c.dataset.feed;
+      // activate nav
+      document.querySelectorAll('nav.nav a').forEach(n => n.classList.remove('active'));
+      const link = document.querySelector(`nav.nav a[data-section="${feed}"]`);
+      if (link) link.classList.add('active');
+      state.activeSection = feed;
+      loadSection(feed);
+    });
+  });
+}
+
+/* render list for active section */
+function prepareAndRenderList() {
+  const contentArea = document.getElementById('contentArea');
+  contentArea.innerHTML = '';
+  const items = state.feedsData[state.activeSection] || [];
+  // store for rendering and filter
+  state.currentItems = items;
+  renderList();
+}
+
+function loadSection(section, force=false) {
+  const contentArea = document.getElementById('contentArea');
+  contentArea.innerHTML = '<div class="card"><h3>Loading</h3><div class="desc">Fetching and preparing feed...</div></div>';
+  if (section === 'dashboard') {
+    renderDashboard();
+    contentArea.innerHTML = ''; // remove content area cards
+    return;
+  }
+  if (!FEEDS[section]) {
+    contentArea.innerHTML = `<div class="card"><h3>No feed</h3><div class="desc">This section is not configured.</div></div>`;
+    return;
+  }
+  // If data already loaded and not forced, just render
+  if (state.feedsData[section] && !force) {
+    // show list
+    state.activeSection = section;
+    prepareAndRenderList();
+    showSummaryHeader(section);
+    return;
+  }
+  // otherwise load everything again (cheap for now)
+  (async () => {
+    try {
+      await loadAllFeeds();
+      state.activeSection = section;
+      prepareAndRenderList();
+      showSummaryHeader(section);
+    } catch (err) {
+      console.error('Load error', err);
+      contentArea.innerHTML = `<div class="card"><h3>Error</h3><div class="desc">${err.message}</div></div>`;
+    }
+  })();
+}
+
+function showSummaryHeader(section) {
+  const summaryArea = document.getElementById('summaryArea');
+  const meta = state.lastLoadedAt[section] ? new Date(state.lastLoadedAt[section]).toLocaleString() : 'N/A';
+  summaryArea.innerHTML = `<div class="card"><h3>${FEEDS[section].name}</h3><div class="meta muted">Records: <strong>${(state.feedsData[section]||[]).length}</strong> • Last load: <strong>${meta}</strong></div></div>`;
+}
+
+/* filtering and rendering */
+function renderList() {
+  const items = state.currentItems || [];
+  const q = (document.getElementById('searchInput').value || '').toLowerCase();
+  const sev = document.getElementById('severitySelect').value;
+  const days = document.getElementById('timeSelect').value;
+
+  let filtered = items.slice();
+
+  if (sev !== 'all') {
+    filtered = filtered.filter(i => (i.severity || '').toLowerCase() === sev);
+  }
+
+  if (q) {
+    filtered = filtered.filter(i => {
+      const hay = (i.id + ' ' + i.title + ' ' + (i.description || '') + ' ' + (i.aliases||[]).join(' ')).toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
+  if (days !== 'all') {
+    const cutoff = Date.now() - (parseInt(days, 10) * 24 * 60 * 60 * 1000);
+    filtered = filtered.filter(i => (i.publishedDate && i.publishedDate.getTime && i.publishedDate.getTime() >= cutoff));
+  }
+
+  // sort
+  const sort = document.getElementById('sortSelect').value;
+  filtered.sort((a,b) => {
+    if (sort === 'date') return (b.publishedDate ? b.publishedDate.getTime() : 0) - (a.publishedDate ? a.publishedDate.getTime() : 0);
+    if (sort === 'severity') {
+      const order = { critical: 0, high:1, medium:2, low:3, '': 4 };
+      return (order[a.severity]||9) - (order[b.severity]||9);
+    }
+    if (sort === 'source') return (a.source||'').localeCompare(b.source||'');
+    return 0;
+  });
+
+  // render
+  const contentArea = document.getElementById('contentArea');
+  if (!filtered.length) {
+    contentArea.innerHTML = `<div class="card"><h3>No results</h3><div class="desc">No vulnerabilities match your filters.</div></div>`;
+    return;
+  }
+  const listHtml = document.createElement('div');
+  listHtml.className = 'card';
+  listHtml.innerHTML = `<h3>${FEEDS[state.activeSection].name} — ${filtered.length} items</h3><div class="cve-list" id="cveList"></div>`;
+  contentArea.innerHTML = '';
+  contentArea.appendChild(listHtml);
+  const cveList = document.getElementById('cveList');
+
+  filtered.forEach(v => {
+    const date = v.publishedDate ? new Date(v.publishedDate).toLocaleDateString() : 'N/A';
+    const sev = v.severity || 'medium';
+    const sevClass = sev === 'critical' ? 'sev-critical' : (sev === 'high' ? 'sev-high' : (sev === 'medium' ? 'sev-medium' : 'sev-low'));
+    const summary = (v.description || '').replace(/\n/g, ' ').slice(0, 260);
+
+    const div = document.createElement('div');
+    div.className = 'cve';
+    div.innerHTML = `
+      <div class="left">
+        <div class="id">${escapeHtml(v.id || '—')}</div>
+        <div class="muted">${escapeHtml(date)}</div>
+        <div class="sev ${sevClass}">${(v.severity||'').toUpperCase() || 'N/A'}</div>
+      </div>
+      <div class="right">
+        <div class="title"><a href="${escapeHtml(v.url || '#')}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${escapeHtml(v.title || v.id || 'Untitled')}</a></div>
+        <div class="summary">${escapeHtml(summary)}${(v.description||'').length > 260 ? '…' : ''}</div>
+        <div class="meta">
+          <div class="muted small">Source: ${escapeHtml(v.source || '')}</div>
+          ${v.affectedPackages && v.affectedPackages.length ? `<div class="muted small">Packages: ${escapeHtml(v.affectedPackages.slice(0,2).join(', '))}${v.affectedPackages.length>2?'...':''}</div>` : ''}
         </div>
-    </div>
+      </div>
+    `;
+    div.addEventListener('click', () => openModal(v));
+    cveList.appendChild(div);
+  });
+}
 
-    <script>
-        // Set up the file paths and their display names
-        const VULN_FEEDS = {
-            'cisa': { file: 'cisa-kev.json', name: 'CISA KEV' },
-            'redhat': { file: 'redhat-cves.json', name: 'RedHat' },
-            'mysql': { file: 'mysql.json', name: 'MySQL' },
-            'postgresql': { file: 'postgresql.json', name: 'PostgreSQL' },
-            'redis': { file: 'redis.json', name: 'Redis' },
-            'ubuntu': { file: 'ubuntu.json', name: 'Ubuntu' },
-            'debian': { file: 'debian.json', name: 'Debian' },
-            'suse': { file: 'suse.json', name: 'SUSE' },
-            'almalinux': { file: 'almalinux.json', name: 'AlmaLinux' },
-            'rocky': { file: 'rocky.json', name: 'Rocky' },
-        };
+/* modal */
+function openModal(v) {
+  const modal = document.getElementById('detailsModal');
+  document.getElementById('modalTitle').textContent = v.id || v.title;
+  document.getElementById('modalMeta').textContent = `${v.source || ''} • ${v.publishedDate ? new Date(v.publishedDate).toLocaleString() : 'N/A'}`;
+  document.getElementById('modalBody').innerHTML = `
+    <div style="margin-bottom:8px;"><strong>Title:</strong> ${escapeHtml(v.title)}</div>
+    <div style="margin-bottom:8px;"><strong>Severity:</strong> ${(v.severity||'').toUpperCase()}</div>
+    <div style="margin-bottom:8px;"><strong>Published:</strong> ${v.publishedDate ? new Date(v.publishedDate).toLocaleString() : 'N/A'}</div>
+    <div style="margin-bottom:8px;"><strong>URL:</strong> <a href="${escapeHtml(v.url||'#')}" target="_blank">${escapeHtml(v.url||'—')}</a></div>
+    <div style="margin-top:12px;"><strong>Description:</strong><div style="margin-top:6px;white-space:pre-wrap;">${escapeHtml(v.description)}</div></div>
+    <details style="margin-top:12px;">
+      <summary style="cursor:pointer">Raw JSON</summary>
+      <pre style="max-height:300px;overflow:auto;background:var(--panel);padding:8px;border-radius:8px;margin-top:8px;color:var(--text)">${escapeHtml(JSON.stringify(v.raw, null, 2))}</pre>
+    </details>
+  `;
+  modal.style.display = 'block';
+}
+document.getElementById('closeModal').addEventListener('click', () => {
+  document.getElementById('detailsModal').style.display = 'none';
+});
+window.addEventListener('click', (ev) => {
+  if (ev.target.id === 'detailsModal') document.getElementById('detailsModal').style.display = 'none';
+});
 
-        // Global data store
-        const VULN_DATA = {};
-        let DATA_FETCHED_TIME = new Date().toISOString();
-        let activeTab = null;
+/* escape */
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-        /*
-        ==================================================
-        Data Normalization Functions
-        ==================================================
-        */
+/* ---------- bootstrap ---------- */
+(async function boot(){
+  // Load minimal feeds (dashboard)
+  try {
+    await loadAllFeeds(); // preload everything once
+    renderDashboard();
+    // default: show dashboard in content area
+    document.getElementById('contentArea').innerHTML = '';
+  } catch (err) {
+    console.error('Boot error', err);
+    document.getElementById('contentArea').innerHTML = `<div class="card"><h3>Error loading feeds</h3><div class="desc">${escapeHtml(err.message)}</div></div>`;
+  }
+})();
 
-        function normalizeSeverity(severity) {
-            if (!severity) return 'NONE';
-            const s = String(severity).toUpperCase().trim();
-            if (s.includes('CRIT')) return 'CRITICAL';
-            if (s.includes('HIGH') || s.includes('MAJOR') || s.includes('IMPORTANT')) return 'HIGH';
-            if (s.includes('MEDIUM') || s.includes('MODERATE')) return 'MEDIUM';
-            if (s.includes('LOW') || s.includes('MINOR') || s.includes('LOWEST')) return 'LOW';
-            return s; // Fallback
-        }
-
-        // Renormalize functions to use the simplified severity mapping
-        function normalizeCISA(vuln) {
-            const id = vuln.cveID || `CISA-${vuln.dateAdded}`;
-            return {
-                id: id,
-                title: vuln.vulnerabilityName,
-                summary: vuln.shortDescription,
-                description: vuln.shortDescription,
-                severity: normalizeSeverity('CRITICAL'),
-                publishedDate: vuln.dateAdded,
-                modifiedDate: vuln.dueDate,
-                sourceLink: vuln.notes ? vuln.notes.split(' ; ')[1] : `https://nvd.nist.gov/vuln/detail/${id}`,
-                sourceName: 'CISA KEV',
-                rawData: vuln
-            };
-        }
-
-        function normalizeOSV(vuln) {
-            const id = vuln.aliases && vuln.aliases.length > 0 && vuln.aliases.find(a => a.startsWith('CVE-')) || vuln.id;
-            const severity = vuln.database_specific?.severity || vuln.severity?.[0]?.score || 'MEDIUM';
-            const link = vuln.references?.find(r => r.type === 'ADVISORY' || r.type === 'WEB')?.url || '#';
-
-            return {
-                id: id,
-                title: vuln.summary,
-                summary: vuln.summary,
-                description: vuln.details,
-                severity: normalizeSeverity(severity),
-                publishedDate: vuln.published,
-                modifiedDate: vuln.modified,
-                sourceLink: link,
-                sourceName: 'OSV.dev',
-                rawData: vuln
-            };
-        }
-
-        function normalizeRedHat(vuln) {
-            const id = vuln.CVE;
-            const description = vuln.bugzilla_description || 'No description available.';
-            const link = vuln.resource_url || `https://access.redhat.com/security/cve/${id}`;
-
-            return {
-                id: id,
-                title: description,
-                summary: description.substring(0, 150) + (description.length > 150 ? '...' : ''),
-                description: description,
-                severity: normalizeSeverity(vuln.severity),
-                publishedDate: vuln.public_date,
-                modifiedDate: vuln.public_date,
-                sourceLink: link,
-                sourceName: 'RedHat',
-                rawData: vuln
-            };
-        }
-
-        function normalizeItem(source, item) {
-            if (source === 'cisa') {
-                return normalizeCISA(item);
-            }
-            if (source === 'redhat') {
-                return normalizeRedHat(item);
-            }
-            return normalizeOSV(item);
-        }
-
-        /*
-        ==================================================
-        Data Fetching and Initialization
-        ==================================================
-        */
-
-        async function initializeDashboard() {
-            document.getElementById('loading-indicator').style.display = 'block';
-
-            const promises = Object.entries(VULN_FEEDS).map(([key, info]) =>
-                fetch(`/data/${info.file}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            // If the response is not OK, we still want to proceed, just log an error
-                            throw new Error(`HTTP error! status: ${response.status} from /data/${info.file}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        let vulnerabilities = [];
-                        if (key === 'cisa') {
-                            vulnerabilities = data.vulnerabilities || [];
-                        } else {
-                            vulnerabilities = Array.isArray(data) ? data : [];
-                        }
-
-                        VULN_DATA[key] = vulnerabilities.map(vuln => normalizeItem(key, vuln));
-                    })
-                    .catch(error => {
-                        console.error(`Error loading ${info.file}:`, error.message);
-                        VULN_DATA[key] = []; // Ensure data is an empty array on failure
-                    })
-            );
-
-            await Promise.all(promises);
-
-            document.getElementById('loading-indicator').style.display = 'none';
-
-            // Initial UI rendering: Dashboard Summary first
-            renderTabs();
-            renderSummaryDashboard();
-            applyTheme();
-
-            // Set up event listeners for summary boxes
-            document.querySelectorAll('.summary-box').forEach(box => {
-                const targetKey = box.dataset.key;
-                if (targetKey) {
-                    box.onclick = () => showDetailsView(targetKey);
-                }
-            });
-        }
-
-        /*
-        ==================================================
-        UI Rendering & Navigation Functions
-        ==================================================
-        */
-
-        function renderSummaryDashboard() {
-            const summaryDashboard = document.getElementById('summary-dashboard');
-            summaryDashboard.innerHTML = '';
-            let totalVulnerabilities = 0;
-            
-            const summaryData = Object.entries(VULN_FEEDS).map(([key, info]) => {
-                const count = VULN_DATA[key] ? VULN_DATA[key].length : 0;
-                totalVulnerabilities += count;
-                return { key, name: info.name, count };
-            });
-
-            const totalBox = document.createElement('div');
-            totalBox.className = 'summary-box total';
-            totalBox.innerHTML = `
-                <h3>Total Vulnerabilities</h3>
-                <div class="count">${totalVulnerabilities}</div>
-                <div class="meta">Across ${summaryData.length} Sources</div>
-            `;
-            summaryDashboard.appendChild(totalBox);
-
-            summaryData.forEach(item => {
-                const box = document.createElement('div');
-                box.className = `summary-box ${item.key}`;
-                box.dataset.key = item.key;
-                box.innerHTML = `
-                    <h3>${item.name}</h3>
-                    <div class="count">${item.count}</div>
-                    <div class="meta">Last Updated: ${new Date(DATA_FETCHED_TIME).toLocaleDateString()}</div>
-                `;
-                summaryDashboard.appendChild(box);
-            });
-        }
-
-        function renderTabs() {
-            const tabNav = document.getElementById('tab-nav');
-            const contentArea = document.getElementById('content-area');
-            tabNav.innerHTML = '';
-            contentArea.innerHTML = '';
-
-            Object.entries(VULN_FEEDS).forEach(([key, info]) => {
-                const count = VULN_DATA[key] ? VULN_DATA[key].length : 0;
-
-                const button = document.createElement('button');
-                button.className = 'tab-button';
-                button.id = `tab-${key}`;
-                button.innerHTML = `${info.name} <span class="count-badge">${count}</span>`;
-                button.onclick = () => switchTab(key);
-                tabNav.appendChild(button);
-
-                const content = document.createElement('div');
-                content.className = 'tab-content';
-                content.id = `content-${key}`;
-                contentArea.appendChild(content);
-            });
-        }
-
-        // --- View Switching Functions ---
-
-        function showDashboardView() {
-            document.getElementById('summary-dashboard').style.display = 'grid';
-            document.getElementById('details-view').style.display = 'none';
-            document.getElementById('back-to-dashboard-btn').style.display = 'none';
-            document.getElementById('search-input').value = ''; // Clear search when going back
-            activeTab = null;
-        }
-
-        function showDetailsView(initialKey) {
-            document.getElementById('summary-dashboard').style.display = 'none';
-            document.getElementById('details-view').style.display = 'block';
-            document.getElementById('back-to-dashboard-btn').style.display = 'flex'; // Show back button
-            switchTab(initialKey);
-        }
-
-        function switchTab(key) {
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-            document.getElementById(`tab-${key}`).classList.add('active');
-            document.getElementById(`content-${key}`).classList.add('active');
-            activeTab = key;
-
-            // Apply current filters to the new tab
-            applyFiltersAndRender(key);
-        }
-
-        function handleFilterChange() {
-            if (activeTab) {
-                applyFiltersAndRender(activeTab);
-            }
-        }
-
-        function applyFiltersAndRender(sourceKey) {
-            const searchTerm = document.getElementById('search-input').value.toLowerCase();
-            const severityFilter = document.getElementById('severity-filter').value;
-            const data = VULN_DATA[sourceKey] || [];
-
-            const filtered = data.filter(vuln => {
-                // Simplified severity mapping for filtering consistency
-                const normalizedVulnSeverity = normalizeSeverity(vuln.severity); 
-                
-                const matchesSearch = !searchTerm ||
-                    vuln.id.toLowerCase().includes(searchTerm) ||
-                    vuln.title.toLowerCase().includes(searchTerm) ||
-                    (vuln.description && vuln.description.toLowerCase().includes(searchTerm));
-
-                const matchesSeverity = !severityFilter || normalizedVulnSeverity === severityFilter;
-
-                return matchesSearch && matchesSeverity;
-            });
-
-            renderCards(sourceKey, filtered);
-        }
-
-        function renderCards(sourceKey, filteredData) {
-            const contentDiv = document.getElementById(`content-${sourceKey}`);
-            contentDiv.innerHTML = '';
-
-            if (filteredData.length === 0) {
-                contentDiv.innerHTML = `<p style="color: var(--sub-text-color); padding: 20px; text-align: center;">No vulnerabilities found matching the current filters for this source.</p>`;
-                return;
-            }
-
-            filteredData.forEach(vuln => {
-                const card = document.createElement('div');
-                card.className = 'vuln-card';
-                card.onclick = () => showModal(vuln);
-
-                // Use the normalized severity for CSS classes
-                const severityClass = `severity-${normalizeSeverity(vuln.severity).toUpperCase()}`;
-
-                card.innerHTML = `
-                    <div class="card-header">
-                        <div class="card-id">${vuln.id}</div>
-                        <div class="card-severity ${severityClass}">${normalizeSeverity(vuln.severity)}</div>
-                    </div>
-                    <div class="card-title">${vuln.title}</div>
-                    <div class="card-meta">
-                        <span>Published: ${new Date(vuln.publishedDate).toLocaleDateString()}</span>
-                        <span>Source: <a href="${vuln.sourceLink}" target="_blank" onclick="event.stopPropagation();">${vuln.sourceName}</a></span>
-                    </div>
-                `;
-                contentDiv.appendChild(card);
-            });
-        }
-
-        function showModal(vuln) {
-            const modal = document.getElementById('details-modal');
-            const modalID = document.getElementById('modal-id');
-            const modalSeverity = document.getElementById('modal-severity');
-            const modalBody = document.getElementById('modal-body');
-
-            const normalizedSeverity = normalizeSeverity(vuln.severity);
-
-            modalID.textContent = vuln.id;
-            modalSeverity.textContent = normalizedSeverity;
-            modalSeverity.className = `card-severity severity-${normalizedSeverity.toUpperCase()}`;
-
-            let detailHTML = `
-                <p><strong>Title:</strong> ${vuln.title}</p>
-                <p><strong>Severity:</strong> <span class="${modalSeverity.className}">${normalizedSeverity}</span></p>
-                <p><strong>Published:</strong> ${new Date(vuln.publishedDate).toLocaleString()}</p>
-                <p><strong>Modified:</strong> ${new Date(vuln.modifiedDate).toLocaleString()}</p>
-                <p><strong>Source:</strong> <a href="${vuln.sourceLink}" target="_blank">${vuln.sourceLink}</a></p>
-                <p><strong>Description:</strong></p>
-                <div class="full-description">${vuln.description}</div>
-            `;
-
-            detailHTML += `
-                <details style="margin-top: 20px; color: var(--sub-text-color);">
-                    <summary style="font-weight: bold; cursor: pointer; color: var(--primary-color);">View Raw Data (JSON)</summary>
-                    <pre style="white-space: pre-wrap; word-wrap: break-word; font-size: 0.8em; max-height: 300px; overflow-y: auto; background: var(--bg-color); padding: 10px; border: 1px dashed var(--border-color); border-radius: 4px;">${JSON.stringify(vuln.rawData, null, 2)}</pre>
-                </details>
-            `;
-
-            modalBody.innerHTML = detailHTML;
-            modal.style.display = 'block';
-        }
-
-        function closeModal() {
-            document.getElementById('details-modal').style.display = 'none';
-        }
-
-        /*
-        ==================================================
-        Theming
-        ==================================================
-        */
-
-        function toggleTheme() {
-            const body = document.documentElement;
-            const toggleButton = document.getElementById('theme-toggle');
-            const icon = toggleButton.querySelector('.material-icons');
-
-            if (body.getAttribute('data-theme') === 'dark') {
-                body.removeAttribute('data-theme');
-                localStorage.setItem('theme', 'light');
-                icon.textContent = 'brightness_4'; // Moon icon
-            } else {
-                body.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-                icon.textContent = 'light_mode'; // Sun icon
-            }
-        }
-
-        function applyTheme() {
-            const storedTheme = localStorage.getItem('theme');
-            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const toggleButton = document.getElementById('theme-toggle');
-            const icon = toggleButton.querySelector('.material-icons');
-
-            if (storedTheme === 'dark' || (!storedTheme && prefersDark)) {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                icon.textContent = 'light_mode';
-            } else {
-                document.documentElement.removeAttribute('data-theme');
-                icon.textContent = 'brightness_4';
-            }
-        }
-
-        // Initialize the dashboard when the DOM is fully loaded
-        document.addEventListener('DOMContentLoaded', initializeDashboard);
-
-        // Close modal on ESC key press
-        document.onkeydown = function(evt) {
-            evt = evt || window.event;
-            if (evt.key === 'Escape' && document.getElementById('details-modal').style.display === 'block') {
-                closeModal();
-            }
-        };
-
-    </script>
+</script>
 </body>
 </html>
