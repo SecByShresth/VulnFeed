@@ -12,14 +12,13 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        # Need to fetch history to push later
         with:
-          fetch-depth: 0 
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.10'
 
       - name: Install dependencies
         run: |
@@ -33,126 +32,183 @@ jobs:
           import csv
           import io
           import os
+          import time
           
-          print("🔍 Fetching daily modified vulnerability IDs from OSV.dev...")
+          print("🚀 Starting OSV.dev vulnerability feed update...")
           
-          # 1. Configuration
+          # Configuration
           MODIFIED_IDS_URL = "https://storage.googleapis.com/osv-vulnerabilities/modified_id.csv"
           VULN_BASE_URL = "https://api.osv.dev/v1/vulns/"
           
-          # Keywords to filter by title/description for your target feeds
+          # Enhanced keyword matching
           TARGET_KEYWORDS = {
-              "mysql": ["mysql", "mariadb"],
-              "postgresql": ["postgres", "postgresql"],
+              "mysql": ["mysql", "mariadb", "percona"],
+              "postgresql": ["postgres", "postgresql", "pgsql"],
               "redis": ["redis"],
-              "exploitdb": ["exploit-db", "edb"] 
+              "exploitdb": ["exploit", "edb-id", "exploit-db"] 
           }
           
           all_vulnerabilities = []
 
-          # 2. Download the modified IDs list
+          # Step 1: Download the modified IDs list
+          print("📥 Downloading modified_id.csv...")
           try:
-              response = requests.get(MODIFIED_IDS_URL)
+              response = requests.get(MODIFIED_IDS_URL, timeout=30)
               response.raise_for_status()
+              print(f"✅ Downloaded modified_id.csv ({len(response.text)} bytes)")
           except requests.RequestException as e:
               print(f"❌ Failed to download modified_id.csv: {e}")
               exit(1)
               
-          # 3. Process the CSV file
+          # Step 2: Process CSV and extract OSV IDs
           csv_data = io.StringIO(response.text)
           reader = csv.reader(csv_data)
           
-          osv_ids_to_fetch = set()
+          osv_ids_to_fetch = []
           for row in reader:
-              if row and row[0].strip().startswith(("GHSA", "CVE", "OSV")):
-                  osv_ids_to_fetch.add(row[0].strip())
-
-          count = 0
-          for osv_id in osv_ids_to_fetch:
+              if row and row[0].strip():
+                  osv_id = row[0].strip()
+                  # Include all types of vulnerabilities
+                  osv_ids_to_fetch.append(osv_id)
+          
+          print(f"📋 Found {len(osv_ids_to_fetch)} IDs to process")
+          
+          # Step 3: Fetch details for each vulnerability
+          session = requests.Session()
+          fetched_count = 0
+          error_count = 0
+          
+          for i, osv_id in enumerate(osv_ids_to_fetch):
+              if i % 50 == 0:
+                  print(f"⏳ Progress: {i}/{len(osv_ids_to_fetch)}...")
               
-              # 4. Fetch the full OSV JSON for the ID
               try:
-                  vuln_response = requests.get(f"{VULN_BASE_URL}{osv_id}")
+                  # Add small delay to be respectful to the API
+                  time.sleep(0.1)
+                  
+                  vuln_response = session.get(f"{VULN_BASE_URL}{osv_id}", timeout=30)
                   vuln_response.raise_for_status()
                   vuln_data = vuln_response.json()
-              except requests.RequestException:
-                  continue 
-              
-              
-              # 5. Determine the source and normalize the data
-              source = "osv-general" 
-              
-              summary = vuln_data.get('summary', vuln_data.get('details', 'No summary available.'))
-              details = vuln_data.get('details', '')
-              
-              # Check keywords for specific DBs
-              for db_source, keywords in TARGET_KEYWORDS.items():
-                  # Check for EDB alias
-                  if db_source == "exploitdb":
-                      if any(alias.upper().startswith('EDB-ID') for alias in vuln_data.get('aliases', [])):
-                          source = db_source
-                          break
                   
-                  # Check summary/details and affected package names
-                  affected_names = [p['package']['name'].lower() for a in vuln_data.get('affected', []) if a.get('package')]
+                  # Extract relevant information
+                  summary = vuln_data.get('summary', '')
+                  details = vuln_data.get('details', '')
+                  aliases = vuln_data.get('aliases', [])
                   
-                  search_text = (summary + details).lower()
+                  # Get affected package names
+                  affected_names = []
+                  for affected in vuln_data.get('affected', []):
+                      if affected.get('package'):
+                          pkg_name = affected['package'].get('name', '').lower()
+                          if pkg_name:
+                              affected_names.append(pkg_name)
                   
-                  if any(k in search_text for k in keywords) or any(k in affected_names for k in keywords):
-                      source = db_source
-                      break 
-              
-              # Normalize the entry format
-              normalized_entry = {
-                  "id": osv_id,
-                  "title": vuln_data.get('summary', osv_id),
-                  "description": summary,
-                  "url": f"https://osv.dev/{osv_id}",
-                  "source": source
-              }
-              
-              all_vulnerabilities.append(normalized_entry)
-              count += 1
-              
-          # 6. Save the consolidated, filtered data into separate JSON files
+                  # Combine all text for keyword searching
+                  search_text = f"{summary} {details} {' '.join(affected_names)}".lower()
+                  
+                  # Determine which feed this belongs to
+                  source = "osv-general"
+                  
+                  # Check for ExploitDB first (via aliases)
+                  if any(alias.upper().startswith('EDB-') for alias in aliases):
+                      source = "exploitdb"
+                  # Check MySQL keywords
+                  elif any(keyword in search_text for keyword in TARGET_KEYWORDS["mysql"]):
+                      source = "mysql"
+                  # Check PostgreSQL keywords  
+                  elif any(keyword in search_text for keyword in TARGET_KEYWORDS["postgresql"]):
+                      source = "postgresql"
+                  # Check Redis keywords
+                  elif any(keyword in search_text for keyword in TARGET_KEYWORDS["redis"]):
+                      source = "redis"
+                  # Check ExploitDB in text as fallback
+                  elif any(keyword in search_text for keyword in TARGET_KEYWORDS["exploitdb"]):
+                      source = "exploitdb"
+                  
+                  # Only include if it matches one of our target categories
+                  if source != "osv-general":
+                      normalized_entry = {
+                          "id": osv_id,
+                          "title": summary or f"Vulnerability {osv_id}",
+                          "description": details or summary or "No description available",
+                          "url": f"https://osv.dev/{osv_id}",
+                          "source": source,
+                          "aliases": aliases,
+                          "affected_packages": affected_names
+                      }
+                      
+                      all_vulnerabilities.append(normalized_entry)
+                      fetched_count += 1
+                  
+              except requests.RequestException as e:
+                  print(f"⚠️ Failed to fetch {osv_id}: {e}")
+                  error_count += 1
+                  continue
+              except json.JSONDecodeError as e:
+                  print(f"⚠️ Failed to parse JSON for {osv_id}: {e}")
+                  error_count += 1
+                  continue
+
+          print(f"\n📊 Processing complete:")
+          print(f"   ✅ Successfully processed: {fetched_count}")
+          print(f"   ❌ Errors encountered: {error_count}")
+          print(f"   📝 Total matching vulnerabilities: {len(all_vulnerabilities)}")
+          
+          # Step 4: Group by source and save to files
           if not os.path.exists("data"):
               os.makedirs("data")
 
-          # Group by the detected source
           grouped_data = {}
           for entry in all_vulnerabilities:
-              db_name = entry['source'].split('-')[0]
-              if db_name not in grouped_data:
-                  grouped_data[db_name] = []
-              grouped_data[db_name].append(entry)
+              source = entry['source']
+              if source not in grouped_data:
+                  grouped_data[source] = []
+              grouped_data[source].append(entry)
 
-          for db, data in grouped_data.items():
-              with open(f"data/{db}.json", "w") as f:
-                  json.dump(data, f, indent=2)
-
-          # Ensure the four main target files exist, even if empty, for consistency
+          # Ensure all target files exist (even if empty)
           for db in ["mysql", "postgresql", "redis", "exploitdb"]:
               if db not in grouped_data:
-                  with open(f"data/{db}.json", "w") as f:
-                      json.dump([], f, indent=2)
-                      
-          print(f"✅ Fetched and processed {count} modified OSV records.")
-          for db, data in grouped_data.items():
-              print(f"   -> Saved {len(data)} entries for {db.upper()} to data/{db}.json")
+                  grouped_data[db] = []
               
+              with open(f"data/{db}.json", "w") as f:
+                  json.dump(grouped_data[db], f, indent=2)
+              print(f"💾 Saved {len(grouped_data[db])} entries to data/{db}.json")
+          
+          # Print some examples for debugging
+          if all_vulnerabilities:
+              print(f"\n🔍 Sample vulnerabilities found:")
+              for source in grouped_data:
+                  if grouped_data[source]:
+                      sample = grouped_data[source][0]
+                      print(f"   {source.upper()}: {sample['id']} - {sample['title'][:60]}...")
+          
+          print("🎉 Vulnerability feed update completed!")
           EOF
 
-      - name: Commit and Push Changes (Standard Git CLI)
+      - name: 📊 Display Results
+        run: |
+          echo "=== Generated Files ==="
+          ls -la data/ || echo "No data directory found"
+          echo ""
+          echo "=== File Contents ==="
+          for file in data/*.json 2>/dev/null; do
+            if [ -f "$file" ]; then
+              count=$(jq length "$file" 2>/dev/null || echo "0")
+              echo "$(basename $file): $count entries"
+            fi
+          done
+
+      - name: Commit and Push Changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
           git add data/*.json
           
-          # Check if there are any changes to commit before trying to commit
-          if git status --porcelain | grep -q data/; then
-              git commit -m "Auto-update feeds from OSV.dev"
-              git push
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
           else
-              echo "No changes in data files to commit."
+            git commit -m "Auto-update: OSV.dev vulnerability feeds $(date +'%Y-%m-%d')"
+            git push
+            echo "Changes committed and pushed."
           fi
