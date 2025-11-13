@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vulnerability Dashboard</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <title>VulnFeed Dashboard - Multi-Source Security Intelligence</title>
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -14,106 +14,130 @@
         }
 
         :root {
-            --bg-primary: #f8fafc;
-            --bg-secondary: #ffffff;
-            --bg-card: #ffffff;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --accent: #3b82f6;
-            --accent-hover: #2563eb;
-            --accent-light: rgba(59, 130, 246, 0.08);
-            --border: #e2e8f0;
-            --critical: #dc2626;
-            --high: #ea580c;
-            --medium: #d97706;
-            --low: #16a34a;
-            --shadow: rgba(0, 0, 0, 0.05);
-            --gradient-primary: linear-gradient(135deg, #3b82f6, #60a5fa);
-            --radius-sm: 6px;
-            --radius-md: 10px;
-            --radius-lg: 14px;
-            --transition: all 0.2s ease;
-            --redhat: #ee0000;
+            --bg-primary: #0a0e27;
+            --bg-secondary: #151a35;
+            --bg-card: #1a1f3a;
+            --text-primary: #e8eaed;
+            --text-secondary: #9aa0b8;
+            --accent: #00d4ff;
+            --accent-hover: #00b8e6;
+            --accent-light: rgba(0, 212, 255, 0.15);
+            --border: #2a3152;
+            --critical: #ff4757;
+            --high: #ff6b81;
+            --medium: #ffa502;
+            --low: #26de81;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-accent: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
             padding: 20px;
-            line-height: 1.5;
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 212, 255, 0.1) 0%, transparent 50%);
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
+        /* Header Styles */
         header {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 30px 20px;
+            margin-bottom: 40px;
+            padding: 40px 30px;
             background: var(--bg-secondary);
             border-radius: var(--radius-lg);
-            box-shadow: 0 4px 12px var(--shadow);
+            box-shadow: 0 8px 32px var(--shadow);
             border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-accent);
         }
 
         h1 {
-            font-size: 2.4rem;
-            margin-bottom: 8px;
-            color: var(--text-primary);
-            font-weight: 700;
-            letter-spacing: -0.5px;
+            font-size: 3rem;
+            margin-bottom: 12px;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            letter-spacing: -1px;
         }
 
         .subtitle {
             color: var(--text-secondary);
-            font-size: 1.1rem;
-            margin-bottom: 12px;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
             font-weight: 400;
         }
 
         .source-badges {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             justify-content: center;
             flex-wrap: wrap;
-            margin-top: 8px;
+            margin-top: 20px;
         }
 
         .source-badge {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 8px 16px;
-            background: var(--accent-light);
+            gap: 8px;
+            padding: 10px 18px;
+            background: var(--bg-card);
             color: var(--accent);
-            border-radius: 20px;
-            font-size: 0.85rem;
+            border-radius: 24px;
+            font-size: 0.9rem;
             font-weight: 600;
-            border: 1px solid rgba(59, 130, 246, 0.2);
+            border: 1px solid var(--border);
+            transition: var(--transition);
         }
 
-        .source-badge.redhat {
-            background: rgba(238, 0, 0, 0.08);
-            color: var(--redhat);
-            border: 1px solid rgba(238, 0, 0, 0.2);
+        .source-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+            border-color: var(--accent);
         }
 
         .last-updated {
-            margin-top: 12px;
-            font-size: 0.85rem;
+            margin-top: 20px;
+            font-size: 0.9rem;
             color: var(--text-secondary);
+            padding: 12px;
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+            display: inline-block;
         }
 
+        /* Filter Panel */
         .filters-panel {
             background: var(--bg-secondary);
-            padding: 24px;
+            padding: 30px;
             border-radius: var(--radius-lg);
-            margin-bottom: 24px;
-            box-shadow: 0 4px 12px var(--shadow);
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px var(--shadow);
             border: 1px solid var(--border);
         }
 
@@ -121,36 +145,44 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .filters-title {
-            font-size: 1.2rem;
-            font-weight: 600;
+            font-size: 1.5rem;
+            font-weight: 700;
             color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .reset-filters {
-            background: transparent;
+            background: var(--accent-light);
             color: var(--accent);
             border: 1px solid var(--accent);
-            padding: 6px 12px;
+            padding: 10px 20px;
             border-radius: var(--radius-sm);
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: var(--transition);
+            font-weight: 600;
         }
 
         .reset-filters:hover {
-            background: var(--accent-light);
+            background: var(--accent);
+            color: var(--bg-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
         }
 
         .source-selector {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-            padding: 16px;
-            background: var(--bg-primary);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: var(--bg-card);
             border-radius: var(--radius-md);
             border: 1px solid var(--border);
         }
@@ -158,82 +190,68 @@
         .source-selector label {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             cursor: pointer;
-            padding: 10px 16px;
+            padding: 14px 20px;
             background: var(--bg-secondary);
             border-radius: var(--radius-sm);
             border: 2px solid var(--border);
             transition: var(--transition);
-            font-weight: 500;
-            flex: 1;
+            font-weight: 600;
             justify-content: center;
         }
 
-        .source-selector input[type="radio"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
+        .source-selector label:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
         }
 
-        .source-selector input[type="radio"]:checked + span {
-            color: var(--accent);
+        .source-selector input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--accent);
         }
 
         .source-selector label:has(input:checked) {
             border-color: var(--accent);
             background: var(--accent-light);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
         }
 
         .filters-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
         }
 
         .filter-group {
             display: flex;
             flex-direction: column;
+            gap: 8px;
         }
 
-        .filter-section-label {
-            font-size: 0.9rem;
+        .filter-group label {
             font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-            padding: 8px 12px;
-            background: var(--bg-primary);
-            border-radius: var(--radius-sm);
-            border-left: 3px solid var(--accent);
-        }
-
-        .filter-section-label.redhat {
-            border-left-color: var(--redhat);
-            background: rgba(238, 0, 0, 0.05);
-        }
-
-        label {
-            margin-bottom: 8px;
-            font-weight: 500;
             color: var(--text-secondary);
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .filter-icon {
             color: var(--accent);
-            width: 16px;
+            width: 18px;
         }
 
         input, select {
-            padding: 10px 14px;
+            padding: 12px 16px;
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
-            background: var(--bg-primary);
+            background: var(--bg-card);
             color: var(--text-primary);
-            font-size: 0.95rem;
+            font-size: 1rem;
             transition: var(--transition);
         }
 
@@ -243,331 +261,290 @@
             box-shadow: 0 0 0 3px var(--accent-light);
         }
 
+        /* Stats Bar */
         .stats-bar {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
         }
 
         .stat-card {
-            flex: 1;
-            min-width: 180px;
             background: var(--bg-secondary);
-            padding: 20px;
+            padding: 25px;
             border-radius: var(--radius-md);
-            box-shadow: 0 2px 8px var(--shadow);
+            box-shadow: 0 4px 16px var(--shadow);
             border: 1px solid var(--border);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-accent);
+            opacity: 0;
             transition: var(--transition);
         }
 
         .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px var(--shadow);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px var(--shadow);
+            border-color: var(--accent);
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
         }
 
         .stat-label {
             color: var(--text-secondary);
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            font-weight: 600;
         }
 
         .stat-value {
-            font-size: 1.8rem;
-            font-weight: 700;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
+        /* Results Header */
         .results-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             flex-wrap: wrap;
-            gap: 12px;
-            padding: 16px;
+            gap: 15px;
+            padding: 20px;
             background: var(--bg-secondary);
             border-radius: var(--radius-md);
-            box-shadow: 0 2px 8px var(--shadow);
+            box-shadow: 0 4px 16px var(--shadow);
             border: 1px solid var(--border);
         }
 
         .results-count {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            font-weight: 500;
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            font-weight: 700;
         }
 
         .results-breakdown {
-            font-size: 0.9rem;
+            font-size: 1rem;
             color: var(--text-secondary);
-            margin-top: 4px;
+            margin-top: 5px;
         }
 
         .sort-controls {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .sort-btn {
-            padding: 8px 14px;
-            background: var(--bg-primary);
+            padding: 10px 18px;
+            background: var(--bg-card);
             color: var(--text-primary);
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
             cursor: pointer;
             transition: var(--transition);
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            font-weight: 600;
         }
 
         .sort-btn:hover {
             border-color: var(--accent);
-            background: var(--bg-secondary);
+            background: var(--accent-light);
+            transform: translateY(-2px);
         }
 
         .sort-btn.active {
-            background: var(--accent);
+            background: var(--gradient-accent);
             border-color: var(--accent);
-            color: white;
+            color: var(--bg-primary);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
         }
 
+        /* CVE Cards */
         .results-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+            gap: 25px;
         }
 
         .cve-card {
             background: var(--bg-secondary);
             border-radius: var(--radius-md);
-            padding: 20px;
-            box-shadow: 0 2px 8px var(--shadow);
+            padding: 25px;
+            box-shadow: 0 4px 16px var(--shadow);
             transition: var(--transition);
             border: 1px solid var(--border);
             position: relative;
+            overflow: hidden;
+        }
+
+        .cve-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent);
+            opacity: 0;
+            transition: var(--transition);
         }
 
         .cve-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 16px var(--shadow);
+            transform: translateY(-6px);
+            box-shadow: 0 12px 32px var(--shadow);
+            border-color: var(--accent);
         }
 
-        .cve-card.redhat-source {
-            border-left: 3px solid var(--redhat);
-        }
-
-        .cve-card.cisa-source {
-            border-left: 3px solid var(--accent);
+        .cve-card:hover::before {
+            opacity: 1;
         }
 
         .cve-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 14px;
-            gap: 10px;
+            margin-bottom: 16px;
+            gap: 12px;
         }
 
         .cve-id {
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1.2rem;
+            font-weight: 700;
             color: var(--accent);
             text-decoration: none;
             transition: var(--transition);
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .cve-id:hover {
             color: var(--accent-hover);
-            text-decoration: underline;
+            transform: translateX(4px);
         }
 
         .badge-container {
             display: flex;
-            gap: 6px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
         .badge {
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
         }
 
         .badge-exploited {
-            background: rgba(59, 130, 246, 0.1);
+            background: rgba(0, 212, 255, 0.2);
             color: var(--accent);
-            border: 1px solid rgba(59, 130, 246, 0.2);
+            border: 1px solid var(--accent);
         }
-        .badge-ransomware {
-            background: rgba(236, 72, 153, 0.1);
-            color: #ec4899;
-            border: 1px solid rgba(236, 72, 153, 0.2);
-        }
-        .badge-due-soon {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--critical);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
+
         .badge-critical {
-            background: rgba(220, 38, 38, 0.1);
+            background: rgba(255, 71, 87, 0.2);
             color: var(--critical);
-            border: 1px solid rgba(220, 38, 38, 0.2);
+            border: 1px solid var(--critical);
         }
-        .badge-important {
-            background: rgba(234, 88, 12, 0.1);
+
+        .badge-high {
+            background: rgba(255, 107, 129, 0.2);
             color: var(--high);
-            border: 1px solid rgba(234, 88, 12, 0.2);
+            border: 1px solid var(--high);
         }
-        .badge-moderate {
-            background: rgba(217, 119, 6, 0.1);
+
+        .badge-medium {
+            background: rgba(255, 165, 2, 0.2);
             color: var(--medium);
-            border: 1px solid rgba(217, 119, 6, 0.2);
+            border: 1px solid var(--medium);
         }
+
         .badge-low {
-            background: rgba(22, 163, 74, 0.1);
+            background: rgba(38, 222, 129, 0.2);
             color: var(--low);
-            border: 1px solid rgba(22, 163, 74, 0.2);
-        }
-        .badge-source {
-            background: rgba(238, 0, 0, 0.1);
-            color: var(--redhat);
-            border: 1px solid rgba(238, 0, 0, 0.2);
-        }
-        .badge-cvss {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--accent);
-            border: 1px solid rgba(59, 130, 246, 0.2);
+            border: 1px solid var(--low);
         }
 
         .cve-description {
             color: var(--text-secondary);
-            line-height: 1.5;
-            margin-bottom: 14px;
-            font-size: 0.9rem;
+            line-height: 1.7;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
         }
 
         .cve-meta {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 12px;
-            padding-top: 14px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            padding-top: 16px;
             border-top: 1px solid var(--border);
-            font-size: 0.8rem;
+            font-size: 0.85rem;
         }
 
         .meta-item {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             color: var(--text-secondary);
         }
 
         .meta-icon {
             color: var(--accent);
-            width: 14px;
+            width: 16px;
             text-align: center;
         }
 
         .meta-label {
-            font-weight: 500;
+            font-weight: 600;
         }
 
-        .action-required {
-            background: rgba(239, 68, 68, 0.05);
-            border-left: 3px solid var(--critical);
-            padding: 12px;
-            margin-top: 14px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-        }
-
-        .action-icon {
-            color: var(--critical);
-            margin-top: 1px;
-        }
-
-        .action-required strong {
-            color: var(--critical);
-        }
-
-        .references-section {
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--border);
-        }
-
-        .references-title {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .references-list {
-            font-size: 0.75rem;
-            max-height: 80px;
-            overflow-y: auto;
-            padding-right: 8px;
-        }
-
-        .reference-item {
-            margin-bottom: 4px;
-            word-break: break-all;
-        }
-
-        .reference-link {
-            color: var(--accent);
-            text-decoration: none;
-        }
-
-        .reference-link:hover {
-            text-decoration: underline;
-        }
-
-        .more-references {
-            color: var(--text-secondary);
-            font-style: italic;
-            font-size: 0.7rem;
-            margin-top: 4px;
-        }
-
+        /* Loading & Error States */
         .loading {
             text-align: center;
-            padding: 60px 20px;
+            padding: 80px 20px;
             color: var(--text-secondary);
-            font-size: 1.1rem;
+            font-size: 1.2rem;
         }
 
         .spinner {
-            border: 3px solid var(--border);
-            border-top: 3px solid var(--accent);
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--accent);
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            margin: 0 auto 25px;
         }
 
         @keyframes spin {
@@ -576,10 +553,10 @@
         }
 
         .error {
-            background: rgba(220, 38, 38, 0.05);
+            background: rgba(255, 71, 87, 0.1);
             border: 1px solid var(--critical);
             color: var(--critical);
-            padding: 20px;
+            padding: 30px;
             border-radius: var(--radius-md);
             text-align: center;
             margin: 20px 0;
@@ -587,93 +564,41 @@
 
         .empty-state {
             text-align: center;
-            padding: 80px 20px;
+            padding: 100px 20px;
             color: var(--text-secondary);
         }
 
         .empty-state-icon {
-            font-size: 3rem;
-            margin-bottom: 16px;
+            font-size: 4rem;
+            margin-bottom: 20px;
             opacity: 0.5;
         }
 
         .empty-state h3 {
-            font-size: 1.5rem;
-            margin-bottom: 8px;
+            font-size: 1.8rem;
+            margin-bottom: 12px;
             color: var(--text-primary);
         }
 
-        .empty-state p {
-            font-size: 1rem;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
+        /* Footer */
         footer {
             text-align: center;
-            margin-top: 50px;
-            padding: 24px 20px;
+            margin-top: 60px;
+            padding: 30px 20px;
             color: var(--text-secondary);
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             border-top: 1px solid var(--border);
         }
 
         footer p {
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2rem;
-            }
-
-            .results-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .filters-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .filters-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-
-            .source-selector {
-                flex-direction: column;
-            }
-
-            .stats-bar {
-                flex-direction: column;
-            }
-
-            .stat-card {
-                min-width: 100%;
-            }
-
-            .results-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .sort-controls {
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .sort-btn {
-                flex: 1;
-                justify-content: center;
-            }
-        }
-
-        /* Animation for cards when they load */
+        /* Animations */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(20px);
             }
             to {
                 opacity: 1;
@@ -682,70 +607,89 @@
         }
 
         .cve-card {
-            animation: fadeInUp 0.3s ease forwards;
+            animation: fadeInUp 0.4s ease forwards;
         }
 
-        /* Stagger animation for multiple cards */
-        .cve-card:nth-child(1) { animation-delay: 0.05s; }
-        .cve-card:nth-child(2) { animation-delay: 0.1s; }
-        .cve-card:nth-child(3) { animation-delay: 0.15s; }
-        .cve-card:nth-child(4) { animation-delay: 0.2s; }
-        .cve-card:nth-child(5) { animation-delay: 0.25s; }
-        .cve-card:nth-child(6) { animation-delay: 0.3s; }
+        .cve-card:nth-child(n) { animation-delay: calc(0.05s * var(--card-index, 0)); }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            h1 { font-size: 2.5rem; }
+            .results-grid { grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .results-grid { grid-template-columns: 1fr; }
+            .filters-grid { grid-template-columns: 1fr; }
+            .source-selector { grid-template-columns: 1fr; }
+            .stats-bar { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-shield-alt"></i> VulnFeed Dashboard</h1>
-            <p class="subtitle">Aggregated vulnerability intelligence from multiple security sources</p>
+            <h1><i class="fas fa-shield-virus"></i> VulnFeed Pro</h1>
+            <p class="subtitle">Multi-Source Vulnerability Intelligence Platform</p>
             <div class="source-badges">
                 <span class="source-badge"><i class="fas fa-exclamation-triangle"></i> CISA KEV</span>
-                <span class="source-badge redhat"><i class="fab fa-redhat"></i> RED HAT CVE</span>
+                <span class="source-badge"><i class="fab fa-redhat"></i> Red Hat</span>
+                <span class="source-badge"><i class="fab fa-linux"></i> Debian</span>
+                <span class="source-badge"><i class="fab fa-ubuntu"></i> Ubuntu</span>
+                <span class="source-badge"><i class="fas fa-database"></i> OSV.dev</span>
+                <span class="source-badge"><i class="fas fa-bug"></i> Exploit-DB</span>
+                <span class="source-badge"><i class="fas fa-server"></i> PostgreSQL</span>
+                <span class="source-badge"><i class="fas fa-leaf"></i> MySQL</span>
             </div>
             <p class="last-updated" id="lastUpdated">Loading data...</p>
         </header>
 
         <div class="filters-panel">
             <div class="filters-header">
-                <h2 class="filters-title"><i class="fas fa-filter"></i> Filters</h2>
+                <h2 class="filters-title"><i class="fas fa-filter"></i> Advanced Filters</h2>
                 <button class="reset-filters" id="resetFilters">
-                    <i class="fas fa-redo"></i> Reset Filters
+                    <i class="fas fa-redo"></i> Reset All
                 </button>
             </div>
 
-            <!-- Data Source Selector -->
             <div class="source-selector">
                 <label>
-                    <input type="radio" name="dataSource" value="cisa" checked>
-                    <span><i class="fas fa-exclamation-triangle"></i> CISA KEV Only</span>
+                    <input type="radio" name="dataSource" value="all" checked>
+                    <span><i class="fas fa-globe"></i> All Sources</span>
+                </label>
+                <label>
+                    <input type="radio" name="dataSource" value="cisa">
+                    <span><i class="fas fa-exclamation-triangle"></i> CISA KEV</span>
                 </label>
                 <label>
                     <input type="radio" name="dataSource" value="redhat">
-                    <span><i class="fab fa-redhat"></i> Red Hat CVE Only</span>
+                    <span><i class="fab fa-redhat"></i> Red Hat</span>
                 </label>
                 <label>
-                    <input type="radio" name="dataSource" value="both">
-                    <span><i class="fas fa-layer-group"></i> Both Sources</span>
+                    <input type="radio" name="dataSource" value="linux">
+                    <span><i class="fab fa-linux"></i> Linux Distros</span>
+                </label>
+                <label>
+                    <input type="radio" name="dataSource" value="databases">
+                    <span><i class="fas fa-database"></i> Databases</span>
                 </label>
             </div>
 
-            <!-- CISA Filters -->
-            <div id="cisaFilters" class="filters-grid">
-                <div id="cisaSectionLabel" class="filter-section-label" style="display: none;">
-                    <i class="fas fa-exclamation-triangle"></i> CISA KEV Filters
-                </div>
+            <div class="filters-grid">
                 <div class="filter-group">
-                    <label for="vendor"><i class="fas fa-building filter-icon"></i> Vendor/Product</label>
-                    <input type="text" id="vendor" placeholder="e.g., Microsoft, Cisco, Apache">
+                    <label for="searchTerm"><i class="fas fa-search filter-icon"></i> Search CVE/Keywords</label>
+                    <input type="text" id="searchTerm" placeholder="CVE-2024-xxxx or keywords">
                 </div>
 
                 <div class="filter-group">
-                    <label for="ransomware"><i class="fas fa-lock filter-icon"></i> Ransomware Filter</label>
-                    <select id="ransomware">
-                        <option value="all">All Vulnerabilities</option>
-                        <option value="known">Known Ransomware Use</option>
-                        <option value="unknown">No Ransomware (Yet)</option>
+                    <label for="severity"><i class="fas fa-exclamation-circle filter-icon"></i> Severity Level</label>
+                    <select id="severity">
+                        <option value="all">All Severities</option>
+                        <option value="critical">Critical</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
                     </select>
                 </div>
 
@@ -755,39 +699,17 @@
                         <option value="7">Last 7 Days</option>
                         <option value="30" selected>Last 30 Days</option>
                         <option value="90">Last 90 Days</option>
+                        <option value="365">Last Year</option>
                         <option value="all">All Time</option>
                     </select>
                 </div>
-            </div>
-
-            <!-- Red Hat Filters -->
-            <div id="redhatFilters" class="filters-grid" style="display: none;">
-                <div id="redhatSectionLabel" class="filter-section-label redhat" style="display: none;">
-                    <i class="fab fa-redhat"></i> Red Hat Filters
-                </div>
-                <div class="filter-group">
-                    <label for="rhSeverity"><i class="fas fa-exclamation-circle filter-icon"></i> Severity</label>
-                    <select id="rhSeverity">
-                        <option value="all">All Severities</option>
-                        <option value="Critical">Critical</option>
-                        <option value="Important">Important</option>
-                        <option value="Moderate">Moderate</option>
-                        <option value="Low">Low</option>
-                    </select>
-                </div>
 
                 <div class="filter-group">
-                    <label for="rhProduct"><i class="fas fa-cube filter-icon"></i> Product</label>
-                    <input type="text" id="rhProduct" placeholder="e.g., Red Hat Enterprise Linux">
-                </div>
-
-                <div class="filter-group">
-                    <label for="rhTimeRange"><i class="fas fa-calendar-alt filter-icon"></i> Time Range</label>
-                    <select id="rhTimeRange">
-                        <option value="7">Last 7 Days</option>
-                        <option value="30" selected>Last 30 Days</option>
-                        <option value="90">Last 90 Days</option>
-                        <option value="all">All Time</option>
+                    <label for="exploitStatus"><i class="fas fa-bolt filter-icon"></i> Exploit Status</label>
+                    <select id="exploitStatus">
+                        <option value="all">All Vulnerabilities</option>
+                        <option value="exploited">Actively Exploited</option>
+                        <option value="poc">PoC Available</option>
                     </select>
                 </div>
             </div>
@@ -805,11 +727,11 @@
                 <button class="sort-btn active" data-sort="date">
                     <i class="fas fa-calendar-plus"></i> Date
                 </button>
-                <button class="sort-btn" data-sort="vendor">
-                    <i class="fas fa-building"></i> Vendor
-                </button>
                 <button class="sort-btn" data-sort="severity">
                     <i class="fas fa-exclamation-triangle"></i> Severity
+                </button>
+                <button class="sort-btn" data-sort="source">
+                    <i class="fas fa-layer-group"></i> Source
                 </button>
             </div>
         </div>
@@ -817,51 +739,48 @@
         <div id="resultsContainer"></div>
 
         <footer>
-            <p>Data Sources:</p>
-            <p>• CISA Known Exploited Vulnerabilities Catalog</p>
-            <p>• Red Hat vulnerability data © Red Hat, Inc., licensed under CC BY 4.0. Source: <a href="https://access.redhat.com/documentation/en-us/red_hat_security_data_api/" target="_blank" style="color: var(--accent);">Red Hat Security Data API</a></p>
-            <p style="margin-top: 12px;">This dashboard is for informational purposes only. Always verify with official sources.</p>
+            <p><strong>Data Sources:</strong></p>
+            <p>CISA KEV • Red Hat CVE • Debian Security • Ubuntu CVE • OSV.dev • Exploit-DB • PostgreSQL • MySQL • MariaDB • MongoDB • Redis</p>
+            <p style="margin-top: 15px; font-size: 0.85rem;">
+                <i class="fas fa-info-circle"></i> This dashboard aggregates vulnerability data from multiple trusted sources. Always verify critical information with official sources.
+            </p>
+            <p style="margin-top: 10px;">
+                <i class="fas fa-sync-alt"></i> Auto-updates every hour via GitHub Actions
+            </p>
         </footer>
     </div>
 
     <script>
-        let allCves = [];
-        let cisaData = [];
-        let redhatData = [];
+        let allVulnerabilities = [];
         let currentSort = 'date';
-        let currentSource = 'cisa';
+        let currentSource = 'all';
 
         const elements = {
-            vendorInput: document.getElementById('vendor'),
-            ransomwareSelect: document.getElementById('ransomware'),
-            timeRangeSelect: document.getElementById('timeRange'),
-            rhSeveritySelect: document.getElementById('rhSeverity'),
-            rhProductInput: document.getElementById('rhProduct'),
-            rhTimeRangeSelect: document.getElementById('rhTimeRange'),
+            searchTerm: document.getElementById('searchTerm'),
+            severity: document.getElementById('severity'),
+            timeRange: document.getElementById('timeRange'),
+            exploitStatus: document.getElementById('exploitStatus'),
             resultsContainer: document.getElementById('resultsContainer'),
             statsBar: document.getElementById('statsBar'),
             resultsHeader: document.getElementById('resultsHeader'),
             resultsCount: document.getElementById('resultsCount'),
             resultsBreakdown: document.getElementById('resultsBreakdown'),
             lastUpdated: document.getElementById('lastUpdated'),
-            resetFilters: document.getElementById('resetFilters'),
-            cisaFilters: document.getElementById('cisaFilters'),
-            redhatFilters: document.getElementById('redhatFilters'),
-            cisaSectionLabel: document.getElementById('cisaSectionLabel'),
-            redhatSectionLabel: document.getElementById('redhatSectionLabel')
+            resetFilters: document.getElementById('resetFilters')
         };
 
         // Event Listeners
         document.querySelectorAll('input[name="dataSource"]').forEach(radio => {
-            radio.addEventListener('change', handleSourceChange);
+            radio.addEventListener('change', (e) => {
+                currentSource = e.target.value;
+                applyFilters();
+            });
         });
 
-        elements.vendorInput.addEventListener('input', applyFilters);
-        elements.ransomwareSelect.addEventListener('change', applyFilters);
-        elements.timeRangeSelect.addEventListener('change', applyFilters);
-        elements.rhSeveritySelect.addEventListener('change', applyFilters);
-        elements.rhProductInput.addEventListener('input', applyFilters);
-        elements.rhTimeRangeSelect.addEventListener('change', applyFilters);
+        elements.searchTerm.addEventListener('input', applyFilters);
+        elements.severity.addEventListener('change', applyFilters);
+        elements.timeRange.addEventListener('change', applyFilters);
+        elements.exploitStatus.addEventListener('change', applyFilters);
         elements.resetFilters.addEventListener('click', resetFilters);
 
         document.querySelectorAll('.sort-btn').forEach(btn => {
@@ -869,516 +788,316 @@
                 document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 currentSort = this.dataset.sort;
-                renderResults(allCves);
+                renderResults(allVulnerabilities);
             });
         });
 
-        // Load data on page load
         window.addEventListener('load', loadAllData);
-
-        function handleSourceChange(e) {
-            currentSource = e.target.value;
-            
-            // Toggle filter visibility and section labels
-            if (currentSource === 'cisa') {
-                elements.cisaFilters.style.display = 'grid';
-                elements.redhatFilters.style.display = 'none';
-                elements.cisaSectionLabel.style.display = 'none';
-                elements.redhatSectionLabel.style.display = 'none';
-            } else if (currentSource === 'redhat') {
-                elements.cisaFilters.style.display = 'none';
-                elements.redhatFilters.style.display = 'grid';
-                elements.cisaSectionLabel.style.display = 'none';
-                elements.redhatSectionLabel.style.display = 'none';
-            } else {
-                elements.cisaFilters.style.display = 'grid';
-                elements.redhatFilters.style.display = 'grid';
-                elements.cisaSectionLabel.style.display = 'block';
-                elements.redhatSectionLabel.style.display = 'block';
-            }
-            
-            applyFilters();
-        }
 
         async function loadAllData() {
             showLoading();
+            const dataSources = [
+                { file: 'cisa-kev.json', parser: parseCISA },
+                { file: 'redhat-cves.json', parser: parseRedHat },
+                { file: 'debian-security.json', parser: parseDebian },
+                { file: 'ubuntu-cve.json', parser: parseUbuntu },
+                { file: 'osv-vulns.json', parser: parseOSV },
+                { file: 'exploit-db.json', parser: parseExploitDB },
+                { file: 'postgresql-advisories.json', parser: parsePostgreSQL },
+                { file: 'mysql-advisories.json', parser: parseMySQL }
+            ];
 
-            try {
-                // Load CISA data
-                const cisaResponse = await fetch('data/cisa-kev.json');
-                if (cisaResponse.ok) {
-                    const cisaJson = await cisaResponse.json();
-                    
-                    if (cisaJson.vulnerabilities && Array.isArray(cisaJson.vulnerabilities)) {
-                        cisaData = cisaJson.vulnerabilities.map(v => ({
-                            id: v.cveID,
-                            description: v.shortDescription || v.vulnerabilityName,
-                            publishedDate: new Date(v.dateAdded),
-                            vendors: v.vendorProject,
-                            product: v.product,
-                            url: `https://nvd.nist.gov/vuln/detail/${v.cveID}`,
-                            exploited: true,
-                            ransomware: v.knownRansomwareCampaignUse === 'Known',
-                            dueDate: new Date(v.dueDate),
-                            action: v.requiredAction,
-                            notes: v.notes,
-                            source: 'cisa'
-                        }));
+            const loadedData = [];
+
+            for (const source of dataSources) {
+                try {
+                    const response = await fetch(`data/${source.file}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        const parsed = source.parser(data);
+                        loadedData.push(...parsed);
                     }
+                } catch (error) {
+                    console.warn(`Failed to load ${source.file}:`, error);
                 }
-
-                // Load Red Hat data
-                const redhatResponse = await fetch('data/redhat-cves.json');
-                if (redhatResponse.ok) {
-                    const redhatJson = await redhatResponse.json();
-                    
-                    if (Array.isArray(redhatJson)) {
-                        redhatData = redhatJson.map(v => {
-                            // Handle different possible field names in Red Hat response
-                            const cveId = v.name || v.CVE || v.cve || 'Unknown CVE';
-                            
-                            // Extract description from details
-                            let description = 'No description available';
-                            if (v.details && Array.isArray(v.details) && v.details.length > 0) {
-                                // Join all details with spaces, as sometimes there are multiple paragraphs
-                                description = v.details.join(' ').trim();
-                            } else if (v.bugzilla?.description) {
-                                description = v.bugzilla.description;
-                            }
-                            
-                            // Parse date - try different possible date fields
-                            let publishedDate = new Date();
-                            if (v.public_date) publishedDate = new Date(v.public_date);
-                            else if (v.published_date) publishedDate = new Date(v.published_date);
-                            else if (v.date) publishedDate = new Date(v.date);
-                            
-                            // Determine severity - use threat_severity if available
-                            let severity = v.threat_severity || v.severity || 'Unknown';
-                            if (severity === 'Unknown' && v.cvss3?.cvss3_base_score) {
-                                const score = parseFloat(v.cvss3.cvss3_base_score);
-                                if (score >= 9.0) severity = 'Critical';
-                                else if (score >= 7.0) severity = 'Important';
-                                else if (score >= 4.0) severity = 'Moderate';
-                                else if (score > 0) severity = 'Low';
-                            }
-
-                            // Extract product information from multiple possible sources
-                            let product = 'Various';
-                            if (v.affected_release && v.affected_release.length > 0) {
-                                product = v.affected_release.map(r => 
-                                    r.product_name || r.product || 'Unknown'
-                                ).filter(name => name && name !== 'Unknown').join(', ');
-                            } else if (v.package_state && v.package_state.length > 0) {
-                                product = v.package_state.map(p => 
-                                    p.product_name || p.product || 'Unknown'
-                                ).filter(name => name && name !== 'Unknown').join(', ') || 'Various';
-                            } else if (v.affected_packages) {
-                                product = Object.keys(v.affected_packages).join(', ');
-                            }
-
-                            // Build CVE URL
-                            let url = v.resource_url || 
-                                     v.url || 
-                                     `https://access.redhat.com/security/cve/${cveId}`;
-
-                            return {
-                                id: cveId,
-                                description: description,
-                                publishedDate: publishedDate,
-                                severity: severity,
-                                vendors: 'Red Hat',
-                                product: product,
-                                url: url,
-                                cvss3Score: v.cvss3?.cvss3_base_score,
-                                cvss3Vector: v.cvss3?.cvss3_scoring_vector,
-                                cwe: v.cwe,
-                                bugzillaUrl: v.bugzilla?.url,
-                                bugzillaId: v.bugzilla?.id,
-                                references: v.references || [],
-                                details: v.details,
-                                source: 'redhat'
-                            };
-                        }).filter(cve => cve.id !== 'Unknown CVE'); // Filter out invalid entries
-                    }
-                }
-
-                if (cisaData.length === 0 && redhatData.length === 0) {
-                    showError('No vulnerability data available. Make sure GitHub Actions has run at least once.');
-                    return;
-                }
-
-                updateLastUpdated();
-                applyFilters();
-            } catch (error) {
-                console.error('Error loading data:', error);
-                showError(`${error.message}<br><br>The GitHub Actions workflow needs to run first to fetch data. Please check the Actions tab.`);
             }
+
+            if (loadedData.length === 0) {
+                showError('No vulnerability data available. Please wait for GitHub Actions to run.');
+                return;
+            }
+
+            allVulnerabilities = loadedData;
+            updateLastUpdated();
+            applyFilters();
+        }
+
+        function parseCISA(data) {
+            if (!data.vulnerabilities) return [];
+            return data.vulnerabilities.map(v => ({
+                id: v.cveID,
+                description: v.shortDescription || v.vulnerabilityName,
+                publishedDate: new Date(v.dateAdded),
+                severity: 'high',
+                source: 'CISA KEV',
+                exploited: true,
+                url: `https://nvd.nist.gov/vuln/detail/${v.cveID}`,
+                vendor: v.vendorProject,
+                product: v.product
+            }));
+        }
+
+        function parseRedHat(data) {
+            if (!Array.isArray(data)) return [];
+            return data.map(v => ({
+                id: v.name || v.CVE,
+                description: (v.details || []).join(' ') || 'No description',
+                publishedDate: new Date(v.public_date || v.date),
+                severity: (v.threat_severity || '').toLowerCase(),
+                source: 'Red Hat',
+                exploited: false,
+                url: v.resource_url || `https://access.redhat.com/security/cve/${v.name}`,
+                cvss: v.cvss3?.cvss3_base_score
+            }));
+        }
+
+        function parseDebian(data) {
+            if (!Array.isArray(data)) return [];
+            return data.map(v => ({
+                id: v.cve || v.CVE,
+                description: v.description || 'No description',
+                publishedDate: new Date(v.date || Date.now()),
+                severity: (v.urgency || 'medium').toLowerCase(),
+                source: 'Debian',
+                exploited: false,
+                url: `https://security-tracker.debian.org/tracker/${v.cve}`
+            }));
+        }
+
+        function parseUbuntu(data) {
+            if (!Array.isArray(data)) return [];
+            return data.map(v => ({
+                id: v.cve || v.id,
+                description: v.description || v.summary || 'No description',
+                publishedDate: new Date(v.published || Date.now()),
+                severity: (v.priority || 'medium').toLowerCase(),
+                source: 'Ubuntu',
+                exploited: false,
+                url: `https://ubuntu.com/security/${v.cve}`
+            }));
+        }
+
+        function parseOSV(data) {
+            if (!Array.isArray(data)) return [];
+            return data.map(v => ({
+                id: v.id || v.cve_id,
+                description: v.summary || v.details || 'No description',
+                publishedDate: new Date(v.published || Date.now()),
+                severity: (v.severity || 'medium').toLowerCase(),
+                source: 'OSV.dev',
+                exploited: false,
+                url: `https://osv.dev/vulnerability/${v.id}`,
+                ecosystem: v.affected?.[0]?.package?.ecosystem
+            }));
+        }
+
+        function parseExploitDB(data) {
+            if (!Array.isArray(data)) return [];
+            return data.map(v => ({
+                id: v.cve || `EDB-${v.id}`,
+                description: v.description || v.title || 'No description',
+                publishedDate: new Date(v.published || v.date || Date.now()),
+                severity: 'high',
+                source: 'Exploit-DB',
+                exploited: true,
+                url: v.url || `https://www.exploit-db.com/exploits/${v.id}`
+            }));
+        }
+
+        function parsePostgreSQL(data) {
+            if (!Array.isArray(data)) return [];
+            return data.map(v => ({
+                id: v.cve || v.id,
+                description: v.description || v.summary || 'No description',
+                publishedDate: new Date(v.published || v.date || Date.now()),
+                severity: (v.severity || 'medium').toLowerCase(),
+                source: 'PostgreSQL',
+                exploited: false,
+                url: v.url || `https://www.postgresql.org/support/security/`
+            }));
+        }
+
+        function parseMySQL(data) {
+            if (!Array.isArray(data)) return [];
+            return data.map(v => ({
+                id: v.cve || v.id,
+                description: v.description || v.summary || 'No description',
+                publishedDate: new Date(v.published || v.date || Date.now()),
+                severity: (v.severity || 'medium').toLowerCase(),
+                source: 'MySQL',
+                exploited: false,
+                url: v.url || `https://www.oracle.com/security-alerts/`
+            }));
         }
 
         function updateLastUpdated() {
-            const messages = [];
-            if (cisaData.length > 0) {
-                messages.push(`CISA: ${cisaData.length} vulnerabilities`);
-            }
-            if (redhatData.length > 0) {
-                messages.push(`Red Hat: ${redhatData.length} CVEs`);
-            }
-            elements.lastUpdated.textContent = `Last updated: ${new Date().toLocaleDateString()} • ${messages.join(' | ')}`;
+            const sourceCount = {};
+            allVulnerabilities.forEach(v => {
+                sourceCount[v.source] = (sourceCount[v.source] || 0) + 1;
+            });
+            const summary = Object.entries(sourceCount).map(([k, v]) => `${k}: ${v}`).join(' | ');
+            elements.lastUpdated.textContent = `Last updated: ${new Date().toLocaleDateString()} • ${summary}`;
         }
 
         function resetFilters() {
-            elements.vendorInput.value = '';
-            elements.ransomwareSelect.value = 'all';
-            elements.timeRangeSelect.value = '30';
-            elements.rhSeveritySelect.value = 'all';
-            elements.rhProductInput.value = '';
-            elements.rhTimeRangeSelect.value = '30';
-            document.querySelector('input[name="dataSource"][value="cisa"]').checked = true;
-            currentSource = 'cisa';
-            elements.cisaFilters.style.display = 'grid';
-            elements.redhatFilters.style.display = 'none';
-            elements.cisaSectionLabel.style.display = 'none';
-            elements.redhatSectionLabel.style.display = 'none';
+            elements.searchTerm.value = '';
+            elements.severity.value = 'all';
+            elements.timeRange.value = '30';
+            elements.exploitStatus.value = 'all';
+            document.querySelector('input[name="dataSource"][value="all"]').checked = true;
+            currentSource = 'all';
             applyFilters();
         }
 
         function applyFilters() {
-            let filtered = [];
+            let filtered = [...allVulnerabilities];
 
-            // Apply source filter
-            if (currentSource === 'cisa') {
-                filtered = filterCISA(cisaData);
-            } else if (currentSource === 'redhat') {
-                filtered = filterRedHat(redhatData);
-            } else {
-                filtered = [...filterCISA(cisaData), ...filterRedHat(redhatData)];
+            // Source filter
+            if (currentSource !== 'all') {
+                if (currentSource === 'linux') {
+                    filtered = filtered.filter(v => ['Debian', 'Ubuntu'].includes(v.source));
+                } else if (currentSource === 'databases') {
+                    filtered = filtered.filter(v => ['PostgreSQL', 'MySQL', 'MariaDB', 'MongoDB', 'Redis'].includes(v.source));
+                } else {
+                    filtered = filtered.filter(v => v.source.toLowerCase().includes(currentSource.toLowerCase()));
+                }
             }
 
-            allCves = filtered;
+            // Search filter
+            const search = elements.searchTerm.value.toLowerCase();
+            if (search) {
+                filtered = filtered.filter(v => 
+                    v.id.toLowerCase().includes(search) ||
+                    v.description.toLowerCase().includes(search)
+                );
+            }
 
-            if (allCves.length === 0) {
+            // Severity filter
+            const sev = elements.severity.value;
+            if (sev !== 'all') {
+                filtered = filtered.filter(v => v.severity === sev);
+            }
+
+            // Time range filter
+            const timeRange = elements.timeRange.value;
+            if (timeRange !== 'all') {
+                const days = parseInt(timeRange);
+                const cutoff = new Date();
+                cutoff.setDate(cutoff.getDate() - days);
+                filtered = filtered.filter(v => v.publishedDate >= cutoff);
+            }
+
+            // Exploit status filter
+            const exploit = elements.exploitStatus.value;
+            if (exploit === 'exploited') {
+                filtered = filtered.filter(v => v.exploited);
+            } else if (exploit === 'poc') {
+                filtered = filtered.filter(v => v.source === 'Exploit-DB');
+            }
+
+            if (filtered.length === 0) {
                 showEmptyState();
             } else {
-                updateStats(allCves);
-                renderResults(allCves);
+                updateStats(filtered);
+                renderResults(filtered);
             }
         }
 
-        function filterCISA(data) {
-            const vendor = elements.vendorInput.value.trim().toLowerCase();
-            const ransomwareFilter = elements.ransomwareSelect.value;
-            const timeRange = elements.timeRangeSelect.value;
-
-            return data.filter(cve => {
-                // Filter by ransomware
-                if (ransomwareFilter === 'known' && !cve.ransomware) {
-                    return false;
+        function renderResults(vulns) {
+            const sorted = [...vulns].sort((a, b) => {
+                if (currentSort === 'date') return b.publishedDate - a.publishedDate;
+                if (currentSort === 'severity') {
+                    const order = { critical: 0, high: 1, medium: 2, low: 3 };
+                    return (order[a.severity] || 4) - (order[b.severity] || 4);
                 }
-                if (ransomwareFilter === 'unknown' && cve.ransomware) {
-                    return false;
-                }
-
-                // Filter by vendor/product
-                if (vendor) {
-                    const vendorMatch = cve.description.toLowerCase().includes(vendor) ||
-                                      cve.vendors?.toLowerCase().includes(vendor) ||
-                                      cve.product?.toLowerCase().includes(vendor);
-                    if (!vendorMatch) return false;
-                }
-
-                // Filter by time range
-                if (timeRange !== 'all') {
-                    const days = parseInt(timeRange);
-                    const cutoffDate = new Date();
-                    cutoffDate.setDate(cutoffDate.getDate() - days);
-                    if (cve.publishedDate < cutoffDate) {
-                        return false;
-                    }
-                }
-
-                return true;
-            });
-        }
-
-        function filterRedHat(data) {
-            const severity = elements.rhSeveritySelect.value;
-            const product = elements.rhProductInput.value.trim().toLowerCase();
-            const timeRange = elements.rhTimeRangeSelect.value;
-
-            return data.filter(cve => {
-                // Filter by severity
-                if (severity !== 'all' && cve.severity !== severity) {
-                    return false;
-                }
-
-                // Filter by product
-                if (product) {
-                    const productMatch = cve.description.toLowerCase().includes(product) ||
-                                        cve.product?.toLowerCase().includes(product);
-                    if (!productMatch) return false;
-                }
-
-                // Filter by time range
-                if (timeRange !== 'all') {
-                    const days = parseInt(timeRange);
-                    const cutoffDate = new Date();
-                    cutoffDate.setDate(cutoffDate.getDate() - days);
-                    if (cve.publishedDate < cutoffDate) {
-                        return false;
-                    }
-                }
-
-                return true;
-            });
-        }
-
-        function renderResults(cves) {
-            const sorted = [...cves].sort((a, b) => {
-                if (currentSort === 'date') {
-                    return b.publishedDate - a.publishedDate;
-                } else if (currentSort === 'vendor') {
-                    return (a.vendors || '').localeCompare(b.vendors || '');
-                } else if (currentSort === 'severity') {
-                    const severityOrder = { 'Critical': 0, 'Important': 1, 'Moderate': 2, 'Low': 3 };
-                    const aSev = severityOrder[a.severity] ?? 4;
-                    const bSev = severityOrder[b.severity] ?? 4;
-                    return aSev - bSev;
-                }
+                if (currentSort === 'source') return a.source.localeCompare(b.source);
             });
 
             elements.resultsHeader.style.display = 'flex';
-            
-            // Update results count with proper breakdown
-            const totalCount = sorted.length;
-            const cisaCount = sorted.filter(c => c.source === 'cisa').length;
-            const redhatCount = sorted.filter(c => c.source === 'redhat').length;
-            
-            if (currentSource === 'both') {
-                elements.resultsCount.textContent = `${totalCount} total vulnerabilities`;
-                elements.resultsBreakdown.textContent = `${cisaCount} from CISA • ${redhatCount} from Red Hat`;
-                elements.resultsBreakdown.style.display = 'block';
-            } else if (currentSource === 'cisa') {
-                elements.resultsCount.textContent = `${totalCount} CISA vulnerability${totalCount !== 1 ? 'ies' : ''}`;
-                elements.resultsBreakdown.style.display = 'none';
-            } else {
-                elements.resultsCount.textContent = `${totalCount} Red Hat CVE${totalCount !== 1 ? 's' : ''}`;
-                elements.resultsBreakdown.style.display = 'none';
-            }
+            elements.resultsCount.textContent = `${sorted.length} vulnerabilities`;
 
-            const html = sorted.map(cve => {
-                if (cve.source === 'cisa') {
-                    return renderCISACard(cve);
-                } else {
-                    return renderRedHatCard(cve);
-                }
-            }).join('');
+            const sourceCounts = {};
+            sorted.forEach(v => sourceCounts[v.source] = (sourceCounts[v.source] || 0) + 1);
+            elements.resultsBreakdown.textContent = Object.entries(sourceCounts)
+                .map(([k, v]) => `${k}: ${v}`).join(' • ');
 
-            elements.resultsContainer.innerHTML = `<div class="results-grid">${html}</div>`;
-        }
-
-        function renderCISACard(cve) {
-            return `
-                <div class="cve-card cisa-source">
+            const html = sorted.map((v, idx) => `
+                <div class="cve-card" style="--card-index: ${idx}">
                     <div class="cve-header">
-                        <a href="${cve.url}" target="_blank" class="cve-id">
-                            <i class="fas fa-bug"></i> ${cve.id}
+                        <a href="${v.url}" target="_blank" class="cve-id">
+                            <i class="fas fa-bug"></i> ${v.id}
                         </a>
                         <div class="badge-container">
-                            <span class="badge badge-exploited"><i class="fas fa-bolt"></i> Exploited</span>
-                            ${cve.ransomware ? '<span class="badge badge-ransomware"><i class="fas fa-lock"></i> Ransomware</span>' : ''}
-                            ${isDueSoon(cve.dueDate) ? '<span class="badge badge-due-soon"><i class="fas fa-exclamation-circle"></i> Due Soon</span>' : ''}
+                            ${v.exploited ? '<span class="badge badge-exploited"><i class="fas fa-bolt"></i> Exploited</span>' : ''}
+                            ${v.severity ? `<span class="badge badge-${v.severity}"><i class="fas fa-exclamation-triangle"></i> ${v.severity.toUpperCase()}</span>` : ''}
                         </div>
                     </div>
-                    <div class="cve-description">
-                        ${cve.description}
-                    </div>
-                    ${cve.action ? `
-                        <div class="action-required">
-                            <i class="fas fa-exclamation-triangle action-icon"></i>
-                            <div><strong>Required Action:</strong> ${cve.action}</div>
-                        </div>
-                    ` : ''}
-                    <div class="cve-meta">
-                        <div class="meta-item">
-                            <i class="fas fa-calendar-plus meta-icon"></i>
-                            <span class="meta-label">Added:</span>
-                            <span>${formatDate(cve.publishedDate)}</span>
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-clock meta-icon"></i>
-                            <span class="meta-label">Due:</span>
-                            <span style="color: ${isDueSoon(cve.dueDate) ? 'var(--critical)' : 'inherit'};">
-                                ${formatDate(cve.dueDate)}
-                            </span>
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-building meta-icon"></i>
-                            <span class="meta-label">Vendor:</span>
-                            <span>${cve.vendors}</span>
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-cube meta-icon"></i>
-                            <span class="meta-label">Product:</span>
-                            <span>${cve.product}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderRedHatCard(cve) {
-            const severityBadge = {
-                'Critical': 'badge-critical',
-                'Important': 'badge-important',
-                'Moderate': 'badge-moderate',
-                'Low': 'badge-low'
-            }[cve.severity] || '';
-
-            // Truncate long descriptions
-            const displayDescription = cve.description.length > 250 
-                ? cve.description.substring(0, 250) + '...' 
-                : cve.description;
-
-            // Format CVSS score if available
-            const cvssDisplay = cve.cvss3Score ? `CVSS:3.0/${cve.cvss3Score}` : '';
-
-            return `
-                <div class="cve-card redhat-source">
-                    <div class="cve-header">
-                        <a href="${cve.url}" target="_blank" class="cve-id">
-                            <i class="fas fa-bug"></i> ${cve.id}
-                        </a>
-                        <div class="badge-container">
-                            <span class="badge badge-source"><i class="fab fa-redhat"></i> Red Hat</span>
-                            ${cve.severity && cve.severity !== 'Unknown' ? 
-                                `<span class="badge ${severityBadge}"><i class="fas fa-exclamation-triangle"></i> ${cve.severity}</span>` : ''}
-                            ${cvssDisplay ? `<span class="badge badge-cvss">${cvssDisplay}</span>` : ''}
-                        </div>
-                    </div>
-                    <div class="cve-description">
-                        ${displayDescription}
-                    </div>
-                    ${cve.bugzillaUrl ? `
-                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 0.85rem;">
-                            <a href="${cve.bugzillaUrl}" target="_blank" style="color: var(--accent); text-decoration: none; display: flex; align-items: center; gap: 6px;">
-                                <i class="fas fa-external-link-alt"></i> Bugzilla #${cve.bugzillaId}
-                            </a>
-                        </div>
-                    ` : ''}
+                    <div class="cve-description">${v.description.substring(0, 200)}${v.description.length > 200 ? '...' : ''}</div>
                     <div class="cve-meta">
                         <div class="meta-item">
                             <i class="fas fa-calendar-plus meta-icon"></i>
                             <span class="meta-label">Published:</span>
-                            <span>${formatDate(cve.publishedDate)}</span>
+                            <span>${formatDate(v.publishedDate)}</span>
                         </div>
-                        ${cve.cvss3Score ? `
+                        <div class="meta-item">
+                            <i class="fas fa-layer-group meta-icon"></i>
+                            <span class="meta-label">Source:</span>
+                            <span>${v.source}</span>
+                        </div>
+                        ${v.cvss ? `
                             <div class="meta-item">
                                 <i class="fas fa-chart-line meta-icon"></i>
-                                <span class="meta-label">CVSS 3:</span>
-                                <span style="font-weight: 600;">${cve.cvss3Score}</span>
-                            </div>
-                        ` : ''}
-                        <div class="meta-item">
-                            <i class="fas fa-cube meta-icon"></i>
-                            <span class="meta-label">Product:</span>
-                            <span title="${cve.product}">${cve.product.length > 30 ? cve.product.substring(0, 30) + '...' : cve.product}</span>
-                        </div>
-                        ${cve.cwe ? `
-                            <div class="meta-item">
-                                <i class="fas fa-code meta-icon"></i>
-                                <span class="meta-label">CWE:</span>
-                                <span>${cve.cwe}</span>
+                                <span class="meta-label">CVSS:</span>
+                                <span style="font-weight: 700;">${v.cvss}</span>
                             </div>
                         ` : ''}
                     </div>
-                    ${cve.references && cve.references.length > 0 ? `
-                        <div class="references-section">
-                            <div class="references-title">
-                                <i class="fas fa-link"></i> References:
-                            </div>
-                            <div class="references-list">
-                                ${cve.references.slice(0, 3).map(ref => 
-                                    `<div class="reference-item">
-                                        <a href="${ref}" target="_blank" class="reference-link">
-                                            ${ref.length > 60 ? ref.substring(0, 60) + '...' : ref}
-                                        </a>
-                                    </div>`
-                                ).join('')}
-                                ${cve.references.length > 3 ? 
-                                    `<div class="more-references">+ ${cve.references.length - 3} more references</div>` : ''}
-                            </div>
-                        </div>
-                    ` : ''}
                 </div>
-            `;
+            `).join('');
+
+            elements.resultsContainer.innerHTML = `<div class="results-grid">${html}</div>`;
         }
 
-        function updateStats(cves) {
-            elements.statsBar.style.display = 'flex';
+        function updateStats(vulns) {
+            elements.statsBar.style.display = 'grid';
 
-            const cisaCves = cves.filter(c => c.source === 'cisa');
-            const redhatCves = cves.filter(c => c.source === 'redhat');
+            const critical = vulns.filter(v => v.severity === 'critical').length;
+            const high = vulns.filter(v => v.severity === 'high').length;
+            const exploited = vulns.filter(v => v.exploited).length;
+            const sources = new Set(vulns.map(v => v.source)).size;
 
-            const now = new Date();
-            const dueSoon = cisaCves.filter(c => {
-                if (!c.dueDate) return false;
-                const daysUntilDue = Math.ceil((c.dueDate - now) / (1000 * 60 * 60 * 24));
-                return daysUntilDue >= 0 && daysUntilDue <= 7;
-            }).length;
-
-            const criticalRedHat = redhatCves.filter(c => c.severity === 'Critical').length;
-            const importantRedHat = redhatCves.filter(c => c.severity === 'Important').length;
-            const ransomware = cisaCves.filter(c => c.ransomware).length;
-
-            let statsHtml = `
+            elements.statsBar.innerHTML = `
                 <div class="stat-card">
-                    <div class="stat-label"><i class="fas fa-bug"></i> Total Results</div>
-                    <div class="stat-value">${cves.length}</div>
+                    <div class="stat-label"><i class="fas fa-bug"></i> Total Vulnerabilities</div>
+                    <div class="stat-value">${vulns.length}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label"><i class="fas fa-fire"></i> Critical Severity</div>
+                    <div class="stat-value" style="color: var(--critical);">${critical}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label"><i class="fas fa-exclamation-triangle"></i> High Severity</div>
+                    <div class="stat-value" style="color: var(--high);">${high}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label"><i class="fas fa-bolt"></i> Actively Exploited</div>
+                    <div class="stat-value" style="color: var(--accent);">${exploited}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label"><i class="fas fa-layer-group"></i> Data Sources</div>
+                    <div class="stat-value">${sources}</div>
                 </div>
             `;
-
-            if (currentSource === 'cisa' || currentSource === 'both') {
-                statsHtml += `
-                    <div class="stat-card">
-                        <div class="stat-label"><i class="fas fa-exclamation-triangle"></i> CISA KEV</div>
-                        <div class="stat-value" style="color: var(--accent);">${cisaCves.length}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label"><i class="fas fa-lock"></i> Ransomware Use</div>
-                        <div class="stat-value" style="color: #ec4899;">${ransomware}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label"><i class="fas fa-clock"></i> Due Within 7 Days</div>
-                        <div class="stat-value" style="color: var(--critical);">${dueSoon}</div>
-                    </div>
-                `;
-            }
-
-            if (currentSource === 'redhat' || currentSource === 'both') {
-                statsHtml += `
-                    <div class="stat-card">
-                        <div class="stat-label"><i class="fab fa-redhat"></i> Red Hat CVEs</div>
-                        <div class="stat-value" style="color: var(--redhat);">${redhatCves.length}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label"><i class="fas fa-fire"></i> Critical Severity</div>
-                        <div class="stat-value" style="color: var(--critical);">${criticalRedHat}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label"><i class="fas fa-exclamation-circle"></i> Important Severity</div>
-                        <div class="stat-value" style="color: var(--high);">${importantRedHat}</div>
-                    </div>
-                `;
-            }
-
-            elements.statsBar.innerHTML = statsHtml;
-        }
-
-        function isDueSoon(dueDate) {
-            if (!dueDate) return false;
-            const now = new Date();
-            const daysUntilDue = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
-            return daysUntilDue >= 0 && daysUntilDue <= 7;
         }
 
         function showLoading() {
@@ -1395,7 +1114,6 @@
         function showError(message) {
             elements.statsBar.style.display = 'none';
             elements.resultsHeader.style.display = 'none';
-            elements.lastUpdated.textContent = 'Failed to load data';
             elements.resultsContainer.innerHTML = `
                 <div class="error">
                     <h3><i class="fas fa-exclamation-triangle"></i> Error</h3>
@@ -1409,32 +1127,23 @@
             elements.resultsHeader.style.display = 'none';
             elements.resultsContainer.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-state-icon">
-                        <i class="fas fa-search"></i>
-                    </div>
+                    <div class="empty-state-icon"><i class="fas fa-search"></i></div>
                     <h3>No Results Found</h3>
-                    <p>Try adjusting your filters or expanding the time range.</p>
+                    <p>Try adjusting your filters or expanding the search criteria.</p>
                 </div>
             `;
         }
 
         function formatDate(date) {
             if (!date || isNaN(date.getTime())) return 'N/A';
-            
             const now = new Date();
             const diff = now - date;
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
             if (days === 0) return 'Today';
             if (days === 1) return 'Yesterday';
             if (days < 7) return `${days} days ago`;
             if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
-
-            return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
         }
     </script>
 </body>
