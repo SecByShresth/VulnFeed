@@ -1,232 +1,731 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>VulnFeed — Unified Vulnerability Dashboard</title>
-<style>
-  :root {
-    --bg: #f5f5f5;
-    --fg: #222;
-    --card-bg: #fff;
-    --accent: #0078d7;
-  }
-  [data-theme="dark"] {
-    --bg: #121212;
-    --fg: #f5f5f5;
-    --card-bg: #1e1e1e;
-    --accent: #3ea6ff;
-  }
-  body {
-    margin: 0;
-    font-family: "Inter", system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--fg);
-    transition: background .3s, color .3s;
-  }
-  header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 1.5rem;
-    background: var(--card-bg);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  h1 {
-    font-size: 1.2rem;
-    margin: 0;
-  }
-  .theme-toggle {
-    cursor: pointer;
-    border: none;
-    background: var(--accent);
-    color: #fff;
-    padding: 0.4rem 0.8rem;
-    border-radius: 0.5rem;
-  }
-  nav {
-    padding: 1rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    justify-content: center;
-    background: var(--card-bg);
-  }
-  nav button {
-    border: none;
-    background: var(--accent);
-    color: #fff;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    font-size: 0.9rem;
-  }
-  nav button.active {
-    background: #005fa3;
-  }
-  section.meta {
-    margin: 1.5rem;
-    padding: 1rem;
-    border-radius: 0.75rem;
-    background: var(--card-bg);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-  }
-  .meta p { margin: 0.2rem 0; }
-  #vulnContainer {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 1rem;
-    padding: 1.5rem;
-  }
-  .vuln-card {
-    background: var(--card-bg);
-    padding: 1rem;
-    border-radius: 0.75rem;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.2s ease;
-  }
-  .vuln-card:hover { transform: translateY(-3px); }
-  .vuln-card h3 {
-    margin: 0 0 0.5rem 0;
-    color: var(--accent);
-    font-size: 1.05rem;
-  }
-  .vuln-card p { margin: 0.2rem 0; font-size: 0.9rem; }
-  .small { opacity: 0.8; font-size: 0.85rem; }
-  .loading { text-align: center; padding: 2rem; font-style: italic; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VulnFeed - Unified Vulnerability Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #151932;
+            --bg-card: #1a1f3a;
+            --text-primary: #e4e4e7;
+            --text-secondary: #a1a1aa;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --border: #27293d;
+            --critical: #ef4444;
+            --high: #f97316;
+            --medium: #eab308;
+            --low: #22c55e;
+            --info: #3b82f6;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .tab:hover {
+            background: var(--bg-card);
+            border-color: var(--accent);
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .vuln-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .vuln-card {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .vuln-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+        }
+
+        .vuln-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.75rem;
+            gap: 1rem;
+        }
+
+        .vuln-id {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .severity-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .severity-critical { background: var(--critical); color: white; }
+        .severity-important { background: var(--high); color: white; }
+        .severity-high { background: var(--high); color: white; }
+        .severity-moderate { background: var(--medium); color: #000; }
+        .severity-medium { background: var(--medium); color: #000; }
+        .severity-low { background: var(--low); color: white; }
+        .severity-unknown { background: var(--text-secondary); color: white; }
+
+        .vuln-description {
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .vuln-meta {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 16px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+
+        .modal-header {
+            padding: 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .close-modal {
+            background: var(--bg-secondary);
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            background: var(--accent);
+        }
+
+        .detail-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-value {
+            color: var(--text-primary);
+        }
+
+        .link-button {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .link-button:hover {
+            background: var(--accent-hover);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--critical);
+            padding: 1rem;
+            border-radius: 8px;
+            color: var(--critical);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 1.75rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
 </head>
-<body data-theme="light">
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ VulnFeed</h1>
+            <p class="subtitle">Unified Vulnerability Intelligence Dashboard</p>
+        </header>
 
-<header>
-  <h1>🛡️ VulnFeed — Unified Vulnerability Dashboard</h1>
-  <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
-</header>
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalVulns">-</div>
+                <div class="stat-label">Total Vulnerabilities</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="lastUpdate">-</div>
+                <div class="stat-label">Last Updated</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="dataSources">-</div>
+                <div class="stat-label">Data Sources</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="criticalCount">-</div>
+                <div class="stat-label">Critical/High</div>
+            </div>
+        </div>
 
-<nav id="feedSelector"></nav>
-<section class="meta" id="metaInfo"><p>Select a feed to view vulnerability data.</p></section>
-<div id="vulnContainer" class="loading">Awaiting selection...</div>
+        <div class="tabs" id="tabs"></div>
 
-<script>
-const sources = [
-  { name: "CISA KEV", file: "data/cisa-kev.json" },
-  { name: "MySQL", file: "data/mysql.json" },
-  { name: "PostgreSQL", file: "data/postgresql.json" },
-  { name: "Redis", file: "data/redis.json" },
-  { name: "Red Hat", file: "data/redhat-cves.json" }, // ✅ Correct path
-  { name: "AlmaLinux", file: "data/almalinux.json" },
-  { name: "Debian", file: "data/debian.json" },
-  { name: "Ubuntu", file: "data/ubuntu.json" },
-  { name: "Rocky", file: "data/rocky.json" },
-  { name: "SUSE", file: "data/suse.json" }
-];
+        <div id="content">
+            <div class="loading">Loading vulnerability data...</div>
+        </div>
+    </div>
 
-const nav = document.getElementById("feedSelector");
-sources.forEach(src => {
-  const btn = document.createElement("button");
-  btn.textContent = src.name;
-  btn.onclick = () => {
-    document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    loadFeed(src);
-  };
-  nav.appendChild(btn);
-});
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 id="modalTitle"></h2>
+                    <div id="modalBadges" style="margin-top: 0.5rem;"></div>
+                </div>
+                <button class="close-modal" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
 
-async function loadFeed(source) {
-  const container = document.getElementById("vulnContainer");
-  const meta = document.getElementById("metaInfo");
-  container.innerHTML = "<p>Loading...</p>";
-  try {
-    const res = await fetch(source.file);
-    const data = await res.json();
+    <script>
+        const DATA_SOURCES = {
+            'cisa-kev': { name: 'CISA KEV', icon: '🇺🇸' },
+            'redhat-cves': { name: 'Red Hat', icon: '🎩' },
+            'almalinux': { name: 'AlmaLinux', icon: '🐧' },
+            'rocky': { name: 'Rocky Linux', icon: '⛰️' },
+            'debian': { name: 'Debian', icon: '🌀' },
+            'ubuntu': { name: 'Ubuntu', icon: '🟠' },
+            'suse': { name: 'SUSE', icon: '🦎' },
+            'mysql': { name: 'MySQL', icon: '🐬' },
+            'postgresql': { name: 'PostgreSQL', icon: '🐘' },
+            'redis': { name: 'Redis', icon: '📮' }
+        };
 
-    // --- Metadata ---
-    meta.innerHTML = `<h2>${source.name}</h2>`;
-    if (source.name === "CISA KEV") {
-      meta.innerHTML += `
-        <p><strong>Catalog Version:</strong> ${data.catalogVersion}</p>
-        <p><strong>Date Released:</strong> ${new Date(data.dateReleased).toLocaleString()}</p>
-        <p><strong>Total Vulnerabilities:</strong> ${data.count}</p>
-      `;
-      renderCISA(data.vulnerabilities);
-    } else {
-      meta.innerHTML += `<p>Entries: ${data.length || data.vulnerabilities?.length || 'N/A'}</p>`;
-      renderGeneric(data, source.name);
-    }
+        let allData = {};
+        let currentTab = 'dashboard';
 
-  } catch (err) {
-    console.error(`Error loading ${source.name}:`, err);
-    container.innerHTML = `<p>Failed to load ${source.name} data.</p>`;
-  }
-}
+        async function loadData() {
+            const results = {};
+            
+            for (const [key, source] of Object.entries(DATA_SOURCES)) {
+                try {
+                    const response = await fetch(`data/${key}.json`);
+                    if (response.ok) {
+                        results[key] = await response.json();
+                    }
+                } catch (error) {
+                    console.error(`Failed to load ${key}:`, error);
+                }
+            }
+            
+            return results;
+        }
 
-function renderCISA(vulns) {
-  const container = document.getElementById("vulnContainer");
-  container.innerHTML = "";
-  vulns.forEach(v => {
-    const refs = v.notes ? v.notes.split(";").map(n =>
-      `<a href="${n.trim()}" target="_blank">${n.trim()}</a>`
-    ).join(" | ") : "";
-    const card = document.createElement("div");
-    card.className = "vuln-card";
-    card.innerHTML = `
-      <h3>${v.cveID}</h3>
-      <p><strong>${v.vendorProject}</strong> — ${v.product}</p>
-      <p><em>${v.vulnerabilityName}</em></p>
-      <p>${v.shortDescription}</p>
-      <p class="small"><strong>Date Added:</strong> ${v.dateAdded} | <strong>Due:</strong> ${v.dueDate}</p>
-      <p class="small"><strong>Ransomware Use:</strong> ${v.knownRansomwareCampaignUse}</p>
-      <p class="small"><strong>Required Action:</strong> ${v.requiredAction}</p>
-      ${refs ? `<p class="small"><strong>References:</strong> ${refs}</p>` : ""}
-    `;
-    container.appendChild(card);
-  });
-  if (vulns.length === 0) container.innerHTML = "<p>No vulnerabilities found.</p>";
-}
+        function normalizeVulnerability(vuln, source) {
+            // Normalize different data formats
+            if (source === 'cisa-kev') {
+                return {
+                    id: vuln.cveID,
+                    title: vuln.vulnerabilityName,
+                    description: vuln.shortDescription,
+                    severity: vuln.knownRansomwareCampaignUse === 'Known' ? 'critical' : 'high',
+                    date: vuln.dateAdded,
+                    vendor: vuln.vendorProject,
+                    product: vuln.product,
+                    dueDate: vuln.dueDate,
+                    cvss: null,
+                    references: vuln.notes ? [vuln.notes] : [],
+                    source: source
+                };
+            } else if (source === 'redhat-cves') {
+                return {
+                    id: vuln.CVE,
+                    title: vuln.bugzilla_description || vuln.CVE,
+                    description: vuln.bugzilla_description || 'No description available',
+                    severity: vuln.severity || 'unknown',
+                    date: vuln.public_date,
+                    cvss: vuln.cvss3_score || vuln.cvss_score,
+                    cvssVector: vuln.cvss3_scoring_vector || vuln.cvss_scoring_vector,
+                    cwe: vuln.CWE,
+                    bugzilla: vuln.bugzilla,
+                    affectedPackages: vuln.affected_packages,
+                    references: [vuln.resource_url],
+                    source: source
+                };
+            } else if (['almalinux', 'rocky', 'debian', 'ubuntu', 'suse'].includes(source)) {
+                return {
+                    id: vuln.id,
+                    title: vuln.summary || vuln.id,
+                    description: vuln.details || 'No description available',
+                    severity: vuln.database_specific?.severity || 'unknown',
+                    date: vuln.published,
+                    modified: vuln.modified,
+                    aliases: vuln.aliases || [],
+                    affected: vuln.affected || [],
+                    references: vuln.references || [],
+                    source: source
+                };
+            } else if (['mysql', 'postgresql', 'redis'].includes(source)) {
+                return {
+                    id: vuln.id,
+                    title: vuln.summary || vuln.id,
+                    description: vuln.details || 'No description available',
+                    severity: vuln.database_specific?.severity || 
+                             (vuln.severity && vuln.severity.length > 0 ? vuln.severity[0].type : 'unknown'),
+                    date: vuln.published,
+                    modified: vuln.modified,
+                    aliases: vuln.aliases || [],
+                    affected: vuln.affected || [],
+                    references: vuln.references || [],
+                    source: source
+                };
+            }
+            
+            return vuln;
+        }
 
-function renderGeneric(data, sourceName) {
-  const container = document.getElementById("vulnContainer");
-  container.innerHTML = "";
+        function getSeverityClass(severity) {
+            if (!severity) return 'severity-unknown';
+            const s = severity.toLowerCase();
+            if (s.includes('critical')) return 'severity-critical';
+            if (s.includes('important') || s.includes('high')) return 'severity-important';
+            if (s.includes('moderate') || s.includes('medium')) return 'severity-moderate';
+            if (s.includes('low')) return 'severity-low';
+            return 'severity-unknown';
+        }
 
-  const vulns = data.vulnerabilities || data || [];
-  vulns.forEach(v => {
-    const title = v.title || v.id || v.cveID || "Unknown Vulnerability";
-    const severity = v.severity || v.cvss?.severity || "N/A";
-    const desc = v.description || v.shortDescription || v.details || "";
-    const date = v.date || v.public_date || v.published || v.updated || "";
-    const refs = (v.references || v.links || v.urls || []).map(r =>
-      `<a href="${r}" target="_blank">${r}</a>`).join(" | ");
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
 
-    const card = document.createElement("div");
-    card.className = "vuln-card";
-    card.innerHTML = `
-      <h3>${title}</h3>
-      <p><strong>Severity:</strong> ${severity}</p>
-      <p>${desc}</p>
-      <p class="small"><strong>Date:</strong> ${date}</p>
-      ${refs ? `<p class="small"><strong>References:</strong> ${refs}</p>` : ""}
-    `;
-    container.appendChild(card);
-  });
-  if (vulns.length === 0) container.innerHTML = "<p>No vulnerabilities found.</p>";
-}
+        function renderVulnerabilityCard(vuln) {
+            return `
+                <div class="vuln-card" onclick='showModal(${JSON.stringify(vuln).replace(/'/g, "&apos;")})'>
+                    <div class="vuln-header">
+                        <div class="vuln-id">${vuln.id}</div>
+                        <span class="severity-badge ${getSeverityClass(vuln.severity)}">
+                            ${vuln.severity || 'Unknown'}
+                        </span>
+                    </div>
+                    <div class="vuln-description">${vuln.title || vuln.description}</div>
+                    <div class="vuln-meta">
+                        <div class="meta-item">📅 ${formatDate(vuln.date)}</div>
+                        ${vuln.cvss ? `<div class="meta-item">⚠️ CVSS: ${vuln.cvss}</div>` : ''}
+                        ${vuln.vendor ? `<div class="meta-item">🏢 ${vuln.vendor}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
 
-function toggleTheme() {
-  const body = document.body;
-  const theme = body.getAttribute("data-theme") === "dark" ? "light" : "dark";
-  body.setAttribute("data-theme", theme);
-  localStorage.setItem("theme", theme);
-}
-(function initTheme() {
-  const saved = localStorage.getItem("theme");
-  if (saved) document.body.setAttribute("data-theme", saved);
-})();
-</script>
+        function renderDashboard() {
+            let totalVulns = 0;
+            let criticalCount = 0;
+            let latestDate = null;
+
+            for (const [source, data] of Object.entries(allData)) {
+                const vulns = source === 'cisa-kev' ? data.vulnerabilities : data;
+                if (Array.isArray(vulns)) {
+                    totalVulns += vulns.length;
+                    
+                    vulns.forEach(v => {
+                        const normalized = normalizeVulnerability(v, source);
+                        const sev = (normalized.severity || '').toLowerCase();
+                        if (sev.includes('critical') || sev.includes('important') || sev.includes('high')) {
+                            criticalCount++;
+                        }
+                        
+                        const vDate = new Date(normalized.date);
+                        if (!latestDate || vDate > latestDate) {
+                            latestDate = vDate;
+                        }
+                    });
+                }
+            }
+
+            document.getElementById('totalVulns').textContent = totalVulns.toLocaleString();
+            document.getElementById('lastUpdate').textContent = latestDate ? formatDate(latestDate) : 'N/A';
+            document.getElementById('dataSources').textContent = Object.keys(allData).length;
+            document.getElementById('criticalCount').textContent = criticalCount.toLocaleString();
+
+            let html = '<div class="vuln-grid">';
+            
+            for (const [source, info] of Object.entries(DATA_SOURCES)) {
+                if (!allData[source]) continue;
+                
+                const data = allData[source];
+                const vulns = source === 'cisa-kev' ? data.vulnerabilities : data;
+                const count = Array.isArray(vulns) ? vulns.length : 0;
+                
+                html += `
+                    <div class="vuln-card" onclick="switchTab('${source}')">
+                        <div class="vuln-header">
+                            <div class="vuln-id">${info.icon} ${info.name}</div>
+                            <span class="severity-badge severity-unknown">${count} vulns</span>
+                        </div>
+                        <div class="vuln-description">Click to view ${info.name} vulnerabilities</div>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            document.getElementById('content').innerHTML = html;
+        }
+
+        function renderSource(source) {
+            if (!allData[source]) {
+                document.getElementById('content').innerHTML = '<div class="empty-state">No data available for this source</div>';
+                return;
+            }
+
+            const data = allData[source];
+            let vulns = source === 'cisa-kev' ? data.vulnerabilities : data;
+            
+            if (!Array.isArray(vulns) || vulns.length === 0) {
+                document.getElementById('content').innerHTML = '<div class="empty-state">No vulnerabilities found</div>';
+                return;
+            }
+
+            vulns = vulns.slice(0, 100).map(v => normalizeVulnerability(v, source));
+            
+            let html = '<div class="vuln-grid">';
+            vulns.forEach(vuln => {
+                html += renderVulnerabilityCard(vuln);
+            });
+            html += '</div>';
+            
+            document.getElementById('content').innerHTML = html;
+        }
+
+        function showModal(vuln) {
+            document.getElementById('modalTitle').textContent = vuln.id;
+            document.getElementById('modalBadges').innerHTML = `
+                <span class="severity-badge ${getSeverityClass(vuln.severity)}">${vuln.severity || 'Unknown'}</span>
+                <span class="tag">${DATA_SOURCES[vuln.source]?.name || vuln.source}</span>
+            `;
+            
+            let body = `
+                <div class="detail-section">
+                    <div class="detail-label">Description</div>
+                    <div class="detail-value">${vuln.description}</div>
+                </div>
+                
+                <div class="detail-section">
+                    <div class="detail-label">Published Date</div>
+                    <div class="detail-value">${formatDate(vuln.date)}</div>
+                </div>
+            `;
+            
+            if (vuln.modified) {
+                body += `
+                    <div class="detail-section">
+                        <div class="detail-label">Last Modified</div>
+                        <div class="detail-value">${formatDate(vuln.modified)}</div>
+                    </div>
+                `;
+            }
+            
+            if (vuln.cvss) {
+                body += `
+                    <div class="detail-section">
+                        <div class="detail-label">CVSS Score</div>
+                        <div class="detail-value">${vuln.cvss} ${vuln.cvssVector ? `(${vuln.cvssVector})` : ''}</div>
+                    </div>
+                `;
+            }
+            
+            if (vuln.cwe) {
+                body += `
+                    <div class="detail-section">
+                        <div class="detail-label">CWE</div>
+                        <div class="detail-value">${vuln.cwe}</div>
+                    </div>
+                `;
+            }
+            
+            if (vuln.aliases && vuln.aliases.length > 0) {
+                body += `
+                    <div class="detail-section">
+                        <div class="detail-label">Aliases</div>
+                        <div class="detail-value">
+                            ${vuln.aliases.map(a => `<span class="tag">${a}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (vuln.affectedPackages && vuln.affectedPackages.length > 0) {
+                body += `
+                    <div class="detail-section">
+                        <div class="detail-label">Affected Packages</div>
+                        <div class="detail-value">
+                            ${vuln.affectedPackages.map(p => `<span class="tag">${p}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (vuln.references && vuln.references.length > 0) {
+                const refs = Array.isArray(vuln.references) ? vuln.references : [vuln.references];
+                body += `
+                    <div class="detail-section">
+                        <div class="detail-label">References</div>
+                        <div class="detail-value">
+                            ${refs.map(ref => {
+                                const url = typeof ref === 'string' ? ref : ref.url;
+                                if (url) {
+                                    return `<a href="${url}" target="_blank" class="link-button" style="margin: 0.25rem; display: inline-block;">View Reference →</a>`;
+                                }
+                                return '';
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('modalBody').innerHTML = body;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`[data-tab="${tab}"]`)?.classList.add('active');
+            
+            if (tab === 'dashboard') {
+                renderDashboard();
+            } else {
+                renderSource(tab);
+            }
+        }
+
+        function renderTabs() {
+            let html = '<div class="tab active" data-tab="dashboard" onclick="switchTab(\'dashboard\')">📊 Dashboard</div>';
+            
+            for (const [key, source] of Object.entries(DATA_SOURCES)) {
+                if (allData[key]) {
+                    html += `<div class="tab" data-tab="${key}" onclick="switchTab('${key}')">${source.icon} ${source.name}</div>`;
+                }
+            }
+            
+            document.getElementById('tabs').innerHTML = html;
+        }
+
+        // Close modal on background click
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') closeModal();
+        });
+
+        // Initialize
+        (async () => {
+            try {
+                allData = await loadData();
+                renderTabs();
+                renderDashboard();
+            } catch (error) {
+                document.getElementById('content').innerHTML = `<div class="error">Failed to load data: ${error.message}</div>`;
+            }
+        })();
+    </script>
 </body>
 </html>
