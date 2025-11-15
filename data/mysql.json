@@ -9,13 +9,13 @@
     "modified": "2024-10-24T17:12:14.830506Z",
     "published": "2024-10-15T21:30:39Z",
     "database_specific": {
-      "github_reviewed_at": "2024-10-24T16:45:37Z",
-      "github_reviewed": true,
       "cwe_ids": [
         "CWE-89"
       ],
-      "nvd_published_at": "2024-10-15T20:15:18Z",
-      "severity": "HIGH"
+      "severity": "HIGH",
+      "github_reviewed_at": "2024-10-24T16:45:37Z",
+      "github_reviewed": true,
+      "nvd_published_at": "2024-10-15T20:15:18Z"
     },
     "references": [
       {
@@ -120,7 +120,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "PyPI/mysql-connector-python"
     }
   },
@@ -137,13 +137,13 @@
       "CGA-3mh2-3mv5-jfp3"
     ],
     "database_specific": {
-      "github_reviewed_at": "2024-05-30T18:34:32Z",
-      "github_reviewed": true,
       "cwe_ids": [
         "CWE-1321"
       ],
-      "nvd_published_at": "2024-05-29T05:16:08Z",
-      "severity": "HIGH"
+      "severity": "HIGH",
+      "github_reviewed_at": "2024-05-30T18:34:32Z",
+      "github_reviewed": true,
+      "nvd_published_at": "2024-05-29T05:16:08Z"
     },
     "references": [
       {
@@ -208,7 +208,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "npm/mysql2"
     }
   },
@@ -225,13 +225,13 @@
       "CGA-q894-55h8-4v53"
     ],
     "database_specific": {
-      "github_reviewed_at": "2024-04-23T20:50:56Z",
-      "github_reviewed": true,
       "cwe_ids": [
         "CWE-94"
       ],
-      "nvd_published_at": "2024-04-23T05:15:48Z",
-      "severity": "CRITICAL"
+      "severity": "CRITICAL",
+      "github_reviewed_at": "2024-04-23T20:50:56Z",
+      "github_reviewed": true,
+      "nvd_published_at": "2024-04-23T05:15:48Z"
     },
     "references": [
       {
@@ -292,7 +292,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "npm/mysql2"
     }
   },
@@ -309,13 +309,13 @@
       "CGA-9p5m-2fmv-28g4"
     ],
     "database_specific": {
-      "github_reviewed_at": "2024-04-12T13:50:58Z",
-      "github_reviewed": true,
       "cwe_ids": [
         "CWE-94"
       ],
-      "nvd_published_at": "2024-04-11T05:15:47Z",
-      "severity": "CRITICAL"
+      "severity": "CRITICAL",
+      "github_reviewed_at": "2024-04-12T13:50:58Z",
+      "github_reviewed": true,
+      "nvd_published_at": "2024-04-11T05:15:47Z"
     },
     "references": [
       {
@@ -384,7 +384,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "npm/mysql2"
     }
   },
@@ -401,13 +401,13 @@
       "CGA-c29j-944x-2v7x"
     ],
     "database_specific": {
-      "github_reviewed_at": "2024-04-12T13:50:12Z",
-      "github_reviewed": true,
       "cwe_ids": [
         "CWE-1321"
       ],
-      "nvd_published_at": "2024-04-10T05:15:48Z",
-      "severity": "MODERATE"
+      "severity": "MODERATE",
+      "github_reviewed_at": "2024-04-12T13:50:12Z",
+      "github_reviewed": true,
+      "nvd_published_at": "2024-04-10T05:15:48Z"
     },
     "references": [
       {
@@ -480,7 +480,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "npm/mysql2"
     }
   },
@@ -497,13 +497,13 @@
       "CGA-hgjg-3j78-ggcp"
     ],
     "database_specific": {
-      "github_reviewed_at": "2024-04-12T13:49:53Z",
-      "github_reviewed": true,
       "cwe_ids": [
         "CWE-20"
       ],
-      "nvd_published_at": "2024-04-10T05:15:48Z",
-      "severity": "MODERATE"
+      "severity": "MODERATE",
+      "github_reviewed_at": "2024-04-12T13:49:53Z",
+      "github_reviewed": true,
+      "nvd_published_at": "2024-04-10T05:15:48Z"
     },
     "references": [
       {
@@ -568,7 +568,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "npm/mysql2"
     }
   },
@@ -582,11 +582,11 @@
     "modified": "2024-12-05T17:02:29.551280Z",
     "published": "2023-10-18T00:31:42Z",
     "database_specific": {
-      "github_reviewed_at": "2024-08-29T18:32:05Z",
+      "nvd_published_at": "2023-10-17T22:15:15Z",
       "cwe_ids": [],
+      "github_reviewed_at": "2024-08-29T18:32:05Z",
       "github_reviewed": true,
-      "severity": "HIGH",
-      "nvd_published_at": "2023-10-17T22:15:15Z"
+      "severity": "HIGH"
     },
     "references": [
       {
@@ -770,7 +770,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "Maven/mysql:mysql-connector-java"
     }
   },
@@ -784,13 +784,13 @@
     "modified": "2023-11-08T04:05:14.605604Z",
     "published": "2022-05-24T19:18:20Z",
     "database_specific": {
-      "github_reviewed_at": "2022-06-22T18:13:52Z",
+      "nvd_published_at": "2021-10-20T11:16:00Z",
       "cwe_ids": [
         "CWE-863"
       ],
+      "github_reviewed_at": "2022-06-22T18:13:52Z",
       "github_reviewed": true,
-      "severity": "MODERATE",
-      "nvd_published_at": "2021-10-20T11:16:00Z"
+      "severity": "MODERATE"
     },
     "references": [
       {
@@ -861,7 +861,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "Maven/mysql:mysql-connector-java"
     }
   },
@@ -876,12 +876,12 @@
     "published": "2022-05-24T16:53:05Z",
     "database_specific": {
       "severity": "MODERATE",
-      "github_reviewed_at": "2023-07-17T18:54:11Z",
+      "github_reviewed": true,
+      "nvd_published_at": "2019-08-12T01:15:00Z",
       "cwe_ids": [
         "CWE-200"
       ],
-      "nvd_published_at": "2019-08-12T01:15:00Z",
-      "github_reviewed": true
+      "github_reviewed_at": "2023-07-17T18:54:11Z"
     },
     "references": [
       {
@@ -945,7 +945,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "npm/mysql"
     }
   },
@@ -959,13 +959,13 @@
     "modified": "2024-12-05T05:42:05.017267Z",
     "published": "2022-05-17T00:25:07Z",
     "database_specific": {
-      "github_reviewed_at": "2022-07-06T20:20:54Z",
+      "nvd_published_at": "2015-04-16T17:00:00Z",
       "cwe_ids": [
         "CWE-284"
       ],
+      "github_reviewed_at": "2022-07-06T20:20:54Z",
       "github_reviewed": true,
-      "severity": "MODERATE",
-      "nvd_published_at": "2015-04-16T17:00:00Z"
+      "severity": "MODERATE"
     },
     "references": [
       {
@@ -1068,7 +1068,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "Maven/mysql:mysql-connector-java"
     }
   },
@@ -1082,13 +1082,13 @@
     "modified": "2024-02-20T05:34:07.091553Z",
     "published": "2022-05-13T01:52:26Z",
     "database_specific": {
-      "github_reviewed_at": "2022-06-28T23:45:33Z",
+      "nvd_published_at": "2018-10-17T01:31:00Z",
       "cwe_ids": [
         "CWE-269"
       ],
+      "github_reviewed_at": "2022-06-28T23:45:33Z",
       "github_reviewed": true,
-      "severity": "HIGH",
-      "nvd_published_at": "2018-10-17T01:31:00Z"
+      "severity": "HIGH"
     },
     "references": [
       {
@@ -1214,7 +1214,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "Maven/mysql:mysql-connector-java"
     }
   },
@@ -1228,11 +1228,11 @@
     "modified": "2024-12-04T05:40:11.119651Z",
     "published": "2022-05-13T01:45:43Z",
     "database_specific": {
+      "cwe_ids": [],
+      "severity": "LOW",
       "github_reviewed_at": "2024-04-22T22:58:16Z",
       "github_reviewed": true,
-      "cwe_ids": [],
-      "nvd_published_at": "2017-04-24T19:59:00Z",
-      "severity": "LOW"
+      "nvd_published_at": "2017-04-24T19:59:00Z"
     },
     "references": [
       {
@@ -1307,7 +1307,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "PyPI/mysql-connector-python"
     }
   },
@@ -1321,13 +1321,13 @@
     "modified": "2023-11-08T03:59:21.268032Z",
     "published": "2022-05-13T01:45:42Z",
     "database_specific": {
-      "github_reviewed_at": "2022-07-01T17:10:39Z",
+      "nvd_published_at": "2017-04-24T19:59:00Z",
       "cwe_ids": [
         "CWE-200"
       ],
+      "github_reviewed_at": "2022-07-01T17:10:39Z",
       "github_reviewed": true,
-      "severity": "LOW",
-      "nvd_published_at": "2017-04-24T19:59:00Z"
+      "severity": "LOW"
     },
     "references": [
       {
@@ -1432,7 +1432,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "Maven/mysql:mysql-connector-java"
     }
   },
@@ -1446,13 +1446,13 @@
     "modified": "2023-11-08T03:59:21.205746Z",
     "published": "2022-05-13T01:45:42Z",
     "database_specific": {
-      "github_reviewed_at": "2022-07-01T17:11:02Z",
+      "nvd_published_at": "2017-04-24T19:59:00Z",
       "cwe_ids": [
         "CWE-200"
       ],
+      "github_reviewed_at": "2022-07-01T17:11:02Z",
       "github_reviewed": true,
-      "severity": "MODERATE",
-      "nvd_published_at": "2017-04-24T19:59:00Z"
+      "severity": "MODERATE"
     },
     "references": [
       {
@@ -1557,7 +1557,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "Maven/mysql:mysql-connector-java"
     }
   },
@@ -1571,13 +1571,13 @@
     "modified": "2023-11-08T03:59:21.145125Z",
     "published": "2022-05-13T01:45:34Z",
     "database_specific": {
-      "github_reviewed_at": "2022-07-01T17:12:48Z",
+      "nvd_published_at": "2017-04-24T19:59:00Z",
       "cwe_ids": [
         "CWE-284"
       ],
+      "github_reviewed_at": "2022-07-01T17:12:48Z",
       "github_reviewed": true,
-      "severity": "HIGH",
-      "nvd_published_at": "2017-04-24T19:59:00Z"
+      "severity": "HIGH"
     },
     "references": [
       {
@@ -1685,7 +1685,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "Maven/mysql:mysql-connector-java"
     }
   },
@@ -1699,13 +1699,13 @@
     "modified": "2024-02-20T05:22:07.435798Z",
     "published": "2022-05-13T01:22:02Z",
     "database_specific": {
-      "github_reviewed_at": "2022-06-27T16:09:55Z",
-      "github_reviewed": true,
       "cwe_ids": [
         "CWE-284"
       ],
-      "nvd_published_at": "2019-01-16T19:30:00Z",
-      "severity": "HIGH"
+      "severity": "HIGH",
+      "github_reviewed_at": "2022-06-27T16:09:55Z",
+      "github_reviewed": true,
+      "nvd_published_at": "2019-01-16T19:30:00Z"
     },
     "references": [
       {
@@ -1806,7 +1806,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "PyPI/mysql-connector-python"
     }
   },
@@ -1820,13 +1820,13 @@
     "modified": "2023-11-08T04:08:05.518768Z",
     "published": "2022-01-20T00:00:48Z",
     "database_specific": {
-      "github_reviewed_at": "2022-06-20T22:48:44Z",
+      "nvd_published_at": "2022-01-19T12:15:00Z",
       "cwe_ids": [
         "CWE-280"
       ],
+      "github_reviewed_at": "2022-06-20T22:48:44Z",
       "github_reviewed": true,
-      "severity": "MODERATE",
-      "nvd_published_at": "2022-01-19T12:15:00Z"
+      "severity": "MODERATE"
     },
     "references": [
       {
@@ -1960,7 +1960,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "Maven/mysql:mysql-connector-java"
     }
   },
@@ -1975,12 +1975,12 @@
     "published": "2020-09-01T15:21:05Z",
     "database_specific": {
       "severity": "MODERATE",
-      "github_reviewed_at": "2020-08-31T18:09:53Z",
+      "github_reviewed": true,
+      "nvd_published_at": "2018-05-29T20:29:00Z",
       "cwe_ids": [
         "CWE-89"
       ],
-      "nvd_published_at": "2018-05-29T20:29:00Z",
-      "github_reviewed": true
+      "github_reviewed_at": "2020-08-31T18:09:53Z"
     },
     "references": [
       {
@@ -2017,14 +2017,14 @@
           }
         ],
         "database_specific": {
-          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2020/09/GHSA-fvq6-55gv-jx9f/GHSA-fvq6-55gv-jx9f.json",
-          "last_known_affected_version_range": "<= 2.0.0-alpha7"
+          "last_known_affected_version_range": "<= 2.0.0-alpha7",
+          "source": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2020/09/GHSA-fvq6-55gv-jx9f/GHSA-fvq6-55gv-jx9f.json"
         }
       }
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "npm/mysql"
     }
   },
@@ -2038,13 +2038,13 @@
     "modified": "2024-02-17T05:24:00.457490Z",
     "published": "2020-07-01T17:12:20Z",
     "database_specific": {
-      "github_reviewed_at": "2020-07-01T17:11:19Z",
+      "nvd_published_at": null,
       "cwe_ids": [
         "CWE-843"
       ],
+      "github_reviewed_at": "2020-07-01T17:11:19Z",
       "github_reviewed": true,
-      "severity": "MODERATE",
-      "nvd_published_at": null
+      "severity": "MODERATE"
     },
     "references": [
       {
@@ -2177,7 +2177,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "Maven/mysql:mysql-connector-java"
     }
   },
@@ -2189,12 +2189,12 @@
     "published": "2019-05-23T09:27:00Z",
     "database_specific": {
       "severity": "MODERATE",
-      "github_reviewed_at": "2019-05-23T07:40:10Z",
+      "github_reviewed": true,
+      "nvd_published_at": null,
       "cwe_ids": [
         "CWE-201"
       ],
-      "nvd_published_at": null,
-      "github_reviewed": true
+      "github_reviewed_at": "2019-05-23T07:40:10Z"
     },
     "references": [
       {
@@ -2241,7 +2241,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2025-11-14T03:44:39.195371+00:00",
+      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
       "source_package": "npm/mysql"
     }
   }
