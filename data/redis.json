@@ -10,13 +10,13 @@
     "modified": "2024-10-25T21:54:11.332865Z",
     "published": "2023-03-26T21:30:23Z",
     "database_specific": {
-      "nvd_published_at": "2023-03-26T19:15:00Z",
       "cwe_ids": [
         "CWE-193"
       ],
       "github_reviewed_at": "2023-03-27T21:31:45Z",
-      "github_reviewed": true,
-      "severity": "MODERATE"
+      "nvd_published_at": "2023-03-26T19:15:00Z",
+      "severity": "MODERATE",
+      "github_reviewed": true
     },
     "references": [
       {
@@ -172,7 +172,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
+      "fetched_at": "2025-11-16T03:48:40.671536+00:00",
       "source_package": "PyPI/redis"
     }
   },
@@ -187,13 +187,13 @@
     "modified": "2024-10-25T21:53:20.660854Z",
     "published": "2023-03-26T21:30:23Z",
     "database_specific": {
-      "nvd_published_at": "2023-03-26T19:15:00Z",
       "cwe_ids": [
         "CWE-459"
       ],
       "github_reviewed_at": "2023-03-27T21:31:52Z",
-      "github_reviewed": true,
-      "severity": "HIGH"
+      "nvd_published_at": "2023-03-26T19:15:00Z",
+      "severity": "HIGH",
+      "github_reviewed": true
     },
     "references": [
       {
@@ -331,7 +331,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
+      "fetched_at": "2025-11-16T03:48:40.671536+00:00",
       "source_package": "PyPI/redis"
     }
   },
@@ -426,7 +426,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
+      "fetched_at": "2025-11-16T03:48:40.671536+00:00",
       "source_package": "PyPI/redis"
     }
   },
@@ -506,7 +506,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
+      "fetched_at": "2025-11-16T03:48:40.671536+00:00",
       "source_package": "PyPI/redis"
     }
   },
@@ -523,13 +523,13 @@
       "CVE-2021-29469"
     ],
     "database_specific": {
-      "severity": "HIGH",
-      "nvd_published_at": "2021-04-23T18:15:00Z",
       "cwe_ids": [
         "CWE-400"
       ],
       "github_reviewed_at": "2021-04-23T18:11:39Z",
-      "github_reviewed": true
+      "github_reviewed": true,
+      "nvd_published_at": "2021-04-23T18:15:00Z",
+      "severity": "HIGH"
     },
     "references": [
       {
@@ -586,7 +586,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-15T03:39:17.343684+00:00",
+      "fetched_at": "2025-11-16T03:48:40.671536+00:00",
       "source_package": "npm/redis"
     }
   }
