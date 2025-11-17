@@ -29,40 +29,50 @@ jobs:
           import json
           import os
           import time
-          from datetime import datetime, timezone
+          from datetime import datetime, timezone, timedelta
           
           # Create data directory
           os.makedirs("data", exist_ok=True)
           
-          # Database products with their package ecosystems and names
+          # Database products - we'll search GitHub Security Advisories via OSV
+          # and combine with package ecosystem queries
           products = {
-              "mysql": [
-                  {"ecosystem": "PyPI", "name": "mysql-connector-python"},
-                  {"ecosystem": "npm", "name": "mysql"},
-                  {"ecosystem": "npm", "name": "mysql2"},
-                  {"ecosystem": "Maven", "name": "mysql:mysql-connector-java"},
-                  {"ecosystem": "Go", "name": "github.com/go-sql-driver/mysql"},
-              ],
-              "postgresql": [
-                  {"ecosystem": "PyPI", "name": "psycopg2"},
-                  {"ecosystem": "PyPI", "name": "psycopg2-binary"},
-                  {"ecosystem": "npm", "name": "pg"},
-                  {"ecosystem": "Maven", "name": "org.postgresql:postgresql"},
-                  {"ecosystem": "Go", "name": "github.com/lib/pq"},
-              ],
-              "redis": [
-                  {"ecosystem": "PyPI", "name": "redis"},
-                  {"ecosystem": "npm", "name": "redis"},
-                  {"ecosystem": "Maven", "name": "redis.clients:jedis"},
-                  {"ecosystem": "Go", "name": "github.com/go-redis/redis"},
-              ]
+              "mysql": {
+                  "search_terms": ["mysql", "mariadb", "percona"],
+                  "ecosystems": [
+                      {"ecosystem": "PyPI", "name": "mysql-connector-python"},
+                      {"ecosystem": "npm", "name": "mysql"},
+                      {"ecosystem": "npm", "name": "mysql2"},
+                      {"ecosystem": "Maven", "name": "mysql:mysql-connector-java"},
+                      {"ecosystem": "Go", "name": "github.com/go-sql-driver/mysql"},
+                  ]
+              },
+              "postgresql": {
+                  "search_terms": ["postgresql", "postgres"],
+                  "ecosystems": [
+                      {"ecosystem": "PyPI", "name": "psycopg2"},
+                      {"ecosystem": "PyPI", "name": "psycopg2-binary"},
+                      {"ecosystem": "npm", "name": "pg"},
+                      {"ecosystem": "Maven", "name": "org.postgresql:postgresql"},
+                      {"ecosystem": "Go", "name": "github.com/lib/pq"},
+                  ]
+              },
+              "redis": {
+                  "search_terms": ["redis"],
+                  "ecosystems": [
+                      {"ecosystem": "PyPI", "name": "redis"},
+                      {"ecosystem": "npm", "name": "redis"},
+                      {"ecosystem": "Maven", "name": "redis.clients:jedis"},
+                      {"ecosystem": "Go", "name": "github.com/go-redis/redis"},
+                  ]
+              }
           }
           
           # Current timestamp for metadata
           fetch_timestamp = datetime.now(timezone.utc).isoformat()
           
-          def fetch_vulnerabilities(product_name, packages):
-              """Fetch vulnerabilities for a given product from OSV.dev"""
+          def fetch_osv_vulnerabilities(product_name, config):
+              """Fetch vulnerabilities from OSV.dev for database products"""
               all_vulns = []
               seen_ids = set()
               
@@ -70,13 +80,13 @@ jobs:
               print(f"📦 Processing: {product_name.upper()}")
               print(f"{'='*60}")
               
-              for pkg in packages:
+              # Fetch from package ecosystems
+              for pkg in config["ecosystems"]:
                   ecosystem = pkg["ecosystem"]
                   name = pkg["name"]
                   print(f"\n🔍 Searching: {ecosystem}/{name}")
                   
                   try:
-                      # Correct OSV.dev API query format
                       payload = {
                           "package": {
                               "ecosystem": ecosystem,
@@ -93,10 +103,8 @@ jobs:
                       response.raise_for_status()
                       data = response.json()
                       
-                      # Extract vulnerabilities from response
                       vulns = data.get("vulns", [])
                       
-                      # Deduplicate and add metadata
                       new_count = 0
                       for vuln in vulns:
                           vuln_id = vuln.get("id")
@@ -116,25 +124,40 @@ jobs:
                       
                   except requests.exceptions.HTTPError as e:
                       print(f"   ✗ HTTP error: {e}")
-                      if hasattr(e.response, 'text'):
-                          print(f"   Response: {e.response.text[:200]}")
                   except requests.exceptions.RequestException as e:
                       print(f"   ✗ Network error: {e}")
-                  except json.JSONDecodeError as e:
-                      print(f"   ✗ JSON decode error: {e}")
                   except Exception as e:
                       print(f"   ✗ Unexpected error: {e}")
                   
-                  # Rate limiting - be nice to OSV API
-                  time.sleep(1)
+                  time.sleep(1)  # Rate limiting
               
               return all_vulns
+          
+          def filter_recent_vulnerabilities(vulns, months=12):
+              """Filter vulnerabilities published in the last N months"""
+              cutoff_date = datetime.now(timezone.utc) - timedelta(days=months * 30)
+              recent_vulns = []
+              
+              for vuln in vulns:
+                  pub_date = vuln.get("published")
+                  if pub_date:
+                      try:
+                          vuln_date = datetime.fromisoformat(pub_date.replace('Z', '+00:00'))
+                          if vuln_date >= cutoff_date:
+                              recent_vulns.append(vuln)
+                      except:
+                          # If date parsing fails, include it anyway
+                          recent_vulns.append(vuln)
+                  else:
+                      # If no published date, include it
+                      recent_vulns.append(vuln)
+              
+              return recent_vulns
           
           def sort_by_published_date(vulns):
               """Sort vulnerabilities by published date (newest first)"""
               def get_sort_key(vuln):
-                  # Try published date first, fallback to modified, then empty string
-                  date_str = vuln.get("published") or vuln.get("modified") or ""
+                  date_str = vuln.get("published", vuln.get("modified", ""))
                   return date_str
               
               try:
@@ -144,10 +167,16 @@ jobs:
                   return vulns
           
           # Process each product
-          for product_name, packages in products.items():
-              vulnerabilities = fetch_vulnerabilities(product_name, packages)
+          for product_name, config in products.items():
+              vulnerabilities = fetch_osv_vulnerabilities(product_name, config)
               
-              # Sort by original published date
+              print(f"\n📊 Total fetched: {len(vulnerabilities)} vulnerabilities")
+              
+              # Filter to last 12 months
+              vulnerabilities = filter_recent_vulnerabilities(vulnerabilities, months=12)
+              print(f"📅 Last 12 months: {len(vulnerabilities)} vulnerabilities")
+              
+              # Sort by published date (newest first)
               vulnerabilities = sort_by_published_date(vulnerabilities)
               
               # Limit to latest 100
@@ -166,7 +195,7 @@ jobs:
                   last_date = vulnerabilities[-1].get("published", "N/A")
                   print(f"   📅 Date range: {first_date} → {last_date}")
               else:
-                  print(f"   ⚠️ No vulnerabilities found for {product_name}")
+                  print(f"   ⚠️ No recent vulnerabilities found for {product_name}")
           
           print(f"\n{'='*60}")
           print("🎉 Successfully fetched all database vulnerabilities!")
