@@ -13,10 +13,10 @@
       "cwe_ids": [
         "CWE-193"
       ],
-      "github_reviewed_at": "2023-03-27T21:31:45Z",
+      "github_reviewed": true,
       "nvd_published_at": "2023-03-26T19:15:00Z",
       "severity": "MODERATE",
-      "github_reviewed": true
+      "github_reviewed_at": "2023-03-27T21:31:45Z"
     },
     "references": [
       {
@@ -172,7 +172,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-16T03:48:40.671536+00:00",
+      "fetched_at": "2025-11-17T03:48:52.298436+00:00",
       "source_package": "PyPI/redis"
     }
   },
@@ -190,10 +190,10 @@
       "cwe_ids": [
         "CWE-459"
       ],
-      "github_reviewed_at": "2023-03-27T21:31:52Z",
+      "github_reviewed": true,
       "nvd_published_at": "2023-03-26T19:15:00Z",
       "severity": "HIGH",
-      "github_reviewed": true
+      "github_reviewed_at": "2023-03-27T21:31:52Z"
     },
     "references": [
       {
@@ -331,7 +331,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-16T03:48:40.671536+00:00",
+      "fetched_at": "2025-11-17T03:48:52.298436+00:00",
       "source_package": "PyPI/redis"
     }
   },
@@ -426,7 +426,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2025-11-16T03:48:40.671536+00:00",
+      "fetched_at": "2025-11-17T03:48:52.298436+00:00",
       "source_package": "PyPI/redis"
     }
   },
@@ -506,7 +506,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2025-11-16T03:48:40.671536+00:00",
+      "fetched_at": "2025-11-17T03:48:52.298436+00:00",
       "source_package": "PyPI/redis"
     }
   },
@@ -523,11 +523,11 @@
       "CVE-2021-29469"
     ],
     "database_specific": {
+      "github_reviewed": true,
+      "github_reviewed_at": "2021-04-23T18:11:39Z",
       "cwe_ids": [
         "CWE-400"
       ],
-      "github_reviewed_at": "2021-04-23T18:11:39Z",
-      "github_reviewed": true,
       "nvd_published_at": "2021-04-23T18:15:00Z",
       "severity": "HIGH"
     },
@@ -586,7 +586,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2025-11-16T03:48:40.671536+00:00",
+      "fetched_at": "2025-11-17T03:48:52.298436+00:00",
       "source_package": "npm/redis"
     }
   }
