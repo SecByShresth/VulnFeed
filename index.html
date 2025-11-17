@@ -469,11 +469,11 @@
                 return {
                     id: vuln.id,
                     title: vuln.summary || vuln.id,
-                    description: vuln.details || 'No description available',
-                    severity: vuln.database_specific?.severity || 
-                             (vuln.severity && vuln.severity.length > 0 ? vuln.severity[0].type : 'unknown'),
+                    description: vuln.description || vuln.details || 'No description available',
+                    severity: vuln.severity || vuln.database_specific?.severity || 'unknown',
                     date: vuln.published,
                     modified: vuln.modified,
+                    cvss: vuln.cvss_score,
                     aliases: vuln.aliases || [],
                     affected: vuln.affected || [],
                     references: vuln.references || [],
@@ -522,7 +522,7 @@
         function renderDashboard() {
             let totalVulns = 0;
             let criticalCount = 0;
-            let latestDate = null;
+            let latestFetchDate = null;
 
             for (const [source, data] of Object.entries(allData)) {
                 const vulns = source === 'cisa-kev' ? data.vulnerabilities : data;
@@ -536,16 +536,28 @@
                             criticalCount++;
                         }
                         
-                        const vDate = new Date(normalized.date);
-                        if (!latestDate || vDate > latestDate) {
-                            latestDate = vDate;
+                        // Get the fetched_at timestamp from metadata
+                        const fetchedAt = v._metadata?.fetched_at || v.fetched_at;
+                        if (fetchedAt) {
+                            const fetchDate = new Date(fetchedAt);
+                            if (!latestFetchDate || fetchDate > latestFetchDate) {
+                                latestFetchDate = fetchDate;
+                            }
                         }
                     });
+                }
+                
+                // For CISA KEV, check the catalog metadata
+                if (source === 'cisa-kev' && data.dateReleased) {
+                    const releaseDate = new Date(data.dateReleased);
+                    if (!latestFetchDate || releaseDate > latestFetchDate) {
+                        latestFetchDate = releaseDate;
+                    }
                 }
             }
 
             document.getElementById('totalVulns').textContent = totalVulns.toLocaleString();
-            document.getElementById('lastUpdate').textContent = latestDate ? formatDate(latestDate) : 'N/A';
+            document.getElementById('lastUpdate').textContent = latestFetchDate ? formatDate(latestFetchDate) : 'N/A';
             document.getElementById('dataSources').textContent = Object.keys(allData).length;
             document.getElementById('criticalCount').textContent = criticalCount.toLocaleString();
 
