@@ -486,7 +486,7 @@
 
         function getSeverityClass(severity) {
             if (!severity) return 'severity-unknown';
-            const s = severity.toLowerCase();
+            const s = (typeof severity === 'string' ? severity : String(severity)).toLowerCase();
             if (s.includes('critical')) return 'severity-critical';
             if (s.includes('important') || s.includes('high')) return 'severity-important';
             if (s.includes('moderate') || s.includes('medium')) return 'severity-moderate';
@@ -531,7 +531,8 @@
                     
                     vulns.forEach(v => {
                         const normalized = normalizeVulnerability(v, source);
-                        const sev = (normalized.severity || '').toLowerCase();
+                        const sevValue = normalized.severity || '';
+                        const sev = (typeof sevValue === 'string' ? sevValue : String(sevValue)).toLowerCase();
                         if (sev.includes('critical') || sev.includes('important') || sev.includes('high')) {
                             criticalCount++;
                         }
