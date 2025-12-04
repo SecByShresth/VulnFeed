@@ -1,0 +1,29 @@
+{
+  "last_update": "2025-12-04T16:12:44.155217Z",
+  "total_vulnerabilities": 26268,
+  "successful_sources": 12,
+  "sources": [
+    "data/cisa-kev.json",
+    "data/maven.json",
+    "data/redhat-cves-list.json",
+    "data/ubuntu.json",
+    "data/alpine.json",
+    "data/pub.json",
+    "data/redhat-cves-summary.json",
+    "data/go.json",
+    "data/pypi.json",
+    "data/nuget.json",
+    "data/almalinux.json",
+    "data/packagist.json",
+    "data/crates-io.json",
+    "data/hex.json",
+    "data/redhat-cves.json",
+    "data/redhat-cves-metadata.json",
+    "data/npm.json",
+    "data/rubygems.json",
+    "data/suse.json",
+    "data/rocky.json",
+    "data/linux.json",
+    "data/debian.json"
+  ]
+}
