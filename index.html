@@ -184,6 +184,81 @@
             box-shadow: 0 8px 16px var(--shadow);
         }
 
+        /* Asset Scanner Button - Prominent CTA */
+        .scanner-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+            background-size: 200% 200%;
+            border: none;
+            border-radius: 14px;
+            padding: 0.875rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            animation: scanner-glow 3s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scanner-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .scanner-btn:hover::before {
+            left: 100%;
+        }
+
+        .scanner-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+            background-position: right center;
+        }
+
+        .scanner-btn:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        .scanner-btn .icon {
+            font-size: 1.25rem;
+            animation: pulse-icon 2s ease-in-out infinite;
+        }
+
+        @keyframes scanner-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 4px 25px rgba(16, 185, 129, 0.6), 0 0 40px rgba(16, 185, 129, 0.2);
+            }
+        }
+
+        @keyframes pulse-icon {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
         .sync-badge {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -534,6 +609,7 @@
             line-height: 1.6;
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -957,6 +1033,10 @@
                             <span class="pulse"></span>
                             <span>Last Sync: <strong id="lastSyncTime">Loading...</strong></span>
                         </div>
+                        <button class="scanner-btn" onclick="openAssetScannerModal()">
+                            <span class="icon">🔍</span>
+                            <span>Asset Scanner</span>
+                        </button>
                         <button class="theme-toggle" onclick="toggleTheme()">
                             <span id="themeIcon">🌙</span>
                             <span id="themeText">Dark</span>
@@ -1042,6 +1122,162 @@
         </div>
     </div>
 
+    <!-- Asset Scanner Modal -->
+    <div class="modal" id="scannerModal">
+        <div class="modal-content" style="max-width: 1100px;">
+            <div class="modal-header"
+                style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 24px 24px 0 0;">
+                <div>
+                    <h2 style="color: white; display: flex; align-items: center; gap: 0.75rem;">
+                        🔍 Asset Exposure Scanner
+                    </h2>
+                    <p style="color: rgba(255,255,255,0.9); margin-top: 0.5rem; font-size: 0.95rem;">
+                        Scan IP addresses or domains for exposed services, security risks & threat intelligence
+                    </p>
+                </div>
+                <button class="close-modal" onclick="closeAssetScannerModal()"
+                    style="background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.3); color: white;">×</button>
+            </div>
+            <div class="modal-body" id="scannerModalBody">
+                <!-- Scanner Input Section -->
+                <div
+                    style="background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card)); border-radius: 16px; padding: 2rem; margin-bottom: 2rem; border: 1px solid var(--border);">
+                    <div class="scanner-input-group" style="margin-bottom: 0;">
+                        <input type="text" id="modalAssetInput" class="scanner-input"
+                            placeholder="Enter IP address (e.g., 8.8.8.8) or domain (e.g., example.com)"
+                            style="font-size: 1.1rem; padding: 1rem 1.5rem;">
+                        <button class="btn btn-primary" onclick="runScanFromModal()"
+                            style="padding: 1rem 2rem; font-size: 1rem;">
+                            🚀 Start Scan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- API Status Section -->
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <div class="api-status-card" id="apiStatus-shodan">
+                        <span class="api-icon">🔎</span>
+                        <span class="api-name">Shodan</span>
+                        <span class="api-badge api-checking">Checking...</span>
+                    </div>
+                    <div class="api-status-card" id="apiStatus-abuseipdb">
+                        <span class="api-icon">🛡️</span>
+                        <span class="api-name">AbuseIPDB</span>
+                        <span class="api-badge api-checking">Checking...</span>
+                    </div>
+                    <div class="api-status-card" id="apiStatus-virustotal">
+                        <span class="api-icon">🦠</span>
+                        <span class="api-name">VirusTotal</span>
+                        <span class="api-badge api-checking">Checking...</span>
+                    </div>
+                </div>
+
+                <!-- Results Container -->
+                <div id="modalScannerResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* API Status Cards */
+        .api-status-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .api-status-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .api-icon {
+            font-size: 1.5rem;
+        }
+
+        .api-name {
+            flex: 1;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .api-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .api-checking {
+            background: var(--warning);
+            color: #000;
+        }
+
+        .api-configured {
+            background: var(--success);
+            color: white;
+        }
+
+        .api-missing {
+            background: var(--critical);
+            color: white;
+        }
+
+        /* Scanner Modal Specific */
+        #scannerModal .scanner-input {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        /* Scanner Results in Modal */
+        #modalScannerResults .result-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        #modalScannerResults .result-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        /* Loading animation for scan */
+        .scan-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            text-align: center;
+        }
+
+        .scan-loading .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--border);
+            border-top-color: var(--success);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+
+        .scan-loading p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+    </style>
+
+    <script src="asset-scanner.js"></script>
     <script src="app.js"></script>
 </body>
 

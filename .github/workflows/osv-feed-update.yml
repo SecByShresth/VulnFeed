@@ -1,13 +1,12 @@
 name: 🔄 Onyx OSV Intelligence Feed
+# Fetches additional OSV ecosystems (Alpine, Amazon Linux, Arch, Fedora, Oracle, npm, PyPI, Maven, etc.)
+# Excludes: CISA KEV, Red Hat, AlmaLinux, Rocky, Debian, Ubuntu, SUSE (handled by separate workflows)
 
 on:
   schedule:
     # Run every 6 hours
     - cron: '0 */6 * * *'
-  workflow_dispatch:
-  push:
-    branches:
-      - main
+  workflow_dispatch:  # Manual trigger only
 
 permissions:
   contents: write

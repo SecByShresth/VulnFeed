@@ -1,0 +1,6 @@
+name = "vulnfeed-api-proxy"
+main = "cloudflare-worker-proxy.js"
+compatibility_date = "2024-01-01"
+
+# Secrets are added via: wrangler secret put <NAME>
+# Do NOT define them here - they conflict with secrets

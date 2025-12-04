@@ -5,7 +5,7 @@
 const DATA_SOURCES = {
     // Government & Security Agencies
     'cisa-kev': { name: 'CISA KEV', icon: '🇺🇸', category: 'government' },
-    
+
     // Enterprise Linux
     'redhat-cves': { name: 'Red Hat', icon: '🎩', category: 'linux' },
     'almalinux': { name: 'AlmaLinux', icon: '🐧', category: 'linux' },
@@ -13,20 +13,20 @@ const DATA_SOURCES = {
     'debian': { name: 'Debian', icon: '🌀', category: 'linux' },
     'ubuntu': { name: 'Ubuntu', icon: '🟠', category: 'linux' },
     'suse': { name: 'SUSE', icon: '🦎', category: 'linux' },
-    
+
     // Additional OSV Ecosystems (to be added)
     'alpine': { name: 'Alpine Linux', icon: '🏔️', category: 'linux' },
     'amazon': { name: 'Amazon Linux', icon: '📦', category: 'linux' },
     'arch': { name: 'Arch Linux', icon: '🏛️', category: 'linux' },
     'fedora': { name: 'Fedora', icon: '🎩', category: 'linux' },
     'oracle': { name: 'Oracle Linux', icon: '🔴', category: 'linux' },
-    
+
     // Databases
     'mysql': { name: 'MySQL', icon: '🐬', category: 'database' },
     'postgresql': { name: 'PostgreSQL', icon: '🐘', category: 'database' },
     'redis': { name: 'Redis', icon: '🔴', category: 'database' },
     'mongodb': { name: 'MongoDB', icon: '🍃', category: 'database' },
-    
+
     // Programming Languages & Ecosystems
     'npm': { name: 'npm (Node.js)', icon: '📦', category: 'package' },
     'pypi': { name: 'PyPI (Python)', icon: '🐍', category: 'package' },
@@ -51,14 +51,14 @@ function toggleTheme() {
     const html = document.documentElement;
     const currentTheme = html.getAttribute('data-theme');
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    
+
     html.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
-    
+
     // Update button text
     document.getElementById('themeIcon').textContent = newTheme === 'light' ? '🌙' : '☀️';
     document.getElementById('themeText').textContent = newTheme === 'light' ? 'Dark' : 'Light';
-    
+
     // Update charts if they exist
     updateChartThemes();
 }
@@ -75,7 +75,7 @@ function initTheme() {
 async function loadData() {
     const results = {};
     const loadPromises = [];
-    
+
     for (const [key, source] of Object.entries(DATA_SOURCES)) {
         loadPromises.push(
             fetch(`data/${key}.json`)
@@ -95,7 +95,7 @@ async function loadData() {
                 })
         );
     }
-    
+
     await Promise.all(loadPromises);
     return results;
 }
@@ -119,7 +119,7 @@ function normalizeVulnerability(vuln, source) {
             ransomware: vuln.knownRansomwareCampaignUse
         };
     }
-    
+
     // Red Hat format
     if (source === 'redhat-cves') {
         return {
@@ -137,7 +137,7 @@ function normalizeVulnerability(vuln, source) {
             source: source
         };
     }
-    
+
     // OSV format (Linux distros, databases, packages)
     return {
         id: vuln.id,
@@ -170,10 +170,10 @@ function formatDate(dateString) {
     if (!dateString) return 'N/A';
     try {
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric' 
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
         });
     } catch {
         return 'N/A';
@@ -187,7 +187,7 @@ function getRelativeTime(dateString) {
         const now = new Date();
         const diffTime = Math.abs(now - date);
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
+
         if (diffDays === 0) return 'Today';
         if (diffDays === 1) return 'Yesterday';
         if (diffDays < 7) return `${diffDays} days ago`;
@@ -200,11 +200,15 @@ function getRelativeTime(dateString) {
 }
 
 // Render Vulnerability Card
+const vulnDataStore = new Map(); // Store vulnerability data
+
 function renderVulnerabilityCard(vuln) {
-    const escapedVuln = JSON.stringify(vuln).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
-    
+    // Generate unique ID for this vulnerability
+    const vulnId = `vuln-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    vulnDataStore.set(vulnId, vuln);
+
     return `
-        <div class="vuln-card" onclick='showModal(JSON.parse("${escapedVuln}"))'>
+        <div class="vuln-card" data-vuln-id="${vulnId}" onclick="showModalById('${vulnId}')">
             <div class="vuln-header">
                 <div class="vuln-id">${vuln.id}</div>
                 <span class="severity-badge ${getSeverityClass(vuln.severity)}">
@@ -228,7 +232,7 @@ function renderDashboard() {
     let criticalCount = 0;
     let latestFetchDate = null;
     let ecosystemCount = 0;
-    
+
     const severityDistribution = {
         critical: 0,
         high: 0,
@@ -236,21 +240,21 @@ function renderDashboard() {
         low: 0,
         unknown: 0
     };
-    
+
     const sourceDistribution = {};
-    
+
     for (const [source, data] of Object.entries(allData)) {
         ecosystemCount++;
         const vulns = source === 'cisa-kev' ? data.vulnerabilities : data;
-        
+
         if (Array.isArray(vulns)) {
             totalVulns += vulns.length;
             sourceDistribution[source] = vulns.length;
-            
+
             vulns.forEach(v => {
                 const normalized = normalizeVulnerability(v, source);
                 const sevValue = String(normalized.severity || '').toLowerCase();
-                
+
                 // Count by severity
                 if (sevValue.includes('critical')) {
                     criticalCount++;
@@ -265,7 +269,7 @@ function renderDashboard() {
                 } else {
                     severityDistribution.unknown++;
                 }
-                
+
                 // Track latest update
                 const fetchedAt = v._metadata?.fetched_at || v.fetched_at;
                 if (fetchedAt) {
@@ -276,7 +280,7 @@ function renderDashboard() {
                 }
             });
         }
-        
+
         // Check CISA KEV metadata
         if (source === 'cisa-kev' && data.dateReleased) {
             const releaseDate = new Date(data.dateReleased);
@@ -285,17 +289,17 @@ function renderDashboard() {
             }
         }
     }
-    
+
     // Update stats
     document.getElementById('totalVulns').textContent = totalVulns.toLocaleString();
     document.getElementById('criticalCount').textContent = criticalCount.toLocaleString();
     document.getElementById('dataSources').textContent = Object.keys(allData).length;
     document.getElementById('ecosystems').textContent = ecosystemCount;
     document.getElementById('lastSyncTime').textContent = latestFetchDate ? formatDate(latestFetchDate) : 'N/A';
-    
+
     // Render charts and source cards
     let html = '<div class="charts-grid">';
-    
+
     // Severity Distribution Chart
     html += `
         <div class="chart-container">
@@ -303,7 +307,7 @@ function renderDashboard() {
             <canvas id="severityChart"></canvas>
         </div>
     `;
-    
+
     // Top Sources Chart
     html += `
         <div class="chart-container">
@@ -311,19 +315,19 @@ function renderDashboard() {
             <canvas id="sourcesChart"></canvas>
         </div>
     `;
-    
+
     html += '</div>';
-    
+
     // Source Cards
     html += '<div class="vuln-grid">';
-    
+
     for (const [source, info] of Object.entries(DATA_SOURCES)) {
         if (!allData[source]) continue;
-        
+
         const data = allData[source];
         const vulns = source === 'cisa-kev' ? data.vulnerabilities : data;
         const count = Array.isArray(vulns) ? vulns.length : 0;
-        
+
         html += `
             <div class="vuln-card" onclick="switchTab('${source}')">
                 <div class="vuln-header">
@@ -337,10 +341,10 @@ function renderDashboard() {
             </div>
         `;
     }
-    
+
     html += '</div>';
     document.getElementById('content').innerHTML = html;
-    
+
     // Render charts
     renderSeverityChart(severityDistribution);
     renderSourcesChart(sourceDistribution);
@@ -350,14 +354,14 @@ function renderDashboard() {
 function renderSeverityChart(data) {
     const ctx = document.getElementById('severityChart');
     if (!ctx) return;
-    
+
     const theme = document.documentElement.getAttribute('data-theme');
     const textColor = theme === 'dark' ? '#cbd5e1' : '#64748b';
-    
+
     if (charts.severity) {
         charts.severity.destroy();
     }
-    
+
     charts.severity = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -397,22 +401,22 @@ function renderSeverityChart(data) {
 function renderSourcesChart(data) {
     const ctx = document.getElementById('sourcesChart');
     if (!ctx) return;
-    
+
     const theme = document.documentElement.getAttribute('data-theme');
     const textColor = theme === 'dark' ? '#cbd5e1' : '#64748b';
-    
+
     // Get top 10 sources
     const sorted = Object.entries(data)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 10);
-    
+
     const labels = sorted.map(([key]) => DATA_SOURCES[key]?.name || key);
     const values = sorted.map(([, value]) => value);
-    
+
     if (charts.sources) {
         charts.sources.destroy();
     }
-    
+
     charts.sources = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -486,10 +490,10 @@ function renderSource(source) {
         `;
         return;
     }
-    
+
     const data = allData[source];
     let vulns = source === 'cisa-kev' ? data.vulnerabilities : data;
-    
+
     if (!Array.isArray(vulns) || vulns.length === 0) {
         document.getElementById('content').innerHTML = `
             <div class="empty-state">
@@ -499,10 +503,10 @@ function renderSource(source) {
         `;
         return;
     }
-    
+
     // Normalize all vulnerabilities
     filteredData = vulns.map(v => normalizeVulnerability(v, source));
-    
+
     // Apply filters
     applyFilters();
 }
@@ -510,41 +514,41 @@ function renderSource(source) {
 // Filtering
 function applyFilters() {
     if (currentTab === 'dashboard' || currentTab === 'asset-scanner') return;
-    
+
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const severityFilter = document.getElementById('severityFilter').value.toLowerCase();
     const timeFilter = parseInt(document.getElementById('timeFilter').value) || 0;
-    
+
     let filtered = [...filteredData];
-    
+
     // Search filter
     if (searchTerm) {
-        filtered = filtered.filter(v => 
+        filtered = filtered.filter(v =>
             v.id.toLowerCase().includes(searchTerm) ||
             v.title.toLowerCase().includes(searchTerm) ||
             v.description.toLowerCase().includes(searchTerm)
         );
     }
-    
+
     // Severity filter
     if (severityFilter) {
-        filtered = filtered.filter(v => 
+        filtered = filtered.filter(v =>
             String(v.severity || '').toLowerCase().includes(severityFilter)
         );
     }
-    
+
     // Time filter
     if (timeFilter > 0) {
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - timeFilter);
-        
+
         filtered = filtered.filter(v => {
             if (!v.date) return false;
             const vulnDate = new Date(v.date);
             return vulnDate >= cutoffDate;
         });
     }
-    
+
     // Render filtered results
     renderFilteredResults(filtered);
 }
@@ -562,9 +566,9 @@ function renderFilteredResults(vulns) {
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
     const pageVulns = vulns.slice(start, end);
-    
+
     let html = `<div class="vuln-grid">`;
-    
+
     if (pageVulns.length === 0) {
         html = `
             <div class="empty-state">
@@ -577,31 +581,31 @@ function renderFilteredResults(vulns) {
             html += renderVulnerabilityCard(vuln);
         });
         html += '</div>';
-        
+
         // Add pagination
         if (totalPages > 1) {
             html += renderPagination(currentPage, totalPages, vulns);
         }
     }
-    
+
     document.getElementById('content').innerHTML = html;
 }
 
 function renderPagination(current, total, data) {
     let html = '<div class="pagination">';
-    
+
     html += `<button class="page-btn" ${current === 1 ? 'disabled' : ''} onclick="changePage(${current - 1}, ${JSON.stringify(data).replace(/"/g, '&quot;')})">← Prev</button>`;
-    
+
     for (let i = 1; i <= Math.min(total, 10); i++) {
         html += `<button class="page-btn ${i === current ? 'active' : ''}" onclick="changePage(${i}, ${JSON.stringify(data).replace(/"/g, '&quot;')})">${i}</button>`;
     }
-    
+
     if (total > 10) {
         html += `<span class="page-btn" disabled>...</span>`;
     }
-    
+
     html += `<button class="page-btn" ${current === total ? 'disabled' : ''} onclick="changePage(${current + 1}, ${JSON.stringify(data).replace(/"/g, '&quot;')})">Next →</button>`;
-    
+
     html += '</div>';
     return html;
 }
@@ -619,7 +623,7 @@ function showModal(vuln) {
         <span class="severity-badge ${getSeverityClass(vuln.severity)}">${vuln.severity || 'Unknown'}</span>
         <span class="tag">${DATA_SOURCES[vuln.source]?.icon || ''} ${DATA_SOURCES[vuln.source]?.name || vuln.source}</span>
     `;
-    
+
     let body = `
         <div class="detail-section">
             <div class="detail-label">Title</div>
@@ -636,7 +640,7 @@ function showModal(vuln) {
             <div class="detail-value">${formatDate(vuln.date)} (${getRelativeTime(vuln.date)})</div>
         </div>
     `;
-    
+
     if (vuln.modified) {
         body += `
             <div class="detail-section">
@@ -645,7 +649,7 @@ function showModal(vuln) {
             </div>
         `;
     }
-    
+
     if (vuln.cvss) {
         body += `
             <div class="detail-section">
@@ -654,7 +658,7 @@ function showModal(vuln) {
             </div>
         `;
     }
-    
+
     if (vuln.cwe) {
         body += `
             <div class="detail-section">
@@ -663,7 +667,7 @@ function showModal(vuln) {
             </div>
         `;
     }
-    
+
     if (vuln.aliases && vuln.aliases.length > 0) {
         body += `
             <div class="detail-section">
@@ -674,7 +678,7 @@ function showModal(vuln) {
             </div>
         `;
     }
-    
+
     if (vuln.affectedPackages && vuln.affectedPackages.length > 0) {
         body += `
             <div class="detail-section">
@@ -685,7 +689,7 @@ function showModal(vuln) {
             </div>
         `;
     }
-    
+
     if (vuln.references && vuln.references.length > 0) {
         const refs = Array.isArray(vuln.references) ? vuln.references : [vuln.references];
         body += `
@@ -693,17 +697,17 @@ function showModal(vuln) {
                 <div class="detail-label">References</div>
                 <div class="detail-value">
                     ${refs.map(ref => {
-                        const url = typeof ref === 'string' ? ref : ref.url;
-                        if (url) {
-                            return `<a href="${url}" target="_blank" class="link-button">View Reference →</a>`;
-                        }
-                        return '';
-                    }).join('')}
+            const url = typeof ref === 'string' ? ref : ref.url;
+            if (url) {
+                return `<a href="${url}" target="_blank" class="link-button">View Reference →</a>`;
+            }
+            return '';
+        }).join('')}
                 </div>
             </div>
         `;
     }
-    
+
     document.getElementById('modalBody').innerHTML = body;
     document.getElementById('modal').classList.add('active');
 }
@@ -712,13 +716,21 @@ function closeModal() {
     document.getElementById('modal').classList.remove('active');
 }
 
+// Helper function to show modal by ID
+function showModalById(vulnId) {
+    const vuln = vulnDataStore.get(vulnId);
+    if (vuln) {
+        showModal(vuln);
+    }
+}
+
 // Tab Switching
 function switchTab(tab) {
     currentTab = tab;
-    
+
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelector(`[data-tab="${tab}"]`)?.classList.add('active');
-    
+
     // Show/hide filter bar
     const filterBar = document.getElementById('filterBar');
     if (tab === 'dashboard' || tab === 'asset-scanner') {
@@ -726,7 +738,7 @@ function switchTab(tab) {
     } else {
         filterBar.style.display = 'flex';
     }
-    
+
     if (tab === 'dashboard') {
         renderDashboard();
     } else if (tab === 'asset-scanner') {
@@ -770,35 +782,35 @@ function renderAssetScanner() {
             </div>
         </div>
     `;
-    
+
     document.getElementById('content').innerHTML = html;
 }
 
 function scanAsset() {
     const input = document.getElementById('assetInput').value.trim();
     const resultsDiv = document.getElementById('scannerResults');
-    
+
     if (!input) {
         resultsDiv.innerHTML = '<div class="error">Please enter an IP address or domain</div>';
         return;
     }
-    
+
     // Validate input
     const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
     const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\.[a-zA-Z]{2,})+$/;
-    
+
     if (!ipRegex.test(input) && !domainRegex.test(input)) {
         resultsDiv.innerHTML = '<div class="error">Invalid IP address or domain format</div>';
         return;
     }
-    
+
     resultsDiv.innerHTML = `
         <div class="loading">
             <div class="loading-spinner"></div>
             <p>Scanning ${input}...</p>
         </div>
     `;
-    
+
     // Simulate scan (replace with actual API calls)
     setTimeout(() => {
         resultsDiv.innerHTML = `
@@ -829,15 +841,13 @@ function exportScanResults(format = 'json') {
 // Tabs Rendering
 function renderTabs() {
     let html = '<div class="tab active" data-tab="dashboard" onclick="switchTab(\'dashboard\')">📊 Dashboard</div>';
-    
+
     for (const [key, source] of Object.entries(DATA_SOURCES)) {
         if (allData[key]) {
             html += `<div class="tab" data-tab="${key}" onclick="switchTab('${key}')">${source.icon} ${source.name}</div>`;
         }
     }
-    
-    html += '<div class="tab" data-tab="asset-scanner" onclick="switchTab(\'asset-scanner\')">🌐 Asset Scanner</div>';
-    
+
     document.getElementById('tabs').innerHTML = html;
 }
 
@@ -848,10 +858,178 @@ document.getElementById('modal').addEventListener('click', (e) => {
 
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeModal();
+    if (e.key === 'Escape') {
+        closeModal();
+        closeAssetScannerModal();
+    }
     if (e.key === '/' && e.target.tagName !== 'INPUT') {
         e.preventDefault();
         document.getElementById('searchInput')?.focus();
+    }
+});
+
+// =====================================================
+// ASSET SCANNER MODAL FUNCTIONS
+// =====================================================
+
+// Open Asset Scanner Modal
+function openAssetScannerModal() {
+    document.getElementById('scannerModal').classList.add('active');
+    document.getElementById('modalScannerResults').innerHTML = '';
+    checkAPIStatus();
+
+    // Focus on input
+    setTimeout(() => {
+        document.getElementById('modalAssetInput')?.focus();
+    }, 300);
+}
+
+// Close Asset Scanner Modal
+function closeAssetScannerModal() {
+    document.getElementById('scannerModal').classList.remove('active');
+}
+
+// Close modal on background click
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'scannerModal') {
+        closeAssetScannerModal();
+    }
+});
+
+// Check API Status - Pings the Cloudflare Worker to check if APIs are online
+async function checkAPIStatus() {
+    const PROXY_URL = 'https://vulnfeed-api-proxy.shresthpaul133.workers.dev';
+
+    const apis = [
+        { id: 'shodan', name: 'Shodan' },
+        { id: 'abuseipdb', name: 'AbuseIPDB' },
+        { id: 'virustotal', name: 'VirusTotal' }
+    ];
+
+    // First check if proxy is reachable
+    try {
+        const proxyCheck = await fetch(`${PROXY_URL}/api/scan-all?target=1.1.1.1`, {
+            method: 'GET',
+            signal: AbortSignal.timeout(10000)
+        });
+
+        if (proxyCheck.ok) {
+            const results = await proxyCheck.json();
+
+            // Update each API status based on scan results
+            results.scans?.forEach(scan => {
+                const apiId = scan.source.toLowerCase();
+                const element = document.getElementById(`apiStatus-${apiId}`);
+                if (!element) return;
+
+                const badge = element.querySelector('.api-badge');
+                if (scan.success) {
+                    badge.className = 'api-badge api-configured';
+                    badge.textContent = 'Online';
+                } else {
+                    badge.className = 'api-badge api-missing';
+                    badge.textContent = 'Error';
+                }
+            });
+        } else {
+            // Proxy returned error
+            apis.forEach(api => {
+                const element = document.getElementById(`apiStatus-${api.id}`);
+                if (!element) return;
+                const badge = element.querySelector('.api-badge');
+                badge.className = 'api-badge api-missing';
+                badge.textContent = 'Offline';
+            });
+        }
+    } catch (error) {
+        // Proxy unreachable
+        console.error('Proxy check failed:', error);
+        apis.forEach(api => {
+            const element = document.getElementById(`apiStatus-${api.id}`);
+            if (!element) return;
+            const badge = element.querySelector('.api-badge');
+            badge.className = 'api-badge api-missing';
+            badge.textContent = 'Offline';
+        });
+    }
+}
+
+// Run scan from modal
+async function runScanFromModal() {
+    const input = document.getElementById('modalAssetInput').value.trim();
+    const resultsDiv = document.getElementById('modalScannerResults');
+
+    if (!input) {
+        resultsDiv.innerHTML = '<div class="error">⚠️ Please enter an IP address or domain to scan</div>';
+        return;
+    }
+
+    // Validate input
+    const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+    const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?(\.[a-zA-Z]{2,})+$/;
+
+    if (!ipRegex.test(input) && !domainRegex.test(input)) {
+        resultsDiv.innerHTML = '<div class="error">❌ Invalid IP address or domain format</div>';
+        return;
+    }
+
+    // Show loading
+    resultsDiv.innerHTML = `
+        <div class="scan-loading">
+            <div class="spinner"></div>
+            <p>🔍 Scanning <strong>${input}</strong>...</p>
+            <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.5rem;">
+                Querying multiple threat intelligence sources...
+            </p>
+        </div>
+    `;
+
+    try {
+        // Check if performAssetScan function exists (from asset-scanner.js)
+        if (typeof performAssetScan === 'function') {
+            const results = await performAssetScan(input);
+            resultsDiv.innerHTML = renderScanResults(results);
+        } else {
+            // Fallback if API functions not available
+            setTimeout(() => {
+                resultsDiv.innerHTML = `
+                    <div class="result-card" style="border-left: 3px solid var(--warning);">
+                        <div class="result-header">⚠️ API Not Configured</div>
+                        <div class="result-item">
+                            <span>Target</span>
+                            <span class="tag">${input}</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Status</span>
+                            <span style="color: var(--warning);">API keys not injected</span>
+                        </div>
+                        <div style="margin-top: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: 8px;">
+                            <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">
+                                <strong>To enable scanning:</strong>
+                            </p>
+                            <ol style="color: var(--text-muted); margin-left: 1.5rem; font-size: 0.875rem;">
+                                <li>Add API keys to GitHub Secrets</li>
+                                <li>Push changes to trigger deployment</li>
+                                <li>Wait for GitHub Actions to complete</li>
+                            </ol>
+                        </div>
+                    </div>
+                `;
+            }, 1500);
+        }
+    } catch (error) {
+        resultsDiv.innerHTML = `
+            <div class="error">
+                <strong>❌ Scan Failed:</strong> ${error.message}
+            </div>
+        `;
+    }
+}
+
+// Allow Enter key to trigger scan
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.id === 'modalAssetInput') {
+        runScanFromModal();
     }
 });
 

@@ -1,4 +1,4 @@
-name: 🚀 Deploy to GitHub Pages
+name: 🔐 Inject API Keys and Deploy
 
 on:
   push:
@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  build-and-deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -25,6 +25,59 @@ jobs:
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
+        
+      - name: 🔐 Inject API Keys
+        run: |
+          echo "📌 Starting API key injection..."
+          
+          # Check if secrets are set (without revealing values)
+          if [ -n "${{ secrets.CENSYS_API_TOKEN }}" ]; then echo "✅ CENSYS_API_TOKEN is set"; else echo "⚠️ CENSYS_API_TOKEN not set"; fi
+          if [ -n "${{ secrets.SHODAN_API_KEY }}" ]; then echo "✅ SHODAN_API_KEY is set"; else echo "⚠️ SHODAN_API_KEY not set"; fi
+          if [ -n "${{ secrets.ABUSEIPDB_API_KEY }}" ]; then echo "✅ ABUSEIPDB_API_KEY is set"; else echo "⚠️ ABUSEIPDB_API_KEY not set"; fi
+          if [ -n "${{ secrets.VT_API_KEY }}" ]; then echo "✅ VT_API_KEY is set"; else echo "⚠️ VT_API_KEY not set"; fi
+          
+          # Replace placeholders with actual API keys
+          # Using different delimiter (|) to avoid issues with special characters in keys
+          sed -i 's|\${CENSYS_API_TOKEN}|${{ secrets.CENSYS_API_TOKEN }}|g' asset-scanner.js
+          sed -i 's|\${SHODAN_API_KEY}|${{ secrets.SHODAN_API_KEY }}|g' asset-scanner.js
+          sed -i 's|\${ABUSEIPDB_API_KEY}|${{ secrets.ABUSEIPDB_API_KEY }}|g' asset-scanner.js
+          sed -i 's|\${VT_API_KEY}|${{ secrets.VT_API_KEY }}|g' asset-scanner.js
+          
+          # Verify replacement (check if placeholders are gone)
+          if grep -q '\${CENSYS_API_TOKEN}' asset-scanner.js; then
+            echo "⚠️ CENSYS_API_TOKEN placeholder still exists"
+          else
+            echo "✅ CENSYS_API_TOKEN injected"
+          fi
+          
+          if grep -q '\${SHODAN_API_KEY}' asset-scanner.js; then
+            echo "⚠️ SHODAN_API_KEY placeholder still exists"
+          else
+            echo "✅ SHODAN_API_KEY injected"
+          fi
+          
+          if grep -q '\${ABUSEIPDB_API_KEY}' asset-scanner.js; then
+            echo "⚠️ ABUSEIPDB_API_KEY placeholder still exists"
+          else
+            echo "✅ ABUSEIPDB_API_KEY injected"
+          fi
+          
+          if grep -q '\${VT_API_KEY}' asset-scanner.js; then
+            echo "⚠️ VT_API_KEY placeholder still exists"
+          else
+            echo "✅ VT_API_KEY injected"
+          fi
+          
+          # Inject Proxy URL (for CORS bypass)
+          if [ -n "${{ secrets.PROXY_URL }}" ]; then
+            echo "✅ PROXY_URL is set"
+            sed -i 's|\${PROXY_URL}|${{ secrets.PROXY_URL }}|g' asset-scanner.js
+            echo "✅ PROXY_URL injected"
+          else
+            echo "⚠️ PROXY_URL not set - Direct API calls will fail due to CORS"
+          fi
+          
+          echo "🎉 API key injection complete!"
         
       - name: 🔧 Setup Pages
         uses: actions/configure-pages@v4
