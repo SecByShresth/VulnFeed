@@ -2,6 +2,9 @@
 // ============================================
 // Supports both direct API calls and proxy-based calls (for CORS bypass)
 
+// Initialize cache for scan results
+window.SCAN_RESULTS_CACHE = window.SCAN_RESULTS_CACHE || {};
+
 // Proxy Configuration - Set this after deploying Cloudflare Worker
 // Example: 'https://vulnfeed-proxy.YOUR-SUBDOMAIN.workers.dev'
 const PROXY_URL = '${PROXY_URL}'; // Will be replaced by GitHub Actions if set
@@ -271,17 +274,20 @@ function renderScanResults(results) {
         html += renderIndividualScanResult(scan);
     });
 
-    // Export buttons
-    const resultsJson = JSON.stringify(results).replace(/"/g, '&quot;');
+    // Store results in cache to avoid HTML attribute breaking
+    const scanId = 'scan_' + Date.now();
+    window.SCAN_RESULTS_CACHE[scanId] = results;
+
+    // Export buttons using the scanId reference
     html += `
         <div style="margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-            <button class="btn btn-primary" onclick='exportScanResults(${resultsJson}, "json")'>
+            <button class="btn btn-primary" onclick="exportScanResults('${scanId}', 'json')">
                 📥 Export JSON
             </button>
-            <button class="btn btn-secondary" onclick='exportScanResults(${resultsJson}, "csv")'>
+            <button class="btn btn-secondary" onclick="exportScanResults('${scanId}', 'csv')">
                 📥 Export CSV
             </button>
-            <button class="btn btn-secondary" onclick='copyToClipboard(${resultsJson})'>
+            <button class="btn btn-secondary" onclick="copyToClipboard('${scanId}')">
                 📋 Copy to Clipboard
             </button>
         </div>
@@ -401,6 +407,118 @@ function renderIndividualScanResult(scan) {
                 <span class="tag ${vulns > 0 ? 'severity-critical' : 'severity-low'}">${vulns} CVEs</span>
             </div>
         `;
+
+        // Add Service Details (Banners & Extended Info)
+        if (scan.data.data && scan.data.data.length > 0) {
+            html += `<div style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+                <h4 style="margin-bottom: 0.5rem; color: var(--text-primary); font-size: 0.95rem;">Service Details</h4>`;
+
+            // Sort by port
+            const services = [...scan.data.data].sort((a, b) => a.port - b.port);
+
+            services.forEach(service => {
+                // FIX: Detect and parse corrupted service.data (which might contain the rest of the JSON object)
+                if (typeof service.data === 'string' && service.data.includes('","')) {
+                    const knownFields = ['html_hash', 'location', 'components', 'server', 'sitemap', 'os', 'timestamp', 'isp', 'transport', 'asn', 'hostnames', 'ip', 'domains', 'org', 'ssl', 'cipher'];
+                    for (const field of knownFields) {
+                        const pattern = `","${field}":`;
+                        const index = service.data.lastIndexOf(pattern);
+                        if (index !== -1) {
+                            const bannerPart = service.data.substring(0, index);
+                            // Reconstruct valid JSON for the tail
+                            const jsonPart = '{"dummy":"' + service.data.substring(index);
+                            try {
+                                const parsed = JSON.parse(jsonPart);
+                                delete parsed.dummy;
+                                Object.assign(service, parsed); // Merge parsed props into service
+                                service.data = bannerPart; // Clean the banner
+                                break;
+                            } catch (e) {
+                                console.warn('Failed to parse corrupted Shodan data', e);
+                            }
+                        }
+                    }
+                }
+
+                const banner = service.data ? service.data.trim() : '';
+
+                // Helper to render a section if data exists
+                const renderSection = (title, content) => {
+                    if (!content) return '';
+                    return `
+                        <div style="margin-top: 0.75rem; border-top: 1px solid var(--border); padding-top: 0.5rem;">
+                            <div style="font-size: 0.8rem; font-weight: bold; color: var(--text-secondary); margin-bottom: 0.25rem;">${title}</div>
+                            ${content}
+                        </div>
+                    `;
+                };
+
+                // SSL Info
+                let sslHtml = '';
+                if (service.ssl) {
+                    const cert = service.ssl.cert || {};
+                    const issuer = cert.issuer || {};
+                    const subject = cert.subject || {};
+                    sslHtml = `
+                        <div style="font-size: 0.85rem; display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem;">
+                            <span style="color: var(--text-muted);">Versions:</span>
+                            <span>${service.ssl.versions ? service.ssl.versions.join(', ') : 'Unknown'}</span>
+                            <span style="color: var(--text-muted);">Expires:</span>
+                            <span>${cert.expires || 'Unknown'}</span>
+                            <span style="color: var(--text-muted);">Issuer:</span>
+                            <span>${issuer.CN || issuer.O || 'Unknown'}</span>
+                            <span style="color: var(--text-muted);">Subject:</span>
+                            <span>${subject.CN || subject.O || 'Unknown'}</span>
+                            ${service.cipher ? `<span style="color: var(--text-muted);">Cipher:</span><span>${service.cipher.name} (${service.cipher.bits} bits)</span>` : ''}
+                        </div>
+                    `;
+                }
+
+                // Components/Tech
+                let componentsHtml = '';
+                if (service.components) {
+                    componentsHtml = `<div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">`;
+                    for (const [name, details] of Object.entries(service.components)) {
+                        componentsHtml += `
+                            <span class="tag" style="font-size: 0.75rem; background: var(--bg-primary); border: 1px solid var(--border);">
+                                ${name} ${details.categories ? `(${details.categories.join(', ')})` : ''}
+                            </span>`;
+                    }
+                    componentsHtml += `</div>`;
+                }
+
+                // Network/Location Info (if different from main)
+                let networkHtml = '';
+                if (service.location || service.asn || service.isp) {
+                    networkHtml = `
+                        <div style="font-size: 0.85rem; display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 1rem;">
+                            ${service.isp ? `<span style="color: var(--text-muted);">ISP:</span><span>${service.isp}</span>` : ''}
+                            ${service.asn ? `<span style="color: var(--text-muted);">ASN:</span><span>${service.asn}</span>` : ''}
+                            ${service.location ? `<span style="color: var(--text-muted);">Location:</span><span>${[service.location.city, service.location.country_name].filter(Boolean).join(', ')}</span>` : ''}
+                        </div>
+                    `;
+                }
+
+                html += `
+                    <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; border: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="font-weight: bold; color: var(--accent); font-size: 1rem;">${service.port}</span>
+                                <span class="tag" style="font-size: 0.75rem;">${service.transport.toUpperCase()}</span>
+                            </div>
+                            <span style="color: var(--text-primary); font-weight: 500;">${service.product || ''} ${service.version || ''}</span>
+                        </div>
+
+                        ${renderSection('Banner', banner ? `<pre style="font-size: 0.8rem; color: var(--text-muted); overflow-x: auto; white-space: pre-wrap; margin: 0; background: var(--bg-card); padding: 0.5rem; border-radius: 4px; max-height: 200px;">${banner.substring(0, 500)}${banner.length > 500 ? '...' : ''}</pre>` : '<span style="color: var(--text-muted); font-style: italic;">No banner available</span>')}
+                        
+                        ${renderSection('SSL/TLS Configuration', sslHtml)}
+                        ${renderSection('Detected Components', componentsHtml)}
+                        ${renderSection('Network & Location', networkHtml)}
+                    </div>
+                `;
+            });
+            html += `</div>`;
+        }
     }
 
     if (scan.source === 'Censys' && scan.data) {
@@ -429,9 +547,24 @@ function renderIndividualScanResult(scan) {
 // EXPORT FUNCTIONS
 // =====================================================
 
-function exportScanResults(results, format) {
-    if (typeof results === 'string') {
-        results = JSON.parse(results);
+function exportScanResults(scanIdOrData, format) {
+    let results;
+
+    // Check if input is an ID string or direct data object
+    if (typeof scanIdOrData === 'string') {
+        if (window.SCAN_RESULTS_CACHE && window.SCAN_RESULTS_CACHE[scanIdOrData]) {
+            results = window.SCAN_RESULTS_CACHE[scanIdOrData];
+        } else {
+            // Try parsing as JSON if it's not a cache ID (legacy fallback)
+            try {
+                results = JSON.parse(scanIdOrData);
+            } catch (e) {
+                console.error('Invalid scan results data');
+                return;
+            }
+        }
+    } else {
+        results = scanIdOrData;
     }
 
     if (format === 'json') {
@@ -459,9 +592,22 @@ function exportScanResults(results, format) {
     }
 }
 
-function copyToClipboard(results) {
-    if (typeof results === 'string') {
-        results = JSON.parse(results);
+function copyToClipboard(scanIdOrData) {
+    let results;
+
+    if (typeof scanIdOrData === 'string') {
+        if (window.SCAN_RESULTS_CACHE && window.SCAN_RESULTS_CACHE[scanIdOrData]) {
+            results = window.SCAN_RESULTS_CACHE[scanIdOrData];
+        } else {
+            try {
+                results = JSON.parse(scanIdOrData);
+            } catch (e) {
+                console.error('Invalid scan results data');
+                return;
+            }
+        }
+    } else {
+        results = scanIdOrData;
     }
 
     navigator.clipboard.writeText(JSON.stringify(results, null, 2))
