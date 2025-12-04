@@ -34,8 +34,11 @@ const DATA_SOURCES = {
     'nuget': { name: 'NuGet (.NET)', icon: '💎', category: 'package' },
     'rubygems': { name: 'RubyGems', icon: '💎', category: 'package' },
     'go': { name: 'Go Modules', icon: '🐹', category: 'package' },
-    'cargo': { name: 'Cargo (Rust)', icon: '🦀', category: 'package' },
-    'composer': { name: 'Composer (PHP)', icon: '🎼', category: 'package' },
+    'crates-io': { name: 'Cargo (Rust)', icon: '🦀', category: 'package' },
+    'packagist': { name: 'Composer (PHP)', icon: '🎼', category: 'package' },
+    'hex': { name: 'Hex (Erlang/Elixir)', icon: '🔮', category: 'package' },
+    'pub': { name: 'Pub (Dart)', icon: '🎯', category: 'package' },
+    'linux': { name: 'Linux Kernel', icon: '🐧', category: 'linux' },
 };
 
 // Global State
