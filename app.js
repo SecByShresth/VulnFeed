@@ -811,31 +811,24 @@ function scanAsset() {
         </div>
     `;
 
-    // Simulate scan (replace with actual API calls)
-    setTimeout(() => {
-        resultsDiv.innerHTML = `
-            <div class="result-card">
-                <div class="result-header">📊 Scan Results for ${input}</div>
-                <div class="result-item">
-                    <span>Status</span>
-                    <span class="tag">⚠️ API Not Configured</span>
+    // Use the real scanner from asset-scanner.js
+    if (typeof performAssetScan === 'function') {
+        performAssetScan(input).then(results => {
+            resultsDiv.innerHTML = renderScanResults(results);
+        }).catch(error => {
+            resultsDiv.innerHTML = `
+                <div class="result-card" style="border-left: 3px solid var(--critical);">
+                    <div class="result-header">❌ Scan Failed</div>
+                    <div class="result-item">
+                        <span>Error</span>
+                        <span style="color: var(--critical);">${error.message}</span>
+                    </div>
                 </div>
-                <div class="result-item">
-                    <span>Message</span>
-                    <span style="color: var(--text-secondary);">Configure API keys in GitHub Secrets to enable scanning</span>
-                </div>
-            </div>
-            
-            <div style="margin-top: 1rem;">
-                <button class="btn btn-secondary" onclick="exportScanResults()">📥 Export Results (JSON)</button>
-                <button class="btn btn-secondary" onclick="exportScanResults('csv')" style="margin-left: 0.5rem;">📥 Export Results (CSV)</button>
-            </div>
-        `;
-    }, 2000);
-}
-
-function exportScanResults(format = 'json') {
-    alert(`Export functionality will be implemented with actual scan data. Format: ${format.toUpperCase()}`);
+            `;
+        });
+    } else {
+        resultsDiv.innerHTML = '<div class="error">Asset Scanner module not loaded.</div>';
+    }
 }
 
 // Tabs Rendering
