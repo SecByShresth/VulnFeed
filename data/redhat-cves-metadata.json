@@ -1,0 +1,11 @@
+{
+  "last_updated": "2025-11-02 07:00:50 UTC",
+  "total_cves_in_list": 1000,
+  "detailed_cves_fetched": 1000,
+  "critical_count": 3,
+  "important_count": 86,
+  "moderate_count": 693,
+  "low_count": 207,
+  "date_range": "All Time",
+  "notes": "Fetched all available Red Hat CVEs"
+}

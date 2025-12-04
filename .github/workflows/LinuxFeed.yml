@@ -1,0 +1,175 @@
+name: 🐧 VulnFeed - Linux Vulnerabilities
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * *"  # Runs daily at 04:00 UTC
+
+jobs:
+  fetch-linux-vulns:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip requests
+          
+      - name: Fetch Linux Vulnerabilities
+        run: |
+          python3 <<'EOF'
+          import requests
+          import json
+          import os
+          import time
+          from datetime import datetime, timezone
+          
+          # Create data directory
+          os.makedirs("data", exist_ok=True)
+          
+          # ✅ Supported Linux distributions only
+          distributions = {
+              "almalinux": {
+                  "ecosystem": "AlmaLinux",
+                  "packages": ["kernel", "glibc", "openssl", "curl", "python3", "nginx", "docker", "systemd"]
+              },
+              "rocky": {
+                  "ecosystem": "Rocky Linux",
+                  "packages": ["kernel", "glibc", "openssl", "curl", "python3", "nginx", "docker", "systemd"]
+              },
+              "debian": {
+                  "ecosystem": "Debian",
+                  "packages": ["linux", "libc6", "openssl", "curl", "python3", "nginx", "docker.io", "systemd"]
+              },
+              "ubuntu": {
+                  "ecosystem": "Ubuntu",
+                  "packages": ["linux", "libc6", "openssl", "curl", "python3", "nginx", "docker.io", "systemd"]
+              },
+              "suse": {
+                  "ecosystem": "SUSE",
+                  "packages": ["kernel-default", "glibc", "openssl", "curl", "python3", "nginx", "docker", "systemd"]
+              }
+          }
+          
+          # Current timestamp for metadata
+          fetch_timestamp = datetime.now(timezone.utc).isoformat()
+          
+          def fetch_vulnerabilities(distro_name, distro_config):
+              """Fetch vulnerabilities for a Linux distribution from OSV.dev"""
+              all_vulns = []
+              seen_ids = set()
+              
+              ecosystem = distro_config["ecosystem"]
+              packages = distro_config["packages"]
+              
+              print(f"\n{'='*60}")
+              print(f"🐧 Processing: {distro_name.upper()} ({ecosystem})")
+              print(f"{'='*60}")
+              
+              for package in packages:
+                  print(f"\n🔍 Searching: {ecosystem}/{package}")
+                  
+                  try:
+                      payload = {
+                          "package": {
+                              "ecosystem": ecosystem,
+                              "name": package
+                          }
+                      }
+                      
+                      response = requests.post(
+                          "https://api.osv.dev/v1/query",
+                          headers={"Content-Type": "application/json"},
+                          json=payload,
+                          timeout=30
+                      )
+                      response.raise_for_status()
+                      data = response.json()
+                      
+                      vulns = data.get("vulns", [])
+                      
+                      new_count = 0
+                      for vuln in vulns:
+                          vuln_id = vuln.get("id")
+                          if vuln_id and vuln_id not in seen_ids:
+                              seen_ids.add(vuln_id)
+                              vuln["_metadata"] = {
+                                  "fetched_at": fetch_timestamp,
+                                  "source_package": f"{ecosystem}/{package}",
+                                  "distribution": distro_name
+                              }
+                              all_vulns.append(vuln)
+                              new_count += 1
+                      
+                      print(f"   ✓ Found {len(vulns)} vulnerabilities ({new_count} new)")
+                      
+                  except requests.exceptions.HTTPError as e:
+                      print(f"   ✗ HTTP error: {e}")
+                      if hasattr(e.response, 'text'):
+                          print(f"   Response: {e.response.text[:200]}")
+                  except requests.exceptions.RequestException as e:
+                      print(f"   ✗ Network error: {e}")
+                  except json.JSONDecodeError as e:
+                      print(f"   ✗ JSON decode error: {e}")
+                  except Exception as e:
+                      print(f"   ✗ Unexpected error: {e}")
+                  
+                  time.sleep(1)
+              
+              return all_vulns
+          
+          def sort_by_published_date(vulns):
+              """Sort vulnerabilities by published date (newest first)"""
+              def get_sort_key(vuln):
+                  date_str = vuln.get("published") or vuln.get("modified") or ""
+                  return date_str
+              
+              try:
+                  return sorted(vulns, key=get_sort_key, reverse=True)
+              except Exception as e:
+                  print(f"   ⚠️ Sorting warning: {e}")
+                  return vulns
+          
+          for distro_name, distro_config in distributions.items():
+              vulnerabilities = fetch_vulnerabilities(distro_name, distro_config)
+              vulnerabilities = sort_by_published_date(vulnerabilities)
+              vulnerabilities = vulnerabilities[:100]
+              
+              output_file = f"data/{distro_name}.json"
+              with open(output_file, "w", encoding="utf-8") as f:
+                  json.dump(vulnerabilities, f, indent=2, ensure_ascii=False)
+              
+              print(f"\n💾 Saved {len(vulnerabilities)} vulnerabilities to {output_file}")
+              
+              if vulnerabilities:
+                  first_date = vulnerabilities[0].get("published", "N/A")
+                  last_date = vulnerabilities[-1].get("published", "N/A")
+                  print(f"   📅 Date range: {first_date} → {last_date}")
+              else:
+                  print(f"   ⚠️ No vulnerabilities found for {distro_name}")
+          
+          print(f"\n{'='*60}")
+          print("🎉 Successfully fetched all Linux vulnerabilities!")
+          print(f"{'='*60}\n")
+          EOF
+          
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/
+          
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "🔄 Update Linux VulnFeed data - $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
+            echo "✓ Changes committed and pushed"
+          else
+            echo "✓ No changes detected - skipping commit"
+          fi
