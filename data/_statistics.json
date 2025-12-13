@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-12-13T06:21:40.949068Z",
+  "generated_at": "2025-12-13T12:26:48.039190Z",
   "total_vulnerabilities": 5481,
   "by_severity": {
     "critical": 164,
@@ -53,6 +53,7 @@
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:n/s:u/c:n/i:l/a:n'}, {'type': 'ubuntu', 'score': 'low'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:n/s:u/c:n/i:n/a:h'}, {'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:n/s:u/c:n/i:n/a:h'}, {'type': 'ubuntu', 'score': 'medium'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:r/s:u/c:n/i:n/a:h'}, {'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:r/s:u/c:n/i:n/a:h'}, {'type': 'ubuntu', 'score': 'medium'}]": 1,
+    "[{'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:h/at:p/pr:n/ui:n/vc:n/vi:n/va:h/sc:n/si:n/sa:n/e:u/cr:x/ir:x/ar:x/mav:x/mac:x/mat:x/mpr:x/mui:x/mvc:x/mvi:x/mva:x/msc:x/msi:x/msa:x/s:x/au:x/r:x/v:x/re:x/u:x'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:h/pr:l/ui:n/s:u/c:h/i:h/a:h'}]": 8,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:r/s:u/c:l/i:n/a:h'}]": 2,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:n/ui:r/s:u/c:n/i:h/a:h'}]": 1,
@@ -62,7 +63,6 @@
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:n/s:u/c:h/i:n/a:n'}]": 14,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:l/ui:n/s:u/c:h/i:h/a:l'}]": 1,
     "[{'type': 'cvss_v4', 'score': 'cvss:4.0/av:a/ac:l/at:p/pr:n/ui:n/vc:n/vi:h/va:n/sc:n/si:h/sa:h/e:p/cr:x/ir:x/ar:x/mav:x/mac:x/mat:x/mpr:x/mui:x/mvc:x/mvi:x/mva:x/msc:x/msi:x/msa:x/s:x/au:x/r:x/v:x/re:x/u:x'}]": 1,
-    "[{'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:h/at:p/pr:n/ui:n/vc:n/vi:n/va:h/sc:n/si:n/sa:n/e:u/cr:x/ir:x/ar:x/mav:x/mac:x/mat:x/mpr:x/mui:x/mvc:x/mvi:x/mva:x/msc:x/msi:x/msa:x/s:x/au:x/r:x/v:x/re:x/u:x'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.0/av:l/ac:l/pr:l/ui:n/s:u/c:n/i:n/a:h'}]": 4,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.0/av:n/ac:l/pr:n/ui:r/s:u/c:h/i:h/a:h'}]": 2,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:n/ui:r/s:c/c:h/i:h/a:h'}]": 2,
