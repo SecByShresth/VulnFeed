@@ -1,6 +1,6 @@
 {
-  "generated_at": "2025-12-19T18:21:37.653399Z",
-  "total_vulnerabilities": 5488,
+  "generated_at": "2025-12-20T01:05:19.982446Z",
+  "total_vulnerabilities": 5489,
   "by_severity": {
     "critical": 164,
     "high": 489,
@@ -81,7 +81,7 @@
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:n/ui:n/s:c/c:n/i:l/a:n'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:l/ui:n/s:u/c:n/i:n/a:h'}]": 4,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:n/ui:n/s:u/c:n/i:n/a:l'}]": 1,
-    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:a/ac:l/pr:n/ui:n/s:u/c:n/i:n/a:h'}]": 2,
+    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:a/ac:l/pr:n/ui:n/s:u/c:n/i:n/a:h'}]": 3,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:n/ui:n/s:u/c:l/i:h/a:h'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:n/s:u/c:n/i:l/a:l'}]": 8,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:n/s:u/c:n/i:l/a:h'}]": 2,
@@ -140,7 +140,6 @@
     "[{'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:l/at:n/pr:l/ui:n/vc:l/vi:n/va:n/sc:n/si:n/sa:n'}]": 1,
     "[{'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:l/at:n/pr:n/ui:a/vc:n/vi:l/va:h/sc:n/si:n/sa:n'}]": 1,
     "[{'type': 'cvss_v4', 'score': 'cvss:4.0/av:l/ac:l/at:n/pr:n/ui:n/vc:n/vi:n/va:n/sc:l/si:l/sa:n'}]": 1,
-    "[{'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:l/at:n/pr:n/ui:a/vc:n/vi:l/va:n/sc:n/si:n/sa:n'}]": 1,
     "[{'type': 'cvss_v4', 'score': 'cvss:4.0/av:l/ac:l/at:n/pr:n/ui:p/vc:n/vi:n/va:l/sc:n/si:n/sa:n/e:u'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:h/pr:n/ui:n/s:u/c:l/i:l/a:l'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:h/ui:n/s:u/c:h/i:n/a:n'}]": 2,
@@ -259,7 +258,7 @@
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:l/ui:n/s:u/c:n/i:n/a:l'}]": 1
   },
   "by_source": {
-    "cisa-kev": 1481,
+    "cisa-kev": 1482,
     "maven": 150,
     "redhat-cves-list": 1000,
     "ubuntu": 100,
@@ -298,7 +297,7 @@
   "top_vendors": {
     "Microsoft": 218,
     "Apple": 59,
-    "Adobe": 50,
+    "Adobe": 49,
     "Google": 42,
     "Cisco": 33,
     "Oracle": 25,
