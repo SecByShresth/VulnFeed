@@ -1,6 +1,6 @@
 {
-  "last_update": "2025-12-31T18:21:34.009707Z",
-  "total_vulnerabilities": 1507,
+  "last_update": "2026-01-01T01:17:22.606002Z",
+  "total_vulnerabilities": 1505,
   "successful_sources": 12,
   "sources": [
     "data/cisa-kev.json",
