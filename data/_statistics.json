@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-01-01T01:17:22.674813Z",
+  "generated_at": "2026-01-01T06:24:20.879630Z",
   "total_vulnerabilities": 5489,
   "by_severity": {
     "critical": 94,
@@ -133,6 +133,7 @@
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:n/s:u/c:h/i:n/a:n'}]": 4,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:h/pr:h/ui:n/s:u/c:n/i:l/a:l'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:n/s:u/c:n/i:n/a:n'}, {'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:h/at:n/pr:n/ui:p/vc:h/vi:h/va:n/sc:n/si:n/sa:n'}]": 1,
+    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:n/s:u/c:l/i:n/a:n'}, {'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:h/at:n/pr:n/ui:n/vc:l/vi:n/va:n/sc:n/si:n/sa:n/e:p'}]": 1,
     "[{'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:l/at:n/pr:l/ui:n/vc:n/vi:l/va:n/sc:n/si:n/sa:n/e:u'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:l/ui:n/s:u/c:l/i:n/a:l'}]": 1,
     "[{'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:l/at:n/pr:n/ui:p/vc:h/vi:h/va:n/sc:n/si:n/sa:n/e:p'}]": 1,
@@ -147,7 +148,6 @@
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:n/s:c/c:l/i:n/a:n'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:r/s:u/c:n/i:l/a:n'}]": 2,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:l/ui:n/s:c/c:n/i:l/a:n'}]": 1,
-    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:n/s:u/c:l/i:n/a:n'}, {'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:h/at:n/pr:n/ui:n/vc:l/vi:n/va:n/sc:n/si:n/sa:n/e:p'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:l/ui:r/s:c/c:l/i:n/a:n'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:n/ui:r/s:u/c:n/i:n/a:l'}, {'type': 'cvss_v4', 'score': 'cvss:4.0/av:l/ac:l/at:n/pr:n/ui:p/vc:n/vi:n/va:l/sc:n/si:n/sa:n/e:u'}]": 1,
     "[{'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:l/at:n/pr:n/ui:n/vc:h/vi:h/va:h/sc:l/si:l/sa:l'}]": 1,
