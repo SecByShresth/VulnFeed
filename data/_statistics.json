@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-01-11T01:18:15.490636Z",
+  "generated_at": "2026-01-11T06:22:55.327634Z",
   "total_vulnerabilities": 5491,
   "by_severity": {
     "critical": 94,
@@ -79,7 +79,7 @@
     "[{'type': 'cvss_v4', 'score': 'cvss:4.0/av:l/ac:h/at:p/pr:l/ui:n/vc:h/vi:h/va:h/sc:n/si:n/sa:n/e:x/cr:x/ir:x/ar:x/mav:x/mac:x/mat:x/mpr:x/mui:x/mvc:x/mvi:x/mva:x/msc:x/msi:x/msa:x/s:x/au:x/r:x/v:x/re:x/u:x'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:l/ui:n/s:u/c:l/i:n/a:n'}]": 4,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:n/s:u/c:h/i:h/a:h'}]": 16,
-    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:r/s:u/c:h/i:n/a:n'}]": 3,
+    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:r/s:u/c:h/i:n/a:n'}]": 4,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:h/pr:l/ui:r/s:u/c:h/i:h/a:h'}]": 2,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:n/s:u/c:h/i:h/a:n'}]": 6,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:n/s:u/c:n/i:l/a:n'}]": 2,
