@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-01-11T18:21:12.187592Z",
+  "generated_at": "2026-01-12T01:15:01.495789Z",
   "total_vulnerabilities": 5491,
   "by_severity": {
     "critical": 94,
@@ -87,7 +87,7 @@
     "[{'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:l/at:n/pr:n/ui:n/vc:n/vi:n/va:h/sc:n/si:n/sa:n/e:x/cr:x/ir:x/ar:x/mav:x/mac:x/mat:x/mpr:x/mui:x/mvc:x/mvi:x/mva:x/msc:x/msi:x/msa:x/s:x/au:x/r:x/v:x/re:x/u:x'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:n/s:u/c:n/i:l/a:h'}]": 2,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:n/ui:n/s:c/c:n/i:l/a:n'}]": 1,
-    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:l/ui:n/s:u/c:n/i:n/a:h'}]": 12,
+    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:l/ui:n/s:u/c:n/i:n/a:h'}]": 7,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:n/ui:n/s:u/c:n/i:n/a:l'}]": 2,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:a/ac:l/pr:n/ui:n/s:u/c:n/i:n/a:h'}]": 2,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:n/ui:n/s:u/c:l/i:h/a:h'}]": 1,
@@ -187,7 +187,7 @@
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:l/ui:r/s:u/c:h/i:n/a:n'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:n/s:u/c:n/i:n/a:h'}, {'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:l/at:n/pr:n/ui:n/vc:n/vi:n/va:h/sc:n/si:n/sa:n/e:x/cr:x/ir:x/ar:x/mav:x/mac:x/mat:x/mpr:x/mui:x/mvc:x/mvi:x/mva:x/msc:x/msi:x/msa:x/s:x/au:x/r:x/v:x/re:x/u:x'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:l/ui:n/s:u/c:l/i:l/a:h'}]": 6,
-    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:l/ui:n/s:u/c:h/i:h/a:h'}]": 34,
+    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:l/ui:n/s:u/c:h/i:h/a:h'}]": 25,
     "[{'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:l/at:n/pr:n/ui:n/vc:n/vi:n/va:h/sc:n/si:n/sa:n'}]": 2,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:r/s:u/c:h/i:l/a:l'}, {'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:l/at:p/pr:n/ui:p/vc:n/vi:n/va:n/sc:h/si:l/sa:l'}]": 2,
     "[{'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:l/at:n/pr:n/ui:n/vc:h/vi:h/va:n/sc:n/si:n/sa:n'}]": 2,
@@ -236,7 +236,7 @@
     "[{'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:l/at:n/pr:n/ui:n/vc:h/vi:h/va:h/sc:n/si:l/sa:n'}]": 1,
     "[{'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:l/at:p/pr:n/ui:n/vc:n/vi:h/va:n/sc:n/si:n/sa:n'}]": 1,
     "[{'type': 'cvss_v4', 'score': 'cvss:4.0/av:l/ac:l/at:n/pr:n/ui:n/vc:h/vi:h/va:h/sc:n/si:n/sa:n/e:u'}]": 1,
-    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:l/ui:n/s:u/c:n/i:h/a:n'}]": 2,
+    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:l/ui:n/s:u/c:n/i:h/a:n'}]": 3,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.0/av:n/ac:l/pr:n/ui:r/s:u/c:n/i:h/a:n'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:n/s:u/c:l/i:l/a:l'}, {'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:l/at:n/pr:l/ui:n/vc:n/vi:h/va:l/sc:n/si:n/sa:n'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:n/s:u/c:n/i:l/a:n'}]": 5,
@@ -288,7 +288,6 @@
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:h/pr:h/ui:n/s:u/c:h/i:h/a:h'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:l/ui:n/s:u/c:h/i:h/a:l'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:h/ui:n/s:u/c:h/i:n/a:h'}]": 1,
-    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:l/ui:n/s:u/c:n/i:n/a:l'}]": 2,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:r/s:u/c:n/i:l/a:n'}]": 1,
     "[{'type': 'cvss_v4', 'score': 'cvss:4.0/av:n/ac:l/at:p/pr:n/ui:n/vc:l/vi:n/va:n/sc:n/si:n/sa:n/e:x/cr:x/ir:x/ar:x/mav:x/mac:x/mat:x/mpr:x/mui:x/mvc:x/mvi:x/mva:x/msc:x/msi:x/msa:x/s:x/au:x/r:x/v:x/re:x/u:x'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:l/ui:n/s:c/c:l/i:l/a:n'}]": 1,
@@ -304,7 +303,8 @@
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:r/s:u/c:n/i:n/a:h'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:n/s:u/c:n/i:l/a:l'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:n/s:u/c:h/i:l/a:l'}]": 1,
-    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:l/ui:r/s:u/c:l/i:n/a:n'}]": 1
+    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:l/ui:r/s:u/c:l/i:n/a:n'}]": 1,
+    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:l/ui:n/s:u/c:n/i:n/a:l'}]": 1
   },
   "by_source": {
     "cisa-kev": 1486,
