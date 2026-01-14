@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-01-14T01:14:25.000094Z",
+  "generated_at": "2026-01-14T06:25:40.259712Z",
   "total_vulnerabilities": 5493,
   "by_severity": {
     "critical": 94,
@@ -8,8 +8,11 @@
     "none": 25,
     "low": 483,
     "important": 194,
-    "[{'type': 'ubuntu', 'score': 'medium'}]": 3,
-    "[{'type': 'ubuntu', 'score': 'low'}]": 4,
+    "[{'type': 'ubuntu', 'score': 'medium'}]": 2,
+    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:n/s:u/c:n/i:h/a:n'}, {'type': 'ubuntu', 'score': 'medium'}]": 1,
+    "[{'type': 'ubuntu', 'score': 'low'}]": 1,
+    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:r/s:u/c:h/i:n/a:n'}, {'type': 'ubuntu', 'score': 'low'}]": 2,
+    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:r/s:u/c:n/i:l/a:n'}, {'type': 'ubuntu', 'score': 'low'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:n/s:u/c:n/i:n/a:h'}, {'type': 'ubuntu', 'score': 'medium'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:n/s:u/c:l/i:n/a:l'}, {'type': 'ubuntu', 'score': 'medium'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:n/s:u/c:n/i:n/a:h'}, {'type': 'ubuntu', 'score': 'low'}]": 3,
