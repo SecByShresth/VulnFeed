@@ -499,7 +499,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -1003,7 +1003,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -1302,7 +1302,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -1805,7 +1805,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -1813,7 +1813,7 @@
   {
     "id": "DEBIAN-CVE-2025-14017",
     "details": "When doing multi-threaded LDAPS transfers (LDAP over TLS) with libcurl, changing TLS options in one thread would inadvertently change them globally and therefore possibly also affect other concurrently setup transfers.  Disabling certificate verification for a specific transfer could unintentionally disable the feature for other threads as well.",
-    "modified": "2026-01-09T11:08:19.782520Z",
+    "modified": "2026-01-17T11:10:40.040707Z",
     "published": "2026-01-08T10:15:45.667Z",
     "upstream": [
       "CVE-2025-14017"
@@ -1973,6 +1973,8 @@
           "8.17.0~rc2-1",
           "8.17.0~rc3-1",
           "8.18.0-1",
+          "8.18.0-1~bpo13+1",
+          "8.18.0-2",
           "8.18.0~rc1-1+exp1",
           "8.18.0~rc2-1",
           "8.18.0~rc3-1",
@@ -2132,6 +2134,8 @@
           "8.17.0~rc2-1",
           "8.17.0~rc3-1",
           "8.18.0-1",
+          "8.18.0-1~bpo13+1",
+          "8.18.0-2",
           "8.18.0~rc1-1+exp1",
           "8.18.0~rc2-1",
           "8.18.0~rc3-1",
@@ -2209,6 +2213,7 @@
           "8.14.1-2",
           "8.14.1-2+deb13u1",
           "8.14.1-2+deb13u2",
+          "8.14.1-2+deb13u2~bpo13+1",
           "8.14.1-2+exp1",
           "8.15.0-1",
           "8.15.0-1~bpo13+1",
@@ -2234,6 +2239,8 @@
           "8.17.0~rc2-1",
           "8.17.0~rc3-1",
           "8.18.0-1",
+          "8.18.0-1~bpo13+1",
+          "8.18.0-2",
           "8.18.0~rc1-1+exp1",
           "8.18.0~rc2-1",
           "8.18.0~rc3-1"
@@ -2301,8 +2308,14 @@
       }
     ],
     "schema_version": "1.7.3",
+    "severity": [
+      {
+        "type": "CVSS_V3",
+        "score": "CVSS:3.1/AV:L/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:N"
+      }
+    ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -2441,7 +2454,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -2497,7 +2510,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -2978,7 +2991,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -3040,7 +3053,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -3127,7 +3140,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -3261,7 +3274,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -3351,7 +3364,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -3532,7 +3545,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -3627,7 +3640,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -3880,7 +3893,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -4079,7 +4092,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/nginx",
       "distribution": "debian"
     }
@@ -4322,7 +4335,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/docker.io",
       "distribution": "debian"
     }
@@ -4372,7 +4385,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/systemd",
       "distribution": "debian"
     }
@@ -4420,7 +4433,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/nginx",
       "distribution": "debian"
     }
@@ -4721,7 +4734,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -4776,7 +4789,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -4857,7 +4870,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -5031,7 +5044,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/systemd",
       "distribution": "debian"
     }
@@ -5102,7 +5115,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/systemd",
       "distribution": "debian"
     }
@@ -5183,7 +5196,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -5264,7 +5277,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -5324,7 +5337,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -5405,7 +5418,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -5626,7 +5639,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/nginx",
       "distribution": "debian"
     }
@@ -5673,7 +5686,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/nginx",
       "distribution": "debian"
     }
@@ -5754,7 +5767,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -5896,7 +5909,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/nginx",
       "distribution": "debian"
     }
@@ -6330,7 +6343,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -6411,7 +6424,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -6534,7 +6547,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -6940,7 +6953,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -7063,7 +7076,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -7284,7 +7297,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/docker.io",
       "distribution": "debian"
     }
@@ -7505,7 +7518,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/docker.io",
       "distribution": "debian"
     }
@@ -7562,7 +7575,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -7726,7 +7739,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -8047,7 +8060,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -8111,7 +8124,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -8169,7 +8182,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -8335,7 +8348,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -8380,7 +8393,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/docker.io",
       "distribution": "debian"
     }
@@ -8544,7 +8557,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -8664,7 +8677,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -8717,7 +8730,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -8768,7 +8781,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/systemd",
       "distribution": "debian"
     }
@@ -8911,7 +8924,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/nginx",
       "distribution": "debian"
     }
@@ -9073,7 +9086,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -9214,7 +9227,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/docker.io",
       "distribution": "debian"
     }
@@ -9295,7 +9308,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -9376,7 +9389,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -9509,7 +9522,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/linux",
       "distribution": "debian"
     }
@@ -9675,7 +9688,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -9756,7 +9769,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/nginx",
       "distribution": "debian"
     }
@@ -9837,7 +9850,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/nginx",
       "distribution": "debian"
     }
@@ -9918,7 +9931,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/nginx",
       "distribution": "debian"
     }
@@ -9999,7 +10012,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/nginx",
       "distribution": "debian"
     }
@@ -10118,7 +10131,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -10235,7 +10248,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -10456,7 +10469,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/docker.io",
       "distribution": "debian"
     }
@@ -10620,7 +10633,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -10701,7 +10714,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -10861,7 +10874,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -11295,7 +11308,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -11414,7 +11427,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -11635,7 +11648,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/docker.io",
       "distribution": "debian"
     }
@@ -11686,7 +11699,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -11767,7 +11780,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/nginx",
       "distribution": "debian"
     }
@@ -11848,7 +11861,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/nginx",
       "distribution": "debian"
     }
@@ -12767,7 +12780,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/systemd",
       "distribution": "debian"
     }
@@ -13684,7 +13697,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/systemd",
       "distribution": "debian"
     }
@@ -13765,7 +13778,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -13986,7 +13999,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/docker.io",
       "distribution": "debian"
     }
@@ -14148,7 +14161,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -14265,7 +14278,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -14420,7 +14433,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/systemd",
       "distribution": "debian"
     }
@@ -14507,7 +14520,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -14558,7 +14571,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -14874,7 +14887,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -15031,7 +15044,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -15193,7 +15206,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -15306,7 +15319,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -15352,7 +15365,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -15506,7 +15519,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -15660,7 +15673,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -15710,7 +15723,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -15795,7 +15808,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -17221,7 +17234,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/nginx",
       "distribution": "debian"
     }
@@ -17335,7 +17348,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -17468,7 +17481,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -17538,7 +17551,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -17690,7 +17703,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -17731,7 +17744,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/curl",
       "distribution": "debian"
     }
@@ -17883,7 +17896,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -17993,7 +18006,7 @@
       }
     ],
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/openssl",
       "distribution": "debian"
     }
@@ -18046,7 +18059,7 @@
     ],
     "schema_version": "1.7.3",
     "_metadata": {
-      "fetched_at": "2026-01-17T04:30:21.672212+00:00",
+      "fetched_at": "2026-01-18T04:39:27.210709+00:00",
       "source_package": "Debian/systemd",
       "distribution": "debian"
     }
