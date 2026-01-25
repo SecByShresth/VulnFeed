@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-01-24T18:21:38.326451Z",
+  "generated_at": "2026-01-25T01:19:20.290789Z",
   "total_vulnerabilities": 5499,
   "by_severity": {
     "critical": 94,
@@ -50,8 +50,8 @@
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:n/s:u/c:n/i:l/a:h'}, {'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:n/s:u/c:n/i:l/a:h'}, {'type': 'ubuntu', 'score': 'low'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:n/s:u/c:n/i:h/a:n'}, {'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:h/pr:n/ui:n/s:u/c:n/i:h/a:n'}, {'type': 'ubuntu', 'score': 'low'}]": 1,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:n/s:u/c:l/i:l/a:n'}, {'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:n/s:u/c:l/i:l/a:n'}, {'type': 'ubuntu', 'score': 'medium'}]": 1,
-    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:n/s:u/c:n/i:n/a:h'}]": 53,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:l/ac:l/pr:l/ui:n/s:u/c:h/i:h/a:h'}]": 26,
+    "[{'type': 'cvss_v3', 'score': 'cvss:3.1/av:n/ac:l/pr:n/ui:n/s:u/c:n/i:n/a:h'}]": 53,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.0/av:n/ac:l/pr:n/ui:n/s:u/c:n/i:n/a:h'}]": 4,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.0/av:n/ac:h/pr:n/ui:n/s:u/c:n/i:n/a:h'}]": 2,
     "[{'type': 'cvss_v3', 'score': 'cvss:3.0/av:l/ac:l/pr:l/ui:r/s:u/c:l/i:n/a:n'}]": 1,
